@@ -7,23 +7,27 @@ Comprehensive documentation for the Wix to WordPress Theme Converter project.
 This directory contains detailed documentation for all aspects of the project:
 
 ### Getting Started
+
 - [Quick Start Guide](./quick-start.md) - Get up and running quickly
 - [Installation Guide](./installation.md) - Detailed installation instructions
 - [Configuration Guide](./configuration.md) - System configuration options
 
 ### Components
+
 - [Crawler Documentation](./crawler.md) - Web crawler details
 - [Theme Generator Documentation](./theme-generator.md) - Theme generation process
 - [WordPress Setup](./wordpress-setup.md) - Local WordPress environment
 - [Testing Guide](./testing.md) - Testing strategies and tools
 
 ### Development
+
 - [Development Guide](./development.md) - Developer setup and workflow
 - [Contributing Guide](./contributing.md) - How to contribute
 - [API Reference](./api-reference.md) - API documentation
 - [Code Style Guide](./code-style.md) - Coding standards
 
 ### Operations
+
 - [Deployment Guide](./deployment.md) - Deployment procedures
 - [Troubleshooting](./troubleshooting.md) - Common issues and solutions
 - [FAQ](./faq.md) - Frequently asked questions
@@ -44,6 +48,7 @@ Each documentation file will be created and populated as the corresponding featu
 ## 🤝 Contributing to Documentation
 
 When adding new features:
+
 1. Update relevant documentation files
 2. Add examples and code snippets
 3. Include screenshots where helpful

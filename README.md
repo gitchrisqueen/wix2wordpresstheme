@@ -65,15 +65,19 @@ npm run test
 ## 🔧 Components
 
 ### Crawler (Playwright)
+
 Automated web crawler that captures Wix site structure, styles, assets, and content.
 
 ### Theme Generator
+
 Converts crawled data into a WordPress-compatible theme with proper structure and hooks.
 
 ### WordPress Local Environment (Docker)
+
 Containerized WordPress setup for theme development and testing.
 
 ### Testing Suite
+
 - **Visual Testing**: Pixel-perfect comparison between original and converted site
 - **DOM Testing**: Structure and functionality validation
 

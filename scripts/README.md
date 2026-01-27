@@ -25,6 +25,7 @@ scripts/
 ## 🎯 Purpose
 
 The scripts module provides:
+
 - Command-line interfaces for all pipeline operations
 - Orchestration of multi-step processes
 - Error handling and recovery
@@ -35,11 +36,13 @@ The scripts module provides:
 ## 🚀 Usage (Not Yet Implemented)
 
 ### Full Pipeline
+
 ```bash
 ./scripts/pipeline.sh --url https://example.wixsite.com/site
 ```
 
 ### Individual Operations
+
 ```bash
 # Setup project
 ./scripts/setup.sh
@@ -66,7 +69,9 @@ The scripts module provides:
 ## 📋 Script Details
 
 ### pipeline.sh
+
 Orchestrates the complete conversion pipeline:
+
 1. Validates prerequisites
 2. Runs crawler
 3. Generates theme
@@ -75,7 +80,9 @@ Orchestrates the complete conversion pipeline:
 6. Generates report
 
 ### setup.sh
+
 Initial project setup:
+
 - Installs Node.js dependencies
 - Sets up Docker environment
 - Creates necessary directories
@@ -83,7 +90,9 @@ Initial project setup:
 - Verifies system requirements
 
 ### crawl.sh
+
 Crawler wrapper:
+
 - Validates URL
 - Configures crawler options
 - Runs crawler
@@ -91,7 +100,9 @@ Crawler wrapper:
 - Logs results
 
 ### generate.sh
+
 Theme generator wrapper:
+
 - Validates crawler output
 - Configures generation options
 - Runs generator
@@ -99,7 +110,9 @@ Theme generator wrapper:
 - Logs results
 
 ### deploy.sh
+
 Theme deployment:
+
 - Validates theme structure
 - Copies to WordPress themes directory
 - Activates theme in WordPress
@@ -107,7 +120,9 @@ Theme deployment:
 - Logs results
 
 ### test.sh
+
 Test runner:
+
 - Sets up test environment
 - Runs visual tests
 - Runs DOM tests
@@ -116,7 +131,9 @@ Test runner:
 - Logs results
 
 ### backup.sh
+
 Backup utility:
+
 - Backs up crawler outputs
 - Backs up generated themes
 - Backs up WordPress database
@@ -124,7 +141,9 @@ Backup utility:
 - Logs backup status
 
 ### clean.sh
+
 Cleanup utility:
+
 - Removes temporary files
 - Cleans old logs
 - Removes old outputs
@@ -132,7 +151,9 @@ Cleanup utility:
 - Logs cleanup status
 
 ### logs.sh
+
 Log management:
+
 - View logs by component
 - Search logs
 - Clean old logs
@@ -140,7 +161,9 @@ Log management:
 - Archive logs
 
 ### health-check.sh
+
 System diagnostics:
+
 - Check Docker status
 - Check WordPress availability
 - Check database connectivity
@@ -151,7 +174,9 @@ System diagnostics:
 ## 🔧 Utility Functions
 
 ### colors.sh
+
 Terminal color utilities:
+
 - Success messages (green)
 - Error messages (red)
 - Warning messages (yellow)
@@ -159,14 +184,18 @@ Terminal color utilities:
 - Formatted output
 
 ### logging.sh
+
 Logging functions:
+
 - Log levels (ERROR, WARN, INFO, DEBUG)
 - Timestamped messages
 - Log file management
 - Log formatting
 
 ### error-handler.sh
+
 Error handling:
+
 - Trap errors
 - Cleanup on failure
 - Error reporting
@@ -178,6 +207,7 @@ Error handling:
 **Status**: Structure only - no implementation yet
 
 **Next Steps**:
+
 1. Implement setup.sh
 2. Create utility functions
 3. Implement pipeline.sh

@@ -1,9 +1,9 @@
 /**
  * Theme Generator Module Entry Point
- * 
+ *
  * This module is responsible for converting crawled Wix site data
  * into a WordPress-compatible theme.
- * 
+ *
  * @module theme-generator
  * @status Not Implemented - Structure Only
  */

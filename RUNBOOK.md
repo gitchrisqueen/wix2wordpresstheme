@@ -14,6 +14,7 @@
 ## System Overview
 
 The Wix to WordPress Theme Converter is a pipeline system consisting of four main stages:
+
 1. **Crawling** - Extract data from Wix site
 2. **Generation** - Convert to WordPress theme
 3. **Deployment** - Install in local WordPress
@@ -22,17 +23,20 @@ The Wix to WordPress Theme Converter is a pipeline system consisting of four mai
 ## Prerequisites
 
 ### Required Software
+
 - **Node.js**: v18.0.0 or higher
 - **npm**: v9.0.0 or higher
 - **Docker**: v20.0.0 or higher
 - **Docker Compose**: v2.0.0 or higher
 
 ### System Requirements
+
 - **RAM**: Minimum 4GB, recommended 8GB
 - **Disk Space**: Minimum 10GB free
 - **Network**: Stable internet connection for crawling
 
 ### Verify Installation
+
 ```bash
 node --version
 npm --version
@@ -43,28 +47,33 @@ docker-compose --version
 ## Installation & Setup
 
 ### 1. Clone Repository
+
 ```bash
 git clone https://github.com/gitchrisqueen/wix2wordpresstheme.git
 cd wix2wordpresstheme
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 3. Configure Environment
+
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
 ### 4. Start WordPress Environment
+
 ```bash
 npm run docker:up
 ```
 
 ### 5. Verify Setup
+
 ```bash
 npm run health-check
 ```
@@ -72,6 +81,7 @@ npm run health-check
 ## Running the Pipeline
 
 ### Full Pipeline (Recommended)
+
 ```bash
 npm run pipeline -- --url https://example.wixsite.com/site
 ```
@@ -79,42 +89,50 @@ npm run pipeline -- --url https://example.wixsite.com/site
 ### Step-by-Step Execution
 
 #### Step 1: Crawl Wix Site
+
 ```bash
 npm run crawl -- --url https://example.wixsite.com/site --output ./crawler/output
 ```
 
 **Expected Output:**
+
 - JSON files with page structure
 - Downloaded assets (images, CSS, JS)
 - Screenshots of each page
 
 #### Step 2: Generate WordPress Theme
+
 ```bash
 npm run generate-theme -- --input ./crawler/output --output ./theme-generator/output
 ```
 
 **Expected Output:**
+
 - WordPress theme directory structure
 - style.css with theme metadata
 - Template files (header.php, footer.php, etc.)
 - Assets directory with optimized resources
 
 #### Step 3: Deploy to Local WordPress
+
 ```bash
 npm run deploy-theme -- --theme ./theme-generator/output
 ```
 
 **Expected Output:**
+
 - Theme copied to WordPress themes directory
 - Theme activated
 - WordPress restarted
 
 #### Step 4: Run Tests
+
 ```bash
 npm run test -- --theme-name converted-wix-theme
 ```
 
 **Expected Output:**
+
 - Visual comparison results
 - DOM structure validation
 - Test report in HTML format
@@ -124,8 +142,10 @@ npm run test -- --theme-name converted-wix-theme
 ### Common Issues
 
 #### Crawler Fails to Connect
+
 **Symptoms:** Timeout errors, connection refused
 **Solutions:**
+
 1. Check internet connection
 2. Verify Wix site is accessible
 3. Check for rate limiting
@@ -137,8 +157,10 @@ tail -f logs/crawler-*.log
 ```
 
 #### Docker Container Won't Start
+
 **Symptoms:** Port already in use, container exits immediately
 **Solutions:**
+
 1. Check port availability:
    ```bash
    lsof -i :8080
@@ -154,8 +176,10 @@ tail -f logs/crawler-*.log
    ```
 
 #### Theme Generation Fails
+
 **Symptoms:** Incomplete theme, missing files
 **Solutions:**
+
 1. Verify crawler output exists
 2. Check crawler output format
 3. Review generator logs: `logs/generator-[timestamp].log`
@@ -165,8 +189,10 @@ tail -f logs/crawler-*.log
    ```
 
 #### Tests Fail
+
 **Symptoms:** Visual differences, DOM mismatches
 **Solutions:**
+
 1. Check baseline images exist
 2. Update baseline if intentional change:
    ```bash
@@ -177,29 +203,32 @@ tail -f logs/crawler-*.log
 
 ### Error Codes
 
-| Code | Description | Action |
-|------|-------------|--------|
-| E001 | Crawler connection failed | Check URL and network |
-| E002 | Invalid crawler output | Re-run crawler |
-| E003 | Theme generation failed | Check crawler data |
-| E004 | WordPress deployment failed | Check Docker status |
-| E005 | Test execution failed | Review test logs |
+| Code | Description                 | Action                |
+| ---- | --------------------------- | --------------------- |
+| E001 | Crawler connection failed   | Check URL and network |
+| E002 | Invalid crawler output      | Re-run crawler        |
+| E003 | Theme generation failed     | Check crawler data    |
+| E004 | WordPress deployment failed | Check Docker status   |
+| E005 | Test execution failed       | Review test logs      |
 
 ## Monitoring & Logging
 
 ### Log Locations
+
 - **Crawler**: `logs/crawler-[timestamp].log`
 - **Generator**: `logs/generator-[timestamp].log`
 - **WordPress**: `logs/wordpress-[timestamp].log`
 - **Tests**: `logs/test-[timestamp].log`
 
 ### Log Levels
+
 - **ERROR**: Critical failures
 - **WARN**: Potential issues
 - **INFO**: Normal operations
 - **DEBUG**: Detailed diagnostics
 
 ### Viewing Logs
+
 ```bash
 # Tail all logs
 npm run logs:tail
@@ -212,6 +241,7 @@ npm run logs:search -- --pattern "error"
 ```
 
 ### Health Checks
+
 ```bash
 # Check all components
 npm run health-check
@@ -225,10 +255,12 @@ npm run health-check -- --component wordpress
 ### Regular Tasks
 
 #### Daily
+
 - Review error logs
 - Monitor disk space
 
 #### Weekly
+
 - Update dependencies:
   ```bash
   npm update
@@ -239,6 +271,7 @@ npm run health-check -- --component wordpress
   ```
 
 #### Monthly
+
 - Update Docker images:
   ```bash
   docker-compose pull
@@ -249,6 +282,7 @@ npm run health-check -- --component wordpress
   ```
 
 ### Backup Procedures
+
 ```bash
 # Backup crawler outputs
 npm run backup -- --component crawler
@@ -263,6 +297,7 @@ npm run backup:full
 ## Emergency Procedures
 
 ### Complete System Reset
+
 ```bash
 # Stop all services
 npm run docker:down
@@ -278,6 +313,7 @@ npm run docker:up
 ```
 
 ### Rollback Last Operation
+
 ```bash
 # View recent operations
 npm run history
@@ -287,7 +323,9 @@ npm run rollback -- --operation [ID]
 ```
 
 ### Contact & Escalation
+
 For critical issues:
+
 1. Check GitHub Issues
 2. Review documentation
 3. Contact maintainers
@@ -295,16 +333,19 @@ For critical issues:
 ## Performance Tuning
 
 ### Crawler Performance
+
 - Adjust concurrent requests in `crawler/config.json`
 - Modify timeout settings
 - Enable/disable headless mode
 
 ### Docker Performance
+
 - Adjust memory limits in `docker-compose.yml`
 - Configure volume mounts
 - Optimize image caching
 
 ### Testing Performance
+
 - Run tests in parallel
 - Adjust screenshot comparison threshold
 - Skip non-critical tests
@@ -312,6 +353,7 @@ For critical issues:
 ## Appendix
 
 ### Useful Commands Cheatsheet
+
 ```bash
 # Full pipeline
 npm run pipeline -- --url [URL]
@@ -335,6 +377,7 @@ npm run health-check
 ```
 
 ### Configuration Files
+
 - `.env` - Environment variables
 - `crawler/config.json` - Crawler settings
 - `theme-generator/config.json` - Generator settings

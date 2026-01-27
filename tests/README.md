@@ -35,6 +35,7 @@ tests/
 ## 🎯 Purpose
 
 The testing module is responsible for:
+
 - Visual regression testing (pixel-perfect comparison)
 - DOM structure validation
 - Interactive element testing
@@ -64,12 +65,14 @@ npm run test:report
 ## 🧪 Test Types
 
 ### Visual Regression Tests
+
 - Pixel-by-pixel comparison between original Wix site and converted WordPress theme
 - Multiple viewport sizes (mobile, tablet, desktop)
 - Cross-browser testing
 - Difference highlighting
 
 ### DOM Structure Tests
+
 - Element hierarchy validation
 - Semantic HTML verification
 - Class and ID preservation
@@ -77,6 +80,7 @@ npm run test:report
 - Interactive element presence
 
 ### Accessibility Tests
+
 - WCAG compliance checking
 - Screen reader compatibility
 - Keyboard navigation
@@ -84,6 +88,7 @@ npm run test:report
 - ARIA attribute verification
 
 ### Performance Tests
+
 - Page load time benchmarks
 - Asset size limits
 - Render blocking resources
@@ -91,6 +96,7 @@ npm run test:report
 - Time to interactive
 
 ### Responsive Tests
+
 - Breakpoint behavior
 - Mobile-first approach
 - Touch target sizes
@@ -100,6 +106,7 @@ npm run test:report
 ## ⚙️ Configuration
 
 ### Visual Test Config (`visual/config.json`)
+
 ```json
 {
   "threshold": 0.01,
@@ -113,6 +120,7 @@ npm run test:report
 ```
 
 ### DOM Test Config (`dom/config.json`)
+
 ```json
 {
   "strictMode": false,
@@ -124,6 +132,7 @@ npm run test:report
 ## 📊 Test Reports
 
 Test reports will be generated in HTML format with:
+
 - Visual diffs with side-by-side comparison
 - Percentage similarity scores
 - Failed test details
@@ -145,6 +154,7 @@ Test reports will be generated in HTML format with:
 **Status**: Structure only - no implementation yet
 
 **Next Steps**:
+
 1. Install test dependencies (Jest, Playwright)
 2. Create test utilities
 3. Implement visual regression tests

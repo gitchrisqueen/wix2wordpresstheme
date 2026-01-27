@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Initial project structure and scaffolding
 - Complete folder organization (crawler, theme-generator, wordpress-local, tests, scripts, docs, logs)
 - Comprehensive documentation (README, RUNBOOK, ARCHITECTURE, CONTRIBUTING)
@@ -19,23 +20,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - .env.example for environment configuration
 
 ### Changed
+
 - N/A
 
 ### Deprecated
+
 - N/A
 
 ### Removed
+
 - N/A
 
 ### Fixed
+
 - N/A
 
 ### Security
+
 - N/A
 
 ## [0.1.0] - 2024-01-27
 
 ### Added
+
 - Initial repository scaffolding
 - Project structure with clear separation of concerns
 - Documentation framework
@@ -46,19 +53,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Release Notes Format
 
 ### Added
+
 New features and capabilities
 
 ### Changed
+
 Changes to existing functionality
 
 ### Deprecated
+
 Features that will be removed in future releases
 
 ### Removed
+
 Features that have been removed
 
 ### Fixed
+
 Bug fixes and corrections
 
 ### Security
+
 Security improvements and vulnerability fixes

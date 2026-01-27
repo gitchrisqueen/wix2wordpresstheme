@@ -27,6 +27,7 @@ theme-generator/
 ## 🎯 Purpose
 
 The theme generator module is responsible for:
+
 - Loading crawled Wix site data
 - Analyzing structure and creating theme plan
 - Generating WordPress theme file structure
@@ -52,6 +53,7 @@ npm run generate-theme -- \
 ## ⚙️ Configuration
 
 The `config.json` file will contain:
+
 - Theme metadata (name, author, version)
 - Template options (which templates to generate)
 - Asset optimization settings
@@ -60,6 +62,7 @@ The `config.json` file will contain:
 ## 📤 Output Format
 
 The generator will output a complete WordPress theme:
+
 ```
 output/my-theme/
 ├── style.css              # Theme metadata and styles
@@ -95,6 +98,7 @@ output/my-theme/
 **Status**: Structure only - no implementation yet
 
 **Next Steps**:
+
 1. Install dependencies
 2. Create template files
 3. Implement theme structure generator

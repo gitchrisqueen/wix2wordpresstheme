@@ -19,6 +19,7 @@ wordpress-local/
 ## 🚀 Quick Start
 
 ### Start WordPress Environment
+
 ```bash
 # From project root
 npm run docker:up
@@ -28,10 +29,12 @@ docker-compose up -d
 ```
 
 ### Access Services
+
 - **WordPress**: http://localhost:8080
 - **PHPMyAdmin**: http://localhost:8081
 
 ### Default Credentials
+
 - **Database Name**: wordpress
 - **Database User**: wordpress
 - **Database Password**: wordpress
@@ -40,26 +43,31 @@ docker-compose up -d
 ## 🛠️ Management
 
 ### Stop Services
+
 ```bash
 npm run docker:down
 ```
 
 ### View Logs
+
 ```bash
 npm run docker:logs
 ```
 
 ### Reset Environment
+
 ```bash
 npm run docker:reset
 ```
 
 ### Backup Database
+
 ```bash
 docker exec wix2wp-mysql mysqldump -u wordpress -pwordpress wordpress > backup.sql
 ```
 
 ### Restore Database
+
 ```bash
 docker exec -i wix2wp-mysql mysql -u wordpress -pwordpress wordpress < backup.sql
 ```
@@ -67,16 +75,19 @@ docker exec -i wix2wp-mysql mysql -u wordpress -pwordpress wordpress < backup.sq
 ## 📦 Services
 
 ### WordPress
+
 - **Image**: wordpress:latest
 - **Port**: 8080
 - **Container Name**: wix2wp-wordpress
 
 ### MySQL
+
 - **Image**: mysql:8.0
 - **Port**: 3306 (internal)
 - **Container Name**: wix2wp-mysql
 
 ### PHPMyAdmin
+
 - **Image**: phpmyadmin:latest
 - **Port**: 8081
 - **Container Name**: wix2wp-phpmyadmin
@@ -84,12 +95,15 @@ docker exec -i wix2wp-mysql mysql -u wordpress -pwordpress wordpress < backup.sq
 ## 🔧 Configuration
 
 ### PHP Settings
+
 Modify `config/php.ini` to adjust:
+
 - Upload size limits
 - Memory limits
 - Execution timeouts
 
 ### WordPress Settings
+
 WordPress configuration is set via environment variables in `docker-compose.yml`.
 
 ## 📝 Notes

@@ -5,6 +5,7 @@ Thank you for your interest in contributing! This document provides guidelines a
 ## 🤝 How to Contribute
 
 ### Reporting Issues
+
 - Check existing issues before creating a new one
 - Use the issue template if available
 - Include detailed information:
@@ -15,12 +16,14 @@ Thank you for your interest in contributing! This document provides guidelines a
   - Logs and screenshots
 
 ### Suggesting Features
+
 - Open a feature request issue
 - Describe the feature and its use case
 - Explain why it would be valuable
 - Consider implementation approach
 
 ### Submitting Code
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
@@ -32,11 +35,13 @@ Thank you for your interest in contributing! This document provides guidelines a
 ## 📋 Development Setup
 
 ### Prerequisites
+
 - Node.js 18+
 - Docker and Docker Compose
 - Git
 
 ### Setup Steps
+
 ```bash
 # Clone your fork
 git clone https://github.com/YOUR_USERNAME/wix2wordpresstheme.git
@@ -55,13 +60,16 @@ npm run docker:up
 ## 💻 Development Workflow
 
 ### Branch Naming
+
 - Feature: `feature/description`
 - Bug fix: `fix/description`
 - Documentation: `docs/description`
 - Refactor: `refactor/description`
 
 ### Commit Messages
+
 Follow conventional commits format:
+
 ```
 type(scope): subject
 
@@ -71,6 +79,7 @@ footer (optional)
 ```
 
 Types:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -80,6 +89,7 @@ Types:
 - `chore`: Maintenance tasks
 
 Examples:
+
 ```
 feat(crawler): add sitemap parsing support
 fix(theme-gen): correct header template generation
@@ -89,6 +99,7 @@ docs(readme): update installation instructions
 ## 🧪 Testing
 
 ### Running Tests
+
 ```bash
 # Run all tests
 npm test
@@ -100,6 +111,7 @@ npm run test:visual
 ```
 
 ### Writing Tests
+
 - Write tests for new features
 - Update tests for bug fixes
 - Maintain test coverage
@@ -108,6 +120,7 @@ npm run test:visual
 ## 📝 Code Style
 
 ### General Guidelines
+
 - Use TypeScript for new code
 - Follow existing code structure
 - Add comments for complex logic
@@ -115,18 +128,21 @@ npm run test:visual
 - Use meaningful variable names
 
 ### TypeScript
+
 - Use explicit types
 - Avoid `any` type
 - Use interfaces for objects
 - Enable strict mode
 
 ### Formatting
+
 - 2 spaces for indentation
 - Use semicolons
 - Single quotes for strings
 - Trailing commas in multi-line
 
 ### Linting
+
 ```bash
 npm run lint
 ```
@@ -134,12 +150,14 @@ npm run lint
 ## 📚 Documentation
 
 ### Code Documentation
+
 - Add JSDoc comments for functions
 - Document parameters and return types
 - Explain complex algorithms
 - Include usage examples
 
 ### README Updates
+
 - Update README for new features
 - Keep documentation current
 - Add examples and screenshots
@@ -148,12 +166,14 @@ npm run lint
 ## 🔍 Code Review Process
 
 ### For Contributors
+
 - Respond to review comments
 - Make requested changes
 - Keep PR focused and small
 - Update PR description if scope changes
 
 ### For Reviewers
+
 - Be constructive and respectful
 - Explain reasoning for changes
 - Approve when ready
@@ -162,12 +182,15 @@ npm run lint
 ## 🚀 Release Process
 
 ### Version Numbers
+
 Follow semantic versioning (MAJOR.MINOR.PATCH):
+
 - MAJOR: Breaking changes
 - MINOR: New features (backward compatible)
 - PATCH: Bug fixes
 
 ### Release Steps
+
 1. Update version in package.json
 2. Update CHANGELOG.md
 3. Create release tag
@@ -187,6 +210,7 @@ By contributing, you agree that your contributions will be licensed under the sa
 ## 🎯 Priority Areas
 
 Current priority areas for contribution:
+
 1. Core crawler implementation
 2. Theme generator logic
 3. Visual testing system
@@ -196,6 +220,7 @@ Current priority areas for contribution:
 ## 🙏 Recognition
 
 Contributors will be:
+
 - Listed in CONTRIBUTORS.md
 - Mentioned in release notes
 - Credited in documentation

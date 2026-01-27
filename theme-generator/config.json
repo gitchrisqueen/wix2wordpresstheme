@@ -9,7 +9,13 @@
     "license": "GPL-2.0-or-later",
     "licenseUri": "http://www.gnu.org/licenses/gpl-2.0.html",
     "textDomain": "converted-wix-theme",
-    "tags": ["custom-background", "custom-logo", "custom-menu", "featured-images", "threaded-comments"]
+    "tags": [
+      "custom-background",
+      "custom-logo",
+      "custom-menu",
+      "featured-images",
+      "threaded-comments"
+    ]
   },
   "templates": {
     "generate": ["header", "footer", "index", "page", "single", "archive", "404"],

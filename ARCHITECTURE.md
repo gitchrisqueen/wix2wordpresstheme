@@ -60,6 +60,7 @@
 **Purpose:** Extract complete Wix site data including structure, styles, assets, and content.
 
 **Technology Stack:**
+
 - Playwright (browser automation)
 - Node.js (runtime)
 - TypeScript (language)
@@ -85,6 +86,7 @@ crawler/
 ```
 
 **Data Flow:**
+
 1. Accept Wix site URL
 2. Navigate to site using Playwright
 3. Discover all pages (sitemap or navigation)
@@ -97,6 +99,7 @@ crawler/
 5. Output structured JSON + asset files
 
 **Output Format:**
+
 ```json
 {
   "site": {
@@ -127,6 +130,7 @@ crawler/
 **Purpose:** Convert crawled data into a WordPress-compatible theme.
 
 **Technology Stack:**
+
 - Node.js (runtime)
 - TypeScript (language)
 - Template engines (Handlebars/EJS)
@@ -153,6 +157,7 @@ theme-generator/
 ```
 
 **Generation Process:**
+
 1. Load crawled data
 2. Analyze structure and create theme plan
 3. Generate WordPress theme structure:
@@ -166,6 +171,7 @@ theme-generator/
 7. Create theme package
 
 **WordPress Theme Structure:**
+
 ```
 theme-output/
 ├── style.css               # Theme metadata
@@ -191,6 +197,7 @@ theme-output/
 **Purpose:** Provide isolated WordPress environment for theme development and testing.
 
 **Technology Stack:**
+
 - Docker (containerization)
 - Docker Compose (orchestration)
 - WordPress (CMS)
@@ -215,18 +222,19 @@ wordpress-local/
 ```
 
 **Docker Services:**
+
 ```yaml
 services:
   wordpress:
     image: wordpress:latest
     ports:
-      - "8080:80"
+      - '8080:80'
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
-  
+
   db:
     image: mysql:8.0
     environment:
@@ -243,6 +251,7 @@ services:
 **Purpose:** Validate theme conversion quality through visual and DOM testing.
 
 **Technology Stack:**
+
 - Jest (test framework)
 - Playwright (browser automation)
 - Pixelmatch (visual comparison)
@@ -272,6 +281,7 @@ tests/
 **Testing Process:**
 
 **Visual Testing:**
+
 1. Load original Wix page
 2. Take screenshot (baseline)
 3. Load converted WordPress page
@@ -282,6 +292,7 @@ tests/
 8. Report differences
 
 **DOM Testing:**
+
 1. Load both pages
 2. Extract DOM structure
 3. Compare element hierarchy
@@ -318,6 +329,7 @@ scripts/
 ### Language Choice: TypeScript/Node.js
 
 **Rationale:**
+
 - Playwright's native support
 - Rich ecosystem for web scraping
 - WordPress/web technology familiarity
@@ -327,6 +339,7 @@ scripts/
 ### Browser Automation: Playwright
 
 **Rationale:**
+
 - Modern browser support
 - Reliable automation APIs
 - Built-in wait mechanisms
@@ -335,6 +348,7 @@ scripts/
 - Better Wix site compatibility
 
 **Alternatives Considered:**
+
 - Puppeteer: Less cross-browser support
 - Selenium: More complex, slower
 - Cheerio: No JavaScript execution
@@ -342,6 +356,7 @@ scripts/
 ### Containerization: Docker
 
 **Rationale:**
+
 - Isolated environment
 - Consistent across systems
 - Easy setup/teardown
@@ -351,6 +366,7 @@ scripts/
 ### Testing: Jest + Playwright
 
 **Rationale:**
+
 - Comprehensive test framework
 - Good TypeScript support
 - Parallel test execution
@@ -360,18 +376,21 @@ scripts/
 ## 🔐 Security Considerations
 
 ### Crawler Security
+
 - Respect robots.txt
 - Rate limiting to avoid DDoS
 - No credential storage
 - Sanitize extracted content
 
 ### WordPress Security
+
 - Isolated Docker environment
 - No external network access (except localhost)
 - Regular image updates
 - Secure database credentials
 
 ### Theme Security
+
 - Escape all output
 - Sanitize user inputs
 - Use WordPress security functions
@@ -390,7 +409,7 @@ scripts/
    ├─> Content Extraction
    ├─> Style Analysis
    └─> Asset Download
-   
+
 3. Intermediate Storage (JSON)
    ├─> pages.json
    ├─> styles.json
@@ -422,7 +441,9 @@ scripts/
 ## 🚀 Extensibility
 
 ### Plugin System
+
 The architecture supports future plugins for:
+
 - Custom post types
 - Additional page builders
 - Alternative CMS targets (not just WordPress)
@@ -430,13 +451,16 @@ The architecture supports future plugins for:
 - Advanced animations
 
 ### Modular Design
+
 Each component is designed to be:
+
 - Independently testable
 - Swappable with alternatives
 - Configurable via JSON
 - Extensible through interfaces
 
 ### Future Enhancements
+
 - Content migration (beyond structure)
 - Dynamic content support
 - E-commerce conversion
@@ -448,11 +472,13 @@ Each component is designed to be:
 ## 📈 Scalability
 
 ### Horizontal Scaling
+
 - Crawler can process multiple pages in parallel
 - Theme generation is stateless
 - Tests can run in parallel
 
 ### Performance Optimization
+
 - Asset caching
 - Incremental crawling (detect changes)
 - Lazy loading for assets
@@ -462,6 +488,7 @@ Each component is designed to be:
 ## 🔍 Monitoring & Observability
 
 ### Logging Strategy
+
 - Structured logging (JSON format)
 - Log levels: ERROR, WARN, INFO, DEBUG
 - Separate logs per component
@@ -469,6 +496,7 @@ Each component is designed to be:
 - Centralized log aggregation ready
 
 ### Metrics
+
 - Crawl duration
 - Page count
 - Asset count and size
@@ -477,6 +505,7 @@ Each component is designed to be:
 - Visual similarity score
 
 ### Health Checks
+
 - Component status
 - Docker container health
 - WordPress availability
@@ -485,36 +514,40 @@ Each component is designed to be:
 ## 🧪 Testing Strategy
 
 ### Unit Tests
+
 - Individual component functions
 - Utility functions
 - Data transformers
 
 ### Integration Tests
+
 - Component interactions
 - End-to-end pipeline
 - Docker environment
 
 ### Visual Tests
+
 - Pixel-perfect comparison
 - Responsive breakpoints
 - Browser compatibility
 
 ### Performance Tests
+
 - Load time benchmarks
 - Asset size limits
 - Memory usage
 
 ## 📚 Technology Stack Summary
 
-| Component | Technologies |
-|-----------|-------------|
-| Crawler | TypeScript, Playwright, Node.js |
+| Component | Technologies                    |
+| --------- | ------------------------------- |
+| Crawler   | TypeScript, Playwright, Node.js |
 | Theme Gen | TypeScript, Node.js, Handlebars |
-| WordPress | Docker, WordPress, MySQL, PHP |
-| Testing | Jest, Playwright, Pixelmatch |
-| Logging | Winston, Morgan |
-| Build | npm/yarn, TypeScript compiler |
-| CI/CD | GitHub Actions (future) |
+| WordPress | Docker, WordPress, MySQL, PHP   |
+| Testing   | Jest, Playwright, Pixelmatch    |
+| Logging   | Winston, Morgan                 |
+| Build     | npm/yarn, TypeScript compiler   |
+| CI/CD     | GitHub Actions (future)         |
 
 ## 🔄 Development Workflow
 
@@ -528,18 +561,21 @@ Each component is designed to be:
 ## 📝 Configuration Management
 
 ### Environment Variables
+
 - Database credentials
 - WordPress URLs
 - API keys (future)
 - Feature flags
 
 ### Config Files
+
 - `crawler/config.json` - Crawling behavior
 - `theme-generator/config.json` - Theme options
 - `docker-compose.yml` - Container settings
 - `tests/config.json` - Test thresholds
 
 ### Version Control
+
 - Git for source code
 - Semantic versioning
 - Tagged releases

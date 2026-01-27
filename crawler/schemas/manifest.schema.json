@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Manifest",
+  "description": "Schema for the discovery manifest output",
+  "type": "object",
+  "required": ["version", "baseUrl", "generatedAt", "discovery", "pages", "stats"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version"
+    },
+    "baseUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Base URL of the site"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of when the manifest was generated"
+    },
+    "discovery": {
+      "type": "object",
+      "required": ["method", "respectRobots"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["sitemap", "crawl", "hybrid"],
+          "description": "Discovery method used"
+        },
+        "respectRobots": {
+          "type": "boolean",
+          "description": "Whether robots.txt was respected"
+        },
+        "sitemapsTried": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of sitemap URLs that were tried"
+        },
+        "crawl": {
+          "type": "object",
+          "properties": {
+            "maxDepth": {
+              "type": "integer",
+              "description": "Maximum crawl depth"
+            },
+            "maxPages": {
+              "type": "integer",
+              "description": "Maximum pages to crawl"
+            }
+          }
+        }
+      }
+    },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["url", "path", "canonical", "source"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Full URL of the page"
+          },
+          "path": {
+            "type": "string",
+            "description": "Path component of the URL"
+          },
+          "canonical": {
+            "type": "string",
+            "format": "uri",
+            "description": "Canonical URL (same as url in phase 1)"
+          },
+          "title": {
+            "type": ["string", "null"],
+            "description": "Page title (null in phase 1)"
+          },
+          "status": {
+            "type": ["integer", "null"],
+            "description": "HTTP status code"
+          },
+          "depth": {
+            "type": "integer",
+            "description": "Depth in crawl tree (0 for sitemap entries)"
+          },
+          "source": {
+            "type": "string",
+            "enum": ["sitemap", "crawl"],
+            "description": "How this page was discovered"
+          },
+          "lastmod": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Last modification date from sitemap"
+          }
+        }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "required": [
+        "pagesFound",
+        "pagesIncluded",
+        "excludedExternal",
+        "excludedDuplicates",
+        "excludedByRules"
+      ],
+      "properties": {
+        "pagesFound": {
+          "type": "integer",
+          "description": "Total pages discovered"
+        },
+        "pagesIncluded": {
+          "type": "integer",
+          "description": "Pages included in manifest"
+        },
+        "excludedExternal": {
+          "type": "integer",
+          "description": "External URLs excluded"
+        },
+        "excludedDuplicates": {
+          "type": "integer",
+          "description": "Duplicate URLs excluded"
+        },
+        "excludedByRules": {
+          "type": "integer",
+          "description": "URLs excluded by filtering rules"
+        }
+      }
+    }
+  }
+}
