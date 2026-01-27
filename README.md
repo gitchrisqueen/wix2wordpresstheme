@@ -26,7 +26,7 @@ wix2wordpresstheme/
 ### Prerequisites
 
 - Node.js 18+ and npm
-- Docker and Docker Compose
+- Docker and Docker Compose v2+
 - Git
 
 ### Installation
