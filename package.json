@@ -1,0 +1,51 @@
+{
+  "name": "wix2wordpresstheme",
+  "version": "0.1.0",
+  "description": "A fully automated, repeatable pipeline to convert Wix websites into pixel-perfect WordPress themes",
+  "main": "index.js",
+  "scripts": {
+    "dev": "echo 'Development mode not implemented yet'",
+    "build": "echo 'Build not implemented yet'",
+    "test": "echo 'Tests not implemented yet'",
+    "lint": "echo 'Linting not implemented yet'",
+    "crawl": "echo 'Crawler not implemented yet'",
+    "generate-theme": "echo 'Theme generator not implemented yet'",
+    "deploy-theme": "echo 'Theme deployment not implemented yet'",
+    "pipeline": "echo 'Full pipeline not implemented yet'",
+    "docker:up": "docker compose -f wordpress-local/docker-compose.yml up -d",
+    "docker:down": "docker compose -f wordpress-local/docker-compose.yml down",
+    "docker:logs": "docker compose -f wordpress-local/docker-compose.yml logs -f",
+    "docker:reset": "docker compose -f wordpress-local/docker-compose.yml down -v && npm run docker:up",
+    "logs:tail": "tail -f logs/*.log",
+    "logs:clean": "rm -f logs/*.log",
+    "health-check": "echo 'Health check not implemented yet'",
+    "clean:all": "rm -rf node_modules crawler/output theme-generator/output logs/*.log"
+  },
+  "keywords": [
+    "wix",
+    "wordpress",
+    "theme",
+    "converter",
+    "migration",
+    "scraper",
+    "playwright"
+  ],
+  "author": "gitchrisqueen",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gitchrisqueen/wix2wordpresstheme.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gitchrisqueen/wix2wordpresstheme/issues"
+  },
+  "homepage": "https://github.com/gitchrisqueen/wix2wordpresstheme#readme",
+  "devDependencies": {
+  },
+  "dependencies": {
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

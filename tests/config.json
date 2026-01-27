@@ -1,0 +1,65 @@
+{
+  "visual": {
+    "enabled": true,
+    "threshold": 0.01,
+    "diffColor": { "r": 255, "g": 0, "b": 0 },
+    "viewports": [
+      { "width": 375, "height": 667, "name": "mobile" },
+      { "width": 768, "height": 1024, "name": "tablet" },
+      { "width": 1920, "height": 1080, "name": "desktop" }
+    ],
+    "browsers": ["chromium"],
+    "updateBaseline": false,
+    "output": {
+      "screenshots": "./visual/current",
+      "baseline": "./visual/baseline",
+      "diff": "./visual/diff",
+      "reports": "./visual/reports"
+    }
+  },
+  "dom": {
+    "enabled": true,
+    "strictMode": false,
+    "ignoreAttributes": ["data-reactid", "data-react-checksum"],
+    "ignoreElements": [".dynamic-content", ".timestamp"],
+    "allowedDifferences": ["style"],
+    "compareText": true,
+    "compareAttributes": true
+  },
+  "accessibility": {
+    "enabled": true,
+    "standard": "WCAG2AA",
+    "runOnly": ["wcag2a", "wcag2aa"],
+    "rules": {},
+    "ignoreRules": []
+  },
+  "performance": {
+    "enabled": true,
+    "metrics": ["FCP", "LCP", "TTI", "TBT", "CLS"],
+    "budgets": {
+      "FCP": 2000,
+      "LCP": 3000,
+      "TTI": 5000,
+      "TBT": 300,
+      "CLS": 0.1
+    },
+    "connection": {
+      "type": "4g",
+      "downloadThroughput": 1500,
+      "uploadThroughput": 750,
+      "latency": 40
+    }
+  },
+  "reporting": {
+    "format": ["html", "json"],
+    "outputDir": "./reports",
+    "includeScreenshots": true,
+    "includeMetrics": true,
+    "verbose": false
+  },
+  "logging": {
+    "level": "info",
+    "file": "../logs/tests.log",
+    "console": true
+  }
+}

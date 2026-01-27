@@ -1,0 +1,49 @@
+{
+  "browser": {
+    "type": "chromium",
+    "headless": true,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "crawl": {
+    "maxDepth": 10,
+    "maxPages": 100,
+    "timeout": 30000,
+    "waitForSelector": "body",
+    "concurrency": 3,
+    "respectRobotsTxt": true,
+    "rateLimit": {
+      "enabled": true,
+      "requestsPerSecond": 2
+    }
+  },
+  "assets": {
+    "download": true,
+    "types": ["images", "fonts", "videos", "css", "js"],
+    "maxSize": 10485760,
+    "imageFormats": ["jpg", "jpeg", "png", "gif", "webp", "svg"],
+    "optimize": false
+  },
+  "screenshots": {
+    "enabled": true,
+    "fullPage": true,
+    "viewports": [
+      { "width": 375, "height": 667, "name": "mobile" },
+      { "width": 768, "height": 1024, "name": "tablet" },
+      { "width": 1920, "height": 1080, "name": "desktop" }
+    ]
+  },
+  "output": {
+    "directory": "./output",
+    "format": "json",
+    "prettyPrint": true,
+    "includeMetadata": true
+  },
+  "logging": {
+    "level": "info",
+    "file": "../logs/crawler.log",
+    "console": true
+  }
+}
