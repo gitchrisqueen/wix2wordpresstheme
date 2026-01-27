@@ -40,7 +40,7 @@ export async function extractDOM(page: Page, url: string): Promise<DOMSnapshot> 
   // Execute in browser context to serialize DOM
   const serializedDOM = await page.evaluate(
     ({ capturedAttrs, skipTags }) => {
-      const serializeNode = (node: any): any => {
+      const serializeNode = (node) => {
         // Skip comments and other non-element/text nodes
         if (node.nodeType === 8) { // Node.COMMENT_NODE
           return null;
@@ -68,7 +68,7 @@ export async function extractDOM(page: Page, url: string): Promise<DOMSnapshot> 
           }
 
           // Build attributes object
-          const attributes: Record<string, string> = {};
+          const attributes = {};
           for (const attr of capturedAttrs) {
             const value = element.getAttribute(attr);
             if (value) {
@@ -77,7 +77,7 @@ export async function extractDOM(page: Page, url: string): Promise<DOMSnapshot> 
           }
 
           // Serialize children
-          const children: any[] = [];
+          const children = [];
           for (const child of Array.from(node.childNodes)) {
             const serialized = serializeNode(child);
             if (serialized) {
@@ -85,7 +85,7 @@ export async function extractDOM(page: Page, url: string): Promise<DOMSnapshot> 
             }
           }
 
-          const result: any = {
+          const result = {
             type: 'element',
             tag,
           };
@@ -130,7 +130,7 @@ export async function extractDOM(page: Page, url: string): Promise<DOMSnapshot> 
  */
 async function extractKeyElements(page: Page): Promise<KeyElements> {
   return await page.evaluate(() => {
-    const keyElements: any = {
+    const keyElements = {
       nav: null,
       footer: null,
       main: null,

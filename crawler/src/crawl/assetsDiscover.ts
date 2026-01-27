@@ -47,9 +47,9 @@ async function discoverFromDOM(
   const assets = await page.evaluate(
     ({ base, allowThirdParty }) => {
       const baseUrlObj = new URL(base);
-      const results: Array<{ url: string; type: string }> = [];
+      const results = [];
 
-      const isAllowed = (url: string): boolean => {
+      const isAllowed = (url) => {
         try {
           const urlObj = new URL(url, base);
           return allowThirdParty || urlObj.origin === baseUrlObj.origin;
@@ -58,7 +58,7 @@ async function discoverFromDOM(
         }
       };
 
-      const addAsset = (url: string | null, type: string) => {
+      const addAsset = (url, type) => {
         if (!url) return;
 
         try {
@@ -161,7 +161,7 @@ async function discoverFromCSS(
 
   // Get all stylesheets
   const stylesheets = await page.evaluate(() => {
-    const sheets: Array<{ href: string; cssText: string }> = [];
+    const sheets = [];
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const sheet of Array.from(document.styleSheets as any)) {

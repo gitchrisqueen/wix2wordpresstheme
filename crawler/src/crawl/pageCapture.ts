@@ -139,7 +139,7 @@ async function capturePageAttempt(
 
     // Ensure page is fully loaded
     await page.evaluate(() => {
-      return new Promise<void>((resolve) => {
+      return new Promise((resolve) => {
         if (document.readyState === 'complete') {
           resolve();
         } else {
