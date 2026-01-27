@@ -13,8 +13,20 @@
          │
          ▼
   ┌──────────────────┐
-  │  1. CRAWLER      │  Playwright-based scraper
-  │  (Playwright)    │  • Page navigation
+  │  1. DISCOVERY    │  ✅ Phase 1 (Complete)
+  │  (Fetch + Cheerio)│ • Sitemap parsing
+  └──────────────────┘  • URL crawling
+         │              • robots.txt compliance
+         │              • URL normalization
+         ▼
+  ┌──────────────────┐
+  │  manifest.json   │  Discovered URLs + metadata
+  └──────────────────┘
+         │
+         ▼
+  ┌──────────────────┐
+  │  2. CRAWLER      │  Phase 2 (Coming)
+  │  (Playwright)    │  • Page snapshots
   └──────────────────┘  • Asset extraction
          │              • Style capturing
          │              • Content extraction
@@ -25,7 +37,7 @@
          │
          ▼
   ┌──────────────────┐
-  │ 2. THEME GEN     │  Theme builder
+  │ 3. THEME GEN     │  Phase 3 (Coming)
   │  (Node.js)       │  • Template generation
   └──────────────────┘  • Asset optimization
          │              • WordPress structure
@@ -37,15 +49,15 @@
          │
          ▼
   ┌──────────────────┐
-  │ 3. WP LOCAL      │  Docker environment
+  │ 4. WP LOCAL      │  Phase 4 (Coming)
   │  (Docker)        │  • WordPress install
   └──────────────────┘  • MySQL database
          │              • Theme deployment
          │              • Plugin support
          ▼
   ┌──────────────────┐
-  │ 4. TESTS         │  Quality assurance
-  │  (Jest+Playwright)│ • Visual regression
+  │ 5. TESTS         │  Phase 5 (Coming)
+  │  (Vitest+Playwright)│ • Visual regression
   └──────────────────┘  • DOM validation
          │              • Performance tests
          │              • Accessibility checks
@@ -55,17 +67,117 @@
 
 ## 🏛️ Component Architecture
 
-### 1. Crawler Module
+### 1. Discovery Module (✅ Phase 1 Complete)
 
-**Purpose:** Extract complete Wix site data including structure, styles, assets, and content.
+**Purpose:** Discover and catalog all pages on a Wix site.
 
 **Technology Stack:**
+
+- Node.js (runtime)
+- TypeScript (language)
+- fetch API (HTTP requests)
+- cheerio (HTML parsing for fallback crawl)
+- fast-xml-parser (sitemap parsing)
+- robots-parser (robots.txt compliance)
+- zod (schema validation)
+- commander (CLI)
+
+**Key Components:**
+
+```
+crawler/
+├── src/
+│   ├── cli/
+│   │   └── discover.ts        # Main CLI entry point
+│   ├── discovery/
+│   │   ├── sitemap.ts         # Sitemap parser with recursion
+│   │   └── crawl.ts           # Fallback crawler (BFS)
+│   ├── lib/
+│   │   ├── url.ts             # URL normalization & filtering
+│   │   ├── robots.ts          # robots.txt parser
+│   │   ├── logger.ts          # Structured logging
+│   │   └── report.ts          # Report generation
+│   └── types/
+│       └── manifest.ts        # Manifest types & validation
+├── schemas/
+│   └── manifest.schema.json   # JSON schema for manifest
+├── output/
+│   └── manifest.json          # Generated manifest
+└── __tests__/                 # Unit tests
+    ├── url.test.ts
+    ├── sitemap.test.ts
+    └── robots.test.ts
+```
+
+**Discovery Flow:**
+
+1. **Normalize base URL** - Handle redirects, www, trailing slashes
+2. **Try sitemaps** - Attempt multiple locations:
+   - `/sitemap.xml`
+   - `/sitemap_index.xml`
+   - `/site-map.xml`
+   - `/_api/sitemap.xml` (Wix-specific)
+3. **Parse sitemaps** - Handle both urlset and sitemapindex recursively
+4. **Fallback crawl** - If no sitemap or empty:
+   - BFS crawl starting from homepage
+   - Max depth (default 2) and max pages (default 500)
+   - Extracts links from HTML using cheerio
+   - Filters out images, PDFs, and other assets
+5. **Validate URLs** - Check HTTP status (HEAD request with GET fallback)
+6. **Generate outputs** - Create manifest.json + reports
+
+**Output Format - manifest.json:**
+
+```json
+{
+  "version": "1.0.0",
+  "baseUrl": "https://example.com",
+  "generatedAt": "2026-01-27T15:20:10.000Z",
+  "discovery": {
+    "method": "sitemap|crawl|hybrid",
+    "respectRobots": true,
+    "sitemapsTried": ["..."],
+    "crawl": { "maxDepth": 2, "maxPages": 500 }
+  },
+  "pages": [
+    {
+      "url": "https://example.com/about",
+      "path": "/about",
+      "canonical": "https://example.com/about",
+      "title": null,
+      "status": 200,
+      "depth": 1,
+      "source": "sitemap|crawl",
+      "lastmod": null
+    }
+  ],
+  "stats": {
+    "pagesFound": 42,
+    "pagesIncluded": 40,
+    "excludedExternal": 10,
+    "excludedDuplicates": 5,
+    "excludedByRules": 7
+  }
+}
+```
+
+**Reports Generated:**
+
+- `docs/REPORTS/<timestamp>/run.json` - Machine-readable run report
+- `docs/REPORTS/<timestamp>/summary.md` - Human-readable summary
+- `docs/REPORTS/<timestamp>/logs.json` - Complete log entries
+
+### 2. Crawler Module (Phase 2 - Coming Soon)
+
+**Purpose:** Extract complete page data including DOM, styles, assets, and content.
+
+**Planned Technology Stack:**
 
 - Playwright (browser automation)
 - Node.js (runtime)
 - TypeScript (language)
 
-**Key Components:**
+**Planned Components:**
 
 ```
 crawler/
@@ -74,29 +186,21 @@ crawler/
 │   ├── page-scraper.ts      # Individual page scraping logic
 │   ├── asset-downloader.ts  # Download images, fonts, etc.
 │   ├── style-extractor.ts   # Extract and process CSS
-│   ├── dom-analyzer.ts      # Analyze DOM structure
-│   └── utils/
-│       ├── logger.ts        # Logging utilities
-│       ├── retry.ts         # Retry logic for failed requests
-│       └── validator.ts     # Data validation
-├── output/                   # Crawled data output directory
-├── config.json              # Crawler configuration
-├── tsconfig.json            # TypeScript configuration
-└── package.json             # Dependencies
+│   └── dom-analyzer.ts      # Analyze DOM structure
+└── output/                   # Crawled data output directory
 ```
 
-**Data Flow:**
+**Planned Data Flow:**
 
-1. Accept Wix site URL
-2. Navigate to site using Playwright
-3. Discover all pages (sitemap or navigation)
-4. For each page:
+1. Load manifest.json from discovery phase
+2. For each page in manifest:
+   - Navigate to page using Playwright
    - Capture DOM structure
    - Extract inline and linked styles
    - Download all assets (images, fonts, videos)
    - Extract content (text, metadata)
    - Take screenshots for testing
-5. Output structured JSON + asset files
+3. Output structured JSON + asset files
 
 **Output Format:**
 

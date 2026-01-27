@@ -5,20 +5,24 @@
 1. [System Overview](#system-overview)
 2. [Prerequisites](#prerequisites)
 3. [Installation & Setup](#installation--setup)
-4. [Running the Pipeline](#running-the-pipeline)
-5. [Troubleshooting](#troubleshooting)
-6. [Monitoring & Logging](#monitoring--logging)
-7. [Maintenance](#maintenance)
-8. [Emergency Procedures](#emergency-procedures)
+4. [Phase 1: Discovery](#phase-1-discovery)
+5. [Running the Pipeline](#running-the-pipeline)
+6. [Troubleshooting](#troubleshooting)
+7. [Monitoring & Logging](#monitoring--logging)
+8. [Maintenance](#maintenance)
+9. [Emergency Procedures](#emergency-procedures)
 
 ## System Overview
 
-The Wix to WordPress Theme Converter is a pipeline system consisting of four main stages:
+The Wix to WordPress Theme Converter is a pipeline system consisting of multiple stages:
 
-1. **Crawling** - Extract data from Wix site
-2. **Generation** - Convert to WordPress theme
-3. **Deployment** - Install in local WordPress
-4. **Testing** - Validate conversion quality
+1. **Discovery** (Phase 1) ✅ - Extract URL list from Wix site
+2. **Crawling** (Phase 2) - Extract data, assets, and snapshots
+3. **Generation** (Phase 3) - Convert to WordPress theme
+4. **Deployment** (Phase 4) - Install in local WordPress
+5. **Testing** (Phase 5) - Validate conversion quality
+
+**Current Status**: Phase 1 (Discovery) is complete and operational.
 
 ## Prerequisites
 
@@ -26,8 +30,8 @@ The Wix to WordPress Theme Converter is a pipeline system consisting of four mai
 
 - **Node.js**: v18.0.0 or higher
 - **npm**: v9.0.0 or higher
-- **Docker**: v20.0.0 or higher
-- **Docker Compose**: v2.0.0 or higher
+- **Docker**: v20.0.0 or higher (for WordPress environment)
+- **Docker Compose**: v2.0.0 or higher (for WordPress environment)
 
 ### System Requirements
 
@@ -59,34 +63,236 @@ cd wix2wordpresstheme
 npm install
 ```
 
-### 3. Configure Environment
+### 3. Verify Setup
 
 ```bash
-cp .env.example .env
-# Edit .env with your configuration
+# Run tests
+npm run test
+
+# Type check
+npm run typecheck
+
+# Lint
+npm run lint
 ```
 
-### 4. Start WordPress Environment
+## Phase 1: Discovery
+
+### Overview
+
+The discovery phase identifies all pages on a Wix website by:
+
+1. Attempting to parse sitemap(s)
+2. Falling back to lightweight crawling if no sitemap found
+3. Normalizing and deduplicating URLs
+4. Validating URL accessibility
+5. Generating a manifest.json with all discovered pages
+
+### Running Discovery
+
+#### Basic Usage
 
 ```bash
-npm run docker:up
+npm run discover -- --baseUrl https://example.wixsite.com/mysite
 ```
 
-### 5. Verify Setup
+#### Common Options
 
 ```bash
-npm run health-check
+# Specify custom output directory
+npm run discover -- --baseUrl https://example.com --outDir ./my-output
+
+# Increase crawl depth and page limit
+npm run discover -- --baseUrl https://example.com --maxDepth 3 --maxPages 1000
+
+# Ignore robots.txt (only if you own the site)
+npm run discover -- --baseUrl https://example.com --respectRobots false
+
+# Keep query strings (for query-based routing sites)
+npm run discover -- --baseUrl https://example.com --keepQuery
+
+# Enable verbose logging
+npm run discover -- --baseUrl https://example.com --verbose
+```
+
+#### Full Options Reference
+
+| Option                 | Default          | Description                            |
+| ---------------------- | ---------------- | -------------------------------------- |
+| `--baseUrl <url>`      | (required)       | Base URL of the website                |
+| `--outDir <path>`      | `crawler/output` | Output directory for manifest          |
+| `--respectRobots`      | `true`           | Respect robots.txt directives          |
+| `--maxDepth <number>`  | `2`              | Maximum crawl depth                    |
+| `--maxPages <number>`  | `500`            | Maximum pages to crawl                 |
+| `--keepQuery`          | `false`          | Keep query strings in URLs             |
+| `--includeUnreachable` | `false`          | Include unreachable URLs in manifest   |
+| `--verbose`            | `false`          | Enable verbose debug logging           |
+
+### Expected Output
+
+A successful discovery run produces:
+
+1. **manifest.json** in the specified output directory
+
+   ```
+   crawler/output/manifest.json
+   ```
+
+2. **Reports** in timestamped directory
+   ```
+   docs/REPORTS/2026-01-27T15-20-10-000Z/
+   ├── run.json      # Machine-readable report
+   ├── summary.md    # Human-readable summary
+   └── logs.json     # Complete logs
+   ```
+
+### Understanding the Manifest
+
+The manifest.json contains:
+
+```json
+{
+  "version": "1.0.0",
+  "baseUrl": "https://example.com",
+  "generatedAt": "2026-01-27T15:20:10.000Z",
+  "discovery": {
+    "method": "sitemap|crawl|hybrid",
+    "respectRobots": true,
+    "sitemapsTried": ["https://example.com/sitemap.xml"],
+    "crawl": { "maxDepth": 2, "maxPages": 500 }
+  },
+  "pages": [
+    {
+      "url": "https://example.com/about",
+      "path": "/about",
+      "canonical": "https://example.com/about",
+      "title": null,
+      "status": 200,
+      "depth": 1,
+      "source": "sitemap|crawl",
+      "lastmod": null
+    }
+  ],
+  "stats": {
+    "pagesFound": 42,
+    "pagesIncluded": 40,
+    "excludedExternal": 10,
+    "excludedDuplicates": 5,
+    "excludedByRules": 7
+  }
+}
+```
+
+### Discovery Methods
+
+- **sitemap**: All pages discovered from sitemap(s)
+- **crawl**: All pages discovered by crawling (no sitemap found)
+- **hybrid**: Pages from both sitemap and supplemental crawl
+
+### Troubleshooting Discovery
+
+#### No Pages Found
+
+**Symptoms**: manifest.json has zero pages
+
+**Solutions**:
+
+1. Verify the base URL is accessible:
+   ```bash
+   curl -I https://example.com
+   ```
+2. Check if robots.txt is blocking discovery:
+   ```bash
+   curl https://example.com/robots.txt
+   ```
+3. Try with robots disabled (if you own the site):
+   ```bash
+   npm run discover -- --baseUrl https://example.com --respectRobots false
+   ```
+4. Increase crawl depth:
+   ```bash
+   npm run discover -- --baseUrl https://example.com --maxDepth 3
+   ```
+
+#### Too Many Pages
+
+**Symptoms**: Discovery finds too many irrelevant pages
+
+**Solutions**:
+
+1. Reduce max pages:
+   ```bash
+   npm run discover -- --baseUrl https://example.com --maxPages 100
+   ```
+2. Reduce crawl depth:
+   ```bash
+   npm run discover -- --baseUrl https://example.com --maxDepth 1
+   ```
+3. Check if query strings are causing duplicates - remove `--keepQuery` if set
+
+#### Discovery Takes Too Long
+
+**Symptoms**: Command runs for many minutes
+
+**Solutions**:
+
+1. Reduce maxPages limit
+2. Reduce maxDepth
+3. Check for crawl loops in verbose mode:
+   ```bash
+   npm run discover -- --baseUrl https://example.com --verbose
+   ```
+
+#### robots.txt Blocking Too Many Pages
+
+**Symptoms**: Many "Blocked by robots.txt" warnings in logs
+
+**Solutions**:
+
+1. If you own the site, use `--respectRobots false`
+2. Review robots.txt to understand what's blocked
+3. Contact site owner to adjust robots.txt if necessary
+
+#### Connection Errors
+
+**Symptoms**: "Failed to fetch" errors in logs
+
+**Solutions**:
+
+1. Check internet connection
+2. Verify site is accessible in browser
+3. Check for rate limiting (wait and retry)
+4. Check if site blocks automated requests (User-Agent)
+
+### Viewing Reports
+
+```bash
+# Find latest report directory
+ls -lt docs/REPORTS/ | head -2
+
+# View summary
+cat docs/REPORTS/<timestamp>/summary.md
+
+# Parse run stats with jq
+cat docs/REPORTS/<timestamp>/run.json | jq '.stats'
+
+# View warnings
+cat docs/REPORTS/<timestamp>/run.json | jq '.warnings[]'
+
+# View errors
+cat docs/REPORTS/<timestamp>/run.json | jq '.errors[]'
 ```
 
 ## Running the Pipeline
 
-### Full Pipeline (Recommended)
+### Full Pipeline (Future)
 
 ```bash
+# Not yet implemented
 npm run pipeline -- --url https://example.wixsite.com/site
 ```
 
-### Step-by-Step Execution
+### Step-by-Step Execution (Future Phases)
 
 #### Step 1: Crawl Wix Site
 
