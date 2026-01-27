@@ -39,10 +39,8 @@ const SKIP_TAGS = ['script', 'style', 'noscript', 'iframe', 'svg'];
 export async function extractDOM(page: Page, url: string): Promise<DOMSnapshot> {
   // Execute in browser context to serialize DOM
   const serializedDOM = await page.evaluate(
-    
     ({ capturedAttrs, skipTags }) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      function serializeNode(node: any): any {
+      const serializeNode = (node: any): any => {
         // Skip comments and other non-element/text nodes
         if (node.nodeType === 8) { // Node.COMMENT_NODE
           return null;
@@ -104,7 +102,7 @@ export async function extractDOM(page: Page, url: string): Promise<DOMSnapshot> 
         }
 
         return null;
-      }
+      };
 
       const body = document.body;
       return serializeNode(body);
@@ -132,8 +130,7 @@ export async function extractDOM(page: Page, url: string): Promise<DOMSnapshot> 
  */
 async function extractKeyElements(page: Page): Promise<KeyElements> {
   return await page.evaluate(() => {
-    
-    const keyElements: KeyElements = {
+    const keyElements: any = {
       nav: null,
       footer: null,
       main: null,
