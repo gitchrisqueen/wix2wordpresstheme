@@ -72,16 +72,13 @@ async function discoverFromDOM(
       };
 
       // Images
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      document.querySelectorAll('img[src]').forEach((img: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        addAsset((img as any).src, 'image');
+      document.querySelectorAll('img[src]').forEach((img) => {
+        addAsset(img.src, 'image');
 
         // Handle srcset
         const srcset = img.getAttribute('srcset');
         if (srcset) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          srcset.split(',').forEach((entry: any) => {
+          srcset.split(',').forEach((entry) => {
             const url = entry.trim().split(/\s+/)[0];
             addAsset(url, 'image');
           });
@@ -89,12 +86,10 @@ async function discoverFromDOM(
       });
 
       // Picture sources
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      document.querySelectorAll('source[srcset]').forEach((source: any) => {
+      document.querySelectorAll('source[srcset]').forEach((source) => {
         const srcset = source.getAttribute('srcset');
         if (srcset) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          srcset.split(',').forEach((entry: any) => {
+          srcset.split(',').forEach((entry) => {
             const url = entry.trim().split(/\s+/)[0];
             addAsset(url, 'image');
           });
@@ -102,37 +97,28 @@ async function discoverFromDOM(
       });
 
       // Video posters
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      document.querySelectorAll('video[poster]').forEach((video: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        addAsset((video as any).poster, 'image');
+      document.querySelectorAll('video[poster]').forEach((video) => {
+        addAsset(video.poster, 'image');
       });
 
       // Favicons
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]').forEach((link: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        addAsset((link as any).href, 'image');
+      document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]').forEach((link) => {
+        addAsset(link.href, 'image');
       });
 
       // OG images
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      document.querySelectorAll('meta[property="og:image"]').forEach((meta: any) => {
+      document.querySelectorAll('meta[property="og:image"]').forEach((meta) => {
         addAsset(meta.getAttribute('content'), 'image');
       });
 
       // Stylesheets
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      document.querySelectorAll('link[rel="stylesheet"]').forEach((link: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        addAsset((link as any).href, 'css');
+      document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
+        addAsset(link.href, 'css');
       });
 
       // Scripts
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      document.querySelectorAll('script[src]').forEach((script: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        addAsset((script as any).src, 'js');
+      document.querySelectorAll('script[src]').forEach((script) => {
+        addAsset(script.src, 'js');
       });
 
       return results;
@@ -163,15 +149,13 @@ async function discoverFromCSS(
   const stylesheets = await page.evaluate(() => {
     const sheets = [];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const sheet of Array.from(document.styleSheets as any)) {
+    for (const sheet of Array.from(document.styleSheets)) {
       try {
         if (sheet.href) {
           let cssText = '';
           try {
             cssText = Array.from(sheet.cssRules)
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              .map((rule: any) => rule.cssText)
+              .map((rule) => rule.cssText)
               .join('\n');
           } catch {
             // CORS or other access error, skip
