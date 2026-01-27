@@ -17,12 +17,13 @@
 The Wix to WordPress Theme Converter is a pipeline system consisting of multiple stages:
 
 1. **Discovery** (Phase 1) ✅ - Extract URL list from Wix site
-2. **Crawling** (Phase 2) - Extract data, assets, and snapshots
-3. **Generation** (Phase 3) - Convert to WordPress theme
-4. **Deployment** (Phase 4) - Install in local WordPress
-5. **Testing** (Phase 5) - Validate conversion quality
+2. **Crawling** (Phase 2) ✅ - Extract data, assets, and snapshots
+3. **Spec Generation** (Phase 3) - Extract design tokens and page specs
+4. **Theme Generation** (Phase 4) - Convert to WordPress theme
+5. **Deployment** (Phase 5) - Install in local WordPress
+6. **Testing** (Phase 6) - Validate conversion quality
 
-**Current Status**: Phase 1 (Discovery) is complete and operational.
+**Current Status**: Phases 1-2 (Discovery and Crawling) are complete and operational.
 
 ## Prerequisites
 
@@ -263,6 +264,178 @@ The manifest.json contains:
 2. Verify site is accessible in browser
 3. Check for rate limiting (wait and retry)
 4. Check if site blocks automated requests (User-Agent)
+
+## Phase 2: Crawling
+
+### Running the Crawl
+
+After discovery, crawl the pages to capture snapshots and assets:
+
+```bash
+# Basic crawl
+npm run crawl -- \
+  --baseUrl https://example.com \
+  --manifest crawler/output/manifest.json
+
+# With custom options
+npm run crawl -- \
+  --baseUrl https://example.com \
+  --manifest crawler/output/manifest.json \
+  --outDir crawler/output \
+  --concurrency 5 \
+  --maxPages 50 \
+  --downloadAssets true \
+  --breakpoints desktop,mobile \
+  --verbose
+```
+
+### Configuration
+
+**Performance Tuning**:
+
+- `--concurrency`: Higher = faster but more resource intensive (default: 3)
+- `--timeoutMs`: Increase for slow sites (default: 45000)
+- `--settleMs`: Increase for dynamic content (default: 750)
+- `--downloadAssets false`: Skip asset downloads for speed
+
+**Reliability**:
+
+- `--retries`: Number of retry attempts per page (default: 2)
+- `--waitUntil networkidle`: Wait for network to settle (strictest)
+- `--waitUntil domcontentloaded`: Faster, less strict (fallback on retry)
+- `--allowPartial true`: Don't fail entire crawl if some pages fail
+
+**Viewport Configuration**:
+
+- `desktop`: 1920x1080 viewport
+- `mobile`: 375x667 viewport
+- `tablet`: 768x1024 viewport
+
+### Output Structure
+
+```
+crawler/output/
+├── manifest.json                 # From Phase 1
+├── crawl-summary.json           # Crawl statistics
+├── crawl-errors.json            # Failed pages (if any)
+└── pages/
+    ├── home/
+    │   ├── page.json            # Page summary
+    │   ├── html/rendered.html   # Full HTML
+    │   ├── dom/dom.json         # Structured DOM
+    │   ├── meta/meta.json       # Metadata
+    │   ├── screenshots/
+    │   │   ├── desktop.png
+    │   │   └── mobile.png
+    │   └── assets/
+    │       ├── manifest.json
+    │       └── files/
+    └── about/
+        └── ...
+```
+
+### Troubleshooting Crawl
+
+#### Page Timeouts
+
+**Symptoms**: Pages fail with timeout errors
+
+**Solutions**:
+
+1. Increase timeout:
+   ```bash
+   npm run crawl -- ... --timeoutMs 90000
+   ```
+2. Increase settle time for dynamic content:
+   ```bash
+   npm run crawl -- ... --settleMs 2000
+   ```
+3. Use faster wait strategy:
+   ```bash
+   npm run crawl -- ... --waitUntil domcontentloaded
+   ```
+
+#### Screenshots Are Blank
+
+**Symptoms**: Screenshots captured but show blank/loading state
+
+**Solutions**:
+
+1. Increase settle time:
+   ```bash
+   npm run crawl -- ... --settleMs 2000
+   ```
+2. Check if site requires JavaScript - may need authentication or cookies
+3. Try desktop-only first to verify:
+   ```bash
+   npm run crawl -- ... --breakpoints desktop
+   ```
+
+#### High Memory Usage
+
+**Symptoms**: System becomes slow, OOM errors
+
+**Solutions**:
+
+1. Reduce concurrency:
+   ```bash
+   npm run crawl -- ... --concurrency 1
+   ```
+2. Limit pages per run:
+   ```bash
+   npm run crawl -- ... --maxPages 10
+   ```
+3. Disable asset downloads temporarily:
+   ```bash
+   npm run crawl -- ... --downloadAssets false
+   ```
+
+#### Asset Download Failures
+
+**Symptoms**: Many assets show "failed" status in assets/manifest.json
+
+**Solutions**:
+
+1. Check asset URLs are accessible manually
+2. Verify CORS/authentication isn't blocking access
+3. Continue without assets if not critical:
+   ```bash
+   npm run crawl -- ... --downloadAssets false
+   ```
+
+#### Incomplete DOM Snapshots
+
+**Symptoms**: dom.json missing expected elements
+
+**Solutions**:
+
+1. Increase settle time for client-side rendering:
+   ```bash
+   npm run crawl -- ... --settleMs 3000
+   ```
+2. Check console errors with verbose mode:
+   ```bash
+   npm run crawl -- ... --verbose
+   ```
+3. Verify JavaScript isn't failing - check error.txt in page folder
+
+#### Rate Limiting
+
+**Symptoms**: Multiple pages fail after initial successes
+
+**Solutions**:
+
+1. Reduce concurrency:
+   ```bash
+   npm run crawl -- ... --concurrency 1
+   ```
+2. Add delay between pages (not implemented - manual batching):
+   ```bash
+   # Crawl in batches
+   npm run crawl -- ... --maxPages 10
+   # Wait, then continue with next batch
+   ```
+3. Check site's robots.txt for crawl-delay directive
 
 ### Viewing Reports
 
