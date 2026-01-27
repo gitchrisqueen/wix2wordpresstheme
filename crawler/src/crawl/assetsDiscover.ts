@@ -46,6 +46,7 @@ async function discoverFromDOM(
 ): Promise<Asset[]> {
   const assets = await page.evaluate(
     ({ base, allowThirdParty }) => {
+      const __name = (target, value) => target;
       const baseUrlObj = new URL(base);
       const results = [];
 
@@ -147,6 +148,7 @@ async function discoverFromCSS(
 
   // Get all stylesheets
   const stylesheets = await page.evaluate(() => {
+    const __name = (target, value) => target;
     const sheets = [];
 
     for (const sheet of Array.from(document.styleSheets)) {

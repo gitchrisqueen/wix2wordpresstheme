@@ -120,6 +120,12 @@ async function capturePageAttempt(
 
   const page = await context.newPage();
 
+  // Define __name helper globally to prevent transpiler helper errors
+  await page.addInitScript(() => {
+    // @ts-ignore
+    window.__name = window.__name || ((target, value) => target);
+  });
+
   try {
     // Navigate with appropriate wait strategy
     const waitStrategy = attempt === 0 ? config.waitUntil : 'domcontentloaded';
@@ -139,6 +145,7 @@ async function capturePageAttempt(
 
     // Ensure page is fully loaded
     await page.evaluate(() => {
+      const __name = (target, value) => target;
       return new Promise((resolve) => {
         if (document.readyState === 'complete') {
           resolve();

@@ -142,6 +142,14 @@ async function processQueue(
         ignoreHTTPSErrors: true,
       });
 
+      await context.addInitScript(() => {
+        // Ensure tsx/esbuild __name helper is available in all pages.
+        // eslint-disable-next-line no-var
+        var __name = (target, value) => target;
+        // @ts-ignore - expose on global for strict mode lookups
+        globalThis.__name = __name;
+      });
+
       try {
         const result = await capturePage(context, pageConfig);
 

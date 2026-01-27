@@ -40,6 +40,7 @@ export async function extractDOM(page: Page, url: string): Promise<DOMSnapshot> 
   // Execute in browser context to serialize DOM
   const serializedDOM = await page.evaluate(
     ({ capturedAttrs, skipTags }) => {
+      const __name = (target, value) => target;
       const serializeNode = (node) => {
         // Skip comments and other non-element/text nodes
         if (node.nodeType === 8) { // Node.COMMENT_NODE
@@ -130,6 +131,7 @@ export async function extractDOM(page: Page, url: string): Promise<DOMSnapshot> 
  */
 async function extractKeyElements(page: Page): Promise<KeyElements> {
   return await page.evaluate(() => {
+    const __name = (target, value) => target;
     const keyElements = {
       nav: null,
       footer: null,

@@ -15,6 +15,7 @@ export async function extractMetadata(page: Page, url: string, status: number): 
   const finalUrl = page.url();
 
   const metadata = await page.evaluate(() => {
+    const __name = (target, value) => target;
     // Get title
     const title = document.title || '';
 
