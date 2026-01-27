@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/gitchrisqueen/wix2wordpresstheme/schemas/dom.schema.json",
+  "title": "DOM Snapshot Schema",
+  "description": "Schema for structured DOM snapshot output",
+  "type": "object",
+  "required": ["url", "capturedAt", "hash", "root", "keyElements"],
+  "properties": {
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Page URL"
+    },
+    "capturedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of DOM capture"
+    },
+    "hash": {
+      "type": "string",
+      "description": "Hash of normalized DOM structure"
+    },
+    "root": {
+      "$ref": "#/definitions/node",
+      "description": "Root DOM node"
+    },
+    "keyElements": {
+      "type": "object",
+      "properties": {
+        "nav": {
+          "type": ["string", "null"],
+          "description": "Primary navigation selector"
+        },
+        "footer": {
+          "type": ["string", "null"],
+          "description": "Footer container selector"
+        },
+        "main": {
+          "type": ["string", "null"],
+          "description": "Main content container selector"
+        }
+      },
+      "description": "Key structural element selectors"
+    }
+  },
+  "definitions": {
+    "node": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["element", "text"]
+        },
+        "tag": {
+          "type": "string",
+          "description": "Element tag name (for type=element)"
+        },
+        "attributes": {
+          "type": "object",
+          "description": "Selected element attributes",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "text": {
+          "type": "string",
+          "description": "Text content (for type=text)"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/node"
+          },
+          "description": "Child nodes"
+        }
+      }
+    }
+  }
+}

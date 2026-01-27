@@ -15,7 +15,7 @@
     "test:coverage": "vitest run --coverage",
     "dev": "echo 'Development mode not implemented yet'",
     "build": "echo 'Build not implemented yet'",
-    "crawl": "echo 'Crawler not implemented yet - use discover command'",
+    "crawl": "tsx crawler/src/cli/crawl.ts",
     "generate-theme": "echo 'Theme generator not implemented yet'",
     "deploy-theme": "echo 'Theme deployment not implemented yet'",
     "pipeline": "echo 'Full pipeline not implemented yet'",
@@ -48,6 +48,7 @@
   },
   "homepage": "https://github.com/gitchrisqueen/wix2wordpresstheme#readme",
   "devDependencies": {
+    "@playwright/test": "^1.58.0",
     "@types/node": "^20.11.5",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
@@ -55,6 +56,7 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
+    "playwright": "^1.58.0",
     "prettier": "^3.2.4",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
@@ -64,6 +66,7 @@
     "ajv": "^8.12.0",
     "cheerio": "^1.0.0-rc.12",
     "commander": "^11.1.0",
+    "css-tree": "^3.1.0",
     "fast-xml-parser": "^4.3.3",
     "robots-parser": "^3.0.1",
     "zod": "^3.22.4"
