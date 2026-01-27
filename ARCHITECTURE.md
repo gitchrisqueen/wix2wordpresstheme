@@ -13,8 +13,20 @@
          │
          ▼
   ┌──────────────────┐
-  │  1. CRAWLER      │  Playwright-based scraper
-  │  (Playwright)    │  • Page navigation
+  │  1. DISCOVERY    │  ✅ Phase 1 (Complete)
+  │  (Fetch + Cheerio)│ • Sitemap parsing
+  └──────────────────┘  • URL crawling
+         │              • robots.txt compliance
+         │              • URL normalization
+         ▼
+  ┌──────────────────┐
+  │  manifest.json   │  Discovered URLs + metadata
+  └──────────────────┘
+         │
+         ▼
+  ┌──────────────────┐
+  │  2. CRAWLER      │  Phase 2 (Coming)
+  │  (Playwright)    │  • Page snapshots
   └──────────────────┘  • Asset extraction
          │              • Style capturing
          │              • Content extraction
@@ -25,7 +37,7 @@
          │
          ▼
   ┌──────────────────┐
-  │ 2. THEME GEN     │  Theme builder
+  │ 3. THEME GEN     │  Phase 3 (Coming)
   │  (Node.js)       │  • Template generation
   └──────────────────┘  • Asset optimization
          │              • WordPress structure
@@ -37,15 +49,15 @@
          │
          ▼
   ┌──────────────────┐
-  │ 3. WP LOCAL      │  Docker environment
+  │ 4. WP LOCAL      │  Phase 4 (Coming)
   │  (Docker)        │  • WordPress install
   └──────────────────┘  • MySQL database
          │              • Theme deployment
          │              • Plugin support
          ▼
   ┌──────────────────┐
-  │ 4. TESTS         │  Quality assurance
-  │  (Jest+Playwright)│ • Visual regression
+  │ 5. TESTS         │  Phase 5 (Coming)
+  │  (Vitest+Playwright)│ • Visual regression
   └──────────────────┘  • DOM validation
          │              • Performance tests
          │              • Accessibility checks
@@ -55,16 +67,117 @@
 
 ## 🏛️ Component Architecture
 
-### 1. Crawler Module
+### 1. Discovery Module (✅ Phase 1 Complete)
 
-**Purpose:** Extract complete Wix site data including structure, styles, assets, and content.
+**Purpose:** Discover and catalog all pages on a Wix site.
 
 **Technology Stack:**
+
+- Node.js (runtime)
+- TypeScript (language)
+- fetch API (HTTP requests)
+- cheerio (HTML parsing for fallback crawl)
+- fast-xml-parser (sitemap parsing)
+- robots-parser (robots.txt compliance)
+- zod (schema validation)
+- commander (CLI)
+
+**Key Components:**
+
+```
+crawler/
+├── src/
+│   ├── cli/
+│   │   └── discover.ts        # Main CLI entry point
+│   ├── discovery/
+│   │   ├── sitemap.ts         # Sitemap parser with recursion
+│   │   └── crawl.ts           # Fallback crawler (BFS)
+│   ├── lib/
+│   │   ├── url.ts             # URL normalization & filtering
+│   │   ├── robots.ts          # robots.txt parser
+│   │   ├── logger.ts          # Structured logging
+│   │   └── report.ts          # Report generation
+│   └── types/
+│       └── manifest.ts        # Manifest types & validation
+├── schemas/
+│   └── manifest.schema.json   # JSON schema for manifest
+├── output/
+│   └── manifest.json          # Generated manifest
+└── __tests__/                 # Unit tests
+    ├── url.test.ts
+    ├── sitemap.test.ts
+    └── robots.test.ts
+```
+
+**Discovery Flow:**
+
+1. **Normalize base URL** - Handle redirects, www, trailing slashes
+2. **Try sitemaps** - Attempt multiple locations:
+   - `/sitemap.xml`
+   - `/sitemap_index.xml`
+   - `/site-map.xml`
+   - `/_api/sitemap.xml` (Wix-specific)
+3. **Parse sitemaps** - Handle both urlset and sitemapindex recursively
+4. **Fallback crawl** - If no sitemap or empty:
+   - BFS crawl starting from homepage
+   - Max depth (default 2) and max pages (default 500)
+   - Extracts links from HTML using cheerio
+   - Filters out images, PDFs, and other assets
+5. **Validate URLs** - Check HTTP status (HEAD request with GET fallback)
+6. **Generate outputs** - Create manifest.json + reports
+
+**Output Format - manifest.json:**
+
+```json
+{
+  "version": "1.0.0",
+  "baseUrl": "https://example.com",
+  "generatedAt": "2026-01-27T15:20:10.000Z",
+  "discovery": {
+    "method": "sitemap|crawl|hybrid",
+    "respectRobots": true,
+    "sitemapsTried": ["..."],
+    "crawl": { "maxDepth": 2, "maxPages": 500 }
+  },
+  "pages": [
+    {
+      "url": "https://example.com/about",
+      "path": "/about",
+      "canonical": "https://example.com/about",
+      "title": null,
+      "status": 200,
+      "depth": 1,
+      "source": "sitemap|crawl",
+      "lastmod": null
+    }
+  ],
+  "stats": {
+    "pagesFound": 42,
+    "pagesIncluded": 40,
+    "excludedExternal": 10,
+    "excludedDuplicates": 5,
+    "excludedByRules": 7
+  }
+}
+```
+
+**Reports Generated:**
+
+- `docs/REPORTS/<timestamp>/run.json` - Machine-readable run report
+- `docs/REPORTS/<timestamp>/summary.md` - Human-readable summary
+- `docs/REPORTS/<timestamp>/logs.json` - Complete log entries
+
+### 2. Crawler Module (Phase 2 - Coming Soon)
+
+**Purpose:** Extract complete page data including DOM, styles, assets, and content.
+
+**Planned Technology Stack:**
+
 - Playwright (browser automation)
 - Node.js (runtime)
 - TypeScript (language)
 
-**Key Components:**
+**Planned Components:**
 
 ```
 crawler/
@@ -73,30 +186,24 @@ crawler/
 │   ├── page-scraper.ts      # Individual page scraping logic
 │   ├── asset-downloader.ts  # Download images, fonts, etc.
 │   ├── style-extractor.ts   # Extract and process CSS
-│   ├── dom-analyzer.ts      # Analyze DOM structure
-│   └── utils/
-│       ├── logger.ts        # Logging utilities
-│       ├── retry.ts         # Retry logic for failed requests
-│       └── validator.ts     # Data validation
-├── output/                   # Crawled data output directory
-├── config.json              # Crawler configuration
-├── tsconfig.json            # TypeScript configuration
-└── package.json             # Dependencies
+│   └── dom-analyzer.ts      # Analyze DOM structure
+└── output/                   # Crawled data output directory
 ```
 
-**Data Flow:**
-1. Accept Wix site URL
-2. Navigate to site using Playwright
-3. Discover all pages (sitemap or navigation)
-4. For each page:
+**Planned Data Flow:**
+
+1. Load manifest.json from discovery phase
+2. For each page in manifest:
+   - Navigate to page using Playwright
    - Capture DOM structure
    - Extract inline and linked styles
    - Download all assets (images, fonts, videos)
    - Extract content (text, metadata)
    - Take screenshots for testing
-5. Output structured JSON + asset files
+3. Output structured JSON + asset files
 
 **Output Format:**
+
 ```json
 {
   "site": {
@@ -127,6 +234,7 @@ crawler/
 **Purpose:** Convert crawled data into a WordPress-compatible theme.
 
 **Technology Stack:**
+
 - Node.js (runtime)
 - TypeScript (language)
 - Template engines (Handlebars/EJS)
@@ -153,6 +261,7 @@ theme-generator/
 ```
 
 **Generation Process:**
+
 1. Load crawled data
 2. Analyze structure and create theme plan
 3. Generate WordPress theme structure:
@@ -166,6 +275,7 @@ theme-generator/
 7. Create theme package
 
 **WordPress Theme Structure:**
+
 ```
 theme-output/
 ├── style.css               # Theme metadata
@@ -191,6 +301,7 @@ theme-output/
 **Purpose:** Provide isolated WordPress environment for theme development and testing.
 
 **Technology Stack:**
+
 - Docker (containerization)
 - Docker Compose (orchestration)
 - WordPress (CMS)
@@ -215,18 +326,19 @@ wordpress-local/
 ```
 
 **Docker Services:**
+
 ```yaml
 services:
   wordpress:
     image: wordpress:latest
     ports:
-      - "8080:80"
+      - '8080:80'
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
-  
+
   db:
     image: mysql:8.0
     environment:
@@ -243,6 +355,7 @@ services:
 **Purpose:** Validate theme conversion quality through visual and DOM testing.
 
 **Technology Stack:**
+
 - Jest (test framework)
 - Playwright (browser automation)
 - Pixelmatch (visual comparison)
@@ -272,6 +385,7 @@ tests/
 **Testing Process:**
 
 **Visual Testing:**
+
 1. Load original Wix page
 2. Take screenshot (baseline)
 3. Load converted WordPress page
@@ -282,6 +396,7 @@ tests/
 8. Report differences
 
 **DOM Testing:**
+
 1. Load both pages
 2. Extract DOM structure
 3. Compare element hierarchy
@@ -318,6 +433,7 @@ scripts/
 ### Language Choice: TypeScript/Node.js
 
 **Rationale:**
+
 - Playwright's native support
 - Rich ecosystem for web scraping
 - WordPress/web technology familiarity
@@ -327,6 +443,7 @@ scripts/
 ### Browser Automation: Playwright
 
 **Rationale:**
+
 - Modern browser support
 - Reliable automation APIs
 - Built-in wait mechanisms
@@ -335,6 +452,7 @@ scripts/
 - Better Wix site compatibility
 
 **Alternatives Considered:**
+
 - Puppeteer: Less cross-browser support
 - Selenium: More complex, slower
 - Cheerio: No JavaScript execution
@@ -342,6 +460,7 @@ scripts/
 ### Containerization: Docker
 
 **Rationale:**
+
 - Isolated environment
 - Consistent across systems
 - Easy setup/teardown
@@ -351,6 +470,7 @@ scripts/
 ### Testing: Jest + Playwright
 
 **Rationale:**
+
 - Comprehensive test framework
 - Good TypeScript support
 - Parallel test execution
@@ -360,18 +480,21 @@ scripts/
 ## 🔐 Security Considerations
 
 ### Crawler Security
+
 - Respect robots.txt
 - Rate limiting to avoid DDoS
 - No credential storage
 - Sanitize extracted content
 
 ### WordPress Security
+
 - Isolated Docker environment
 - No external network access (except localhost)
 - Regular image updates
 - Secure database credentials
 
 ### Theme Security
+
 - Escape all output
 - Sanitize user inputs
 - Use WordPress security functions
@@ -390,7 +513,7 @@ scripts/
    ├─> Content Extraction
    ├─> Style Analysis
    └─> Asset Download
-   
+
 3. Intermediate Storage (JSON)
    ├─> pages.json
    ├─> styles.json
@@ -422,7 +545,9 @@ scripts/
 ## 🚀 Extensibility
 
 ### Plugin System
+
 The architecture supports future plugins for:
+
 - Custom post types
 - Additional page builders
 - Alternative CMS targets (not just WordPress)
@@ -430,13 +555,16 @@ The architecture supports future plugins for:
 - Advanced animations
 
 ### Modular Design
+
 Each component is designed to be:
+
 - Independently testable
 - Swappable with alternatives
 - Configurable via JSON
 - Extensible through interfaces
 
 ### Future Enhancements
+
 - Content migration (beyond structure)
 - Dynamic content support
 - E-commerce conversion
@@ -448,11 +576,13 @@ Each component is designed to be:
 ## 📈 Scalability
 
 ### Horizontal Scaling
+
 - Crawler can process multiple pages in parallel
 - Theme generation is stateless
 - Tests can run in parallel
 
 ### Performance Optimization
+
 - Asset caching
 - Incremental crawling (detect changes)
 - Lazy loading for assets
@@ -462,6 +592,7 @@ Each component is designed to be:
 ## 🔍 Monitoring & Observability
 
 ### Logging Strategy
+
 - Structured logging (JSON format)
 - Log levels: ERROR, WARN, INFO, DEBUG
 - Separate logs per component
@@ -469,6 +600,7 @@ Each component is designed to be:
 - Centralized log aggregation ready
 
 ### Metrics
+
 - Crawl duration
 - Page count
 - Asset count and size
@@ -477,6 +609,7 @@ Each component is designed to be:
 - Visual similarity score
 
 ### Health Checks
+
 - Component status
 - Docker container health
 - WordPress availability
@@ -485,36 +618,40 @@ Each component is designed to be:
 ## 🧪 Testing Strategy
 
 ### Unit Tests
+
 - Individual component functions
 - Utility functions
 - Data transformers
 
 ### Integration Tests
+
 - Component interactions
 - End-to-end pipeline
 - Docker environment
 
 ### Visual Tests
+
 - Pixel-perfect comparison
 - Responsive breakpoints
 - Browser compatibility
 
 ### Performance Tests
+
 - Load time benchmarks
 - Asset size limits
 - Memory usage
 
 ## 📚 Technology Stack Summary
 
-| Component | Technologies |
-|-----------|-------------|
-| Crawler | TypeScript, Playwright, Node.js |
+| Component | Technologies                    |
+| --------- | ------------------------------- |
+| Crawler   | TypeScript, Playwright, Node.js |
 | Theme Gen | TypeScript, Node.js, Handlebars |
-| WordPress | Docker, WordPress, MySQL, PHP |
-| Testing | Jest, Playwright, Pixelmatch |
-| Logging | Winston, Morgan |
-| Build | npm/yarn, TypeScript compiler |
-| CI/CD | GitHub Actions (future) |
+| WordPress | Docker, WordPress, MySQL, PHP   |
+| Testing   | Jest, Playwright, Pixelmatch    |
+| Logging   | Winston, Morgan                 |
+| Build     | npm/yarn, TypeScript compiler   |
+| CI/CD     | GitHub Actions (future)         |
 
 ## 🔄 Development Workflow
 
@@ -528,18 +665,21 @@ Each component is designed to be:
 ## 📝 Configuration Management
 
 ### Environment Variables
+
 - Database credentials
 - WordPress URLs
 - API keys (future)
 - Feature flags
 
 ### Config Files
+
 - `crawler/config.json` - Crawling behavior
 - `theme-generator/config.json` - Theme options
 - `docker-compose.yml` - Container settings
 - `tests/config.json` - Test thresholds
 
 ### Version Control
+
 - Git for source code
 - Semantic versioning
 - Tagged releases

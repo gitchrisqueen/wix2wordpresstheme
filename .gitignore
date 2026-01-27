@@ -54,6 +54,9 @@ crawler/downloads/
 # Theme outputs
 theme-generator/output/
 
+# Reports (exclude timestamped reports but keep directory structure)
+docs/REPORTS/*/
+
 # Temporary files
 tmp/
 temp/

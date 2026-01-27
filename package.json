@@ -3,12 +3,19 @@
   "version": "0.1.0",
   "description": "A fully automated, repeatable pipeline to convert Wix websites into pixel-perfect WordPress themes",
   "main": "index.js",
+  "type": "module",
   "scripts": {
+    "discover": "tsx crawler/src/cli/discover.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "dev": "echo 'Development mode not implemented yet'",
     "build": "echo 'Build not implemented yet'",
-    "test": "echo 'Tests not implemented yet'",
-    "lint": "echo 'Linting not implemented yet'",
-    "crawl": "echo 'Crawler not implemented yet'",
+    "crawl": "echo 'Crawler not implemented yet - use discover command'",
     "generate-theme": "echo 'Theme generator not implemented yet'",
     "deploy-theme": "echo 'Theme deployment not implemented yet'",
     "pipeline": "echo 'Full pipeline not implemented yet'",
@@ -19,7 +26,7 @@
     "logs:tail": "tail -f logs/*.log",
     "logs:clean": "rm -f logs/*.log",
     "health-check": "echo 'Health check not implemented yet'",
-    "clean:all": "rm -rf node_modules crawler/output theme-generator/output logs/*.log"
+    "clean:all": "rm -rf node_modules crawler/output theme-generator/output logs/*.log docs/REPORTS"
   },
   "keywords": [
     "wix",
@@ -41,8 +48,25 @@
   },
   "homepage": "https://github.com/gitchrisqueen/wix2wordpresstheme#readme",
   "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "@vitest/coverage-v8": "^1.2.1",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "prettier": "^3.2.4",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.1"
   },
   "dependencies": {
+    "ajv": "^8.12.0",
+    "cheerio": "^1.0.0-rc.12",
+    "commander": "^11.1.0",
+    "fast-xml-parser": "^4.3.3",
+    "robots-parser": "^3.0.1",
+    "zod": "^3.22.4"
   },
   "engines": {
     "node": ">=18.0.0",

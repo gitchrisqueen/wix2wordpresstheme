@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop, 'copilot/**']
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run type check
+        run: npm run typecheck
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage reports
+        if: matrix.node-version == '20.x'
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+  integration:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run discovery on example.com
+        run: |
+          npm run discover -- --baseUrl https://example.com --maxPages 10 --maxDepth 1 --verbose
+        continue-on-error: true
+
+      - name: Check manifest output
+        run: |
+          if [ -f "crawler/output/manifest.json" ]; then
+            echo "✅ Manifest generated successfully"
+            cat crawler/output/manifest.json | head -50
+          else
+            echo "❌ Manifest not found"
+            exit 1
+          fi
+
+      - name: Check report output
+        run: |
+          LATEST_REPORT=$(ls -t docs/REPORTS | head -1)
+          if [ -d "docs/REPORTS/$LATEST_REPORT" ]; then
+            echo "✅ Report generated successfully"
+            cat "docs/REPORTS/$LATEST_REPORT/summary.md"
+          else
+            echo "❌ Report not found"
+            exit 1
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: discovery-output
+          path: |
+            crawler/output/
+            docs/REPORTS/
+          retention-days: 7

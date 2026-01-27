@@ -1,9 +1,9 @@
 /**
  * Crawler Module Entry Point
- * 
+ *
  * This module is responsible for crawling Wix websites and extracting
  * all necessary data for theme conversion.
- * 
+ *
  * @module crawler
  * @status Not Implemented - Structure Only
  */

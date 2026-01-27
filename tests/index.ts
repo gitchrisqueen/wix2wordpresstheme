@@ -1,9 +1,9 @@
 /**
  * Tests Module Entry Point
- * 
+ *
  * This module is responsible for testing the quality of the
  * converted WordPress theme.
- * 
+ *
  * @module tests
  * @status Not Implemented - Structure Only
  */

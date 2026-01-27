@@ -23,6 +23,7 @@ crawler/
 ## 🎯 Purpose
 
 The crawler module is responsible for:
+
 - Navigating Wix websites using headless browser automation
 - Discovering all pages through sitemap or navigation analysis
 - Extracting DOM structure and content
@@ -47,6 +48,7 @@ npm run crawl -- --url https://example.wixsite.com/site \
 ## ⚙️ Configuration
 
 The `config.json` file will contain:
+
 - Browser settings (headless, viewport size)
 - Crawl behavior (concurrent requests, timeout)
 - Asset download options (file types, size limits)
@@ -55,6 +57,7 @@ The `config.json` file will contain:
 ## 📤 Output Format
 
 The crawler will output:
+
 ```
 output/
 ├── site-metadata.json    # Site-level information
@@ -85,6 +88,7 @@ output/
 **Status**: Structure only - no implementation yet
 
 **Next Steps**:
+
 1. Install Playwright and dependencies
 2. Implement basic crawler functionality
 3. Add page discovery logic
