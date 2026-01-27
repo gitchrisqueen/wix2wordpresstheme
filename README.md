@@ -16,11 +16,21 @@ This project provides a complete solution for converting Wix websites into WordP
 - CLI with comprehensive options
 - Structured reporting and logging
 
+**Phase 2: Page Snapshots & Asset Downloads** ✅ **Complete**
+
+- Playwright-based page capture with retry logic
+- Desktop and mobile screenshots
+- Rendered HTML and structured DOM snapshots
+- Metadata extraction (title, meta tags, OG, headings)
+- Asset discovery from DOM, CSS, and network
+- Concurrent page processing with configurable limits
+- Per-page output with JSON validation
+
 **Coming Soon**:
 
-- Phase 2: Page snapshots and asset downloads
-- Phase 3: Theme generation
-- Phase 4: Testing and verification
+- Phase 3: PageSpec and design token extraction
+- Phase 4: Theme generation
+- Phase 5: Testing and verification
 
 ## 📋 Prerequisites
 
@@ -144,6 +154,127 @@ npm run discover -- --baseUrl https://example.com --maxDepth 4 --maxPages 2000 -
 
 ```bash
 npm run discover -- --baseUrl https://mysite.com --respectRobots false
+```
+
+## 📸 Phase 2: Page Crawl & Snapshots
+
+Capture comprehensive snapshots of discovered pages using Playwright.
+
+### Quick Start
+
+```bash
+# Basic usage - crawl pages from manifest
+npm run discover -- --baseUrl https://example.com
+npm run crawl -- --baseUrl https://example.com --manifest crawler/output/manifest.json
+
+# Custom output directory and concurrency
+npm run crawl -- \
+  --baseUrl https://example.com \
+  --manifest crawler/output/manifest.json \
+  --outDir ./crawl-output \
+  --concurrency 5
+
+# Mobile-first capture
+npm run crawl -- \
+  --baseUrl https://example.com \
+  --manifest crawler/output/manifest.json \
+  --breakpoints mobile
+
+# Limit pages and skip asset downloads
+npm run crawl -- \
+  --baseUrl https://example.com \
+  --manifest crawler/output/manifest.json \
+  --maxPages 10 \
+  --downloadAssets false
+```
+
+### Crawl Options
+
+| Option              | Default            | Description                                    |
+| ------------------- | ------------------ | ---------------------------------------------- |
+| `--baseUrl`         | (required)         | Base URL of the website                        |
+| `--manifest`        | (required)         | Path to manifest.json from discovery           |
+| `--outDir`          | `crawler/output`   | Output directory for crawl results             |
+| `--maxPages`        | (all)              | Maximum number of pages to crawl               |
+| `--concurrency`     | `3`                | Number of concurrent page captures             |
+| `--timeoutMs`       | `45000`            | Page load timeout in milliseconds              |
+| `--retries`         | `2`                | Number of retries per page on failure          |
+| `--waitUntil`       | `networkidle`      | Wait strategy (networkidle, domcontentloaded)  |
+| `--settleMs`        | `750`              | Additional wait time after page load           |
+| `--breakpoints`     | `desktop,mobile`   | Comma-separated viewport names                 |
+| `--downloadAssets`  | `true`             | Download page assets (images, fonts, CSS)      |
+| `--respectRobots`   | `true`             | Respect robots.txt from discovery              |
+| `--allowPartial`    | `false`            | Allow partial success (don't exit on failures) |
+| `--verbose`         | `false`            | Enable verbose debug logging                   |
+
+### Outputs
+
+Crawl generates per-page artifacts organized by slug:
+
+```
+crawler/output/pages/<slug>/
+├── page.json              # Page summary
+├── html/
+│   └── rendered.html      # Full rendered HTML
+├── dom/
+│   └── dom.json          # Structured DOM snapshot
+├── meta/
+│   └── meta.json         # Metadata (title, OG, headings)
+├── screenshots/
+│   ├── desktop.png       # Desktop viewport screenshot
+│   └── mobile.png        # Mobile viewport screenshot
+└── assets/
+    ├── manifest.json     # Asset list with hashes
+    └── files/            # Downloaded assets
+```
+
+Plus summary files:
+
+1. **crawl-summary.json** - Overall crawl statistics
+   - Location: `crawler/output/crawl-summary.json`
+2. **crawl-errors.json** - Failed pages (if any)
+   - Location: `crawler/output/crawl-errors.json`
+3. **run.json** - Machine-readable run report
+   - Location: `docs/REPORTS/<timestamp>/run.json`
+4. **summary.md** - Human-readable summary
+   - Location: `docs/REPORTS/<timestamp>/summary.md`
+
+### Examples
+
+**Example 1: Full pipeline**
+
+```bash
+# Step 1: Discover pages
+npm run discover -- --baseUrl https://example.wixsite.com/mysite
+
+# Step 2: Crawl discovered pages
+npm run crawl -- \
+  --baseUrl https://example.wixsite.com/mysite \
+  --manifest crawler/output/manifest.json
+```
+
+**Example 2: High-speed shallow crawl**
+
+```bash
+npm run discover -- --baseUrl https://example.com --maxDepth 1
+npm run crawl -- \
+  --baseUrl https://example.com \
+  --manifest crawler/output/manifest.json \
+  --concurrency 10 \
+  --downloadAssets false \
+  --breakpoints desktop
+```
+
+**Example 3: Detailed crawl with retries**
+
+```bash
+npm run crawl -- \
+  --baseUrl https://example.com \
+  --manifest crawler/output/manifest.json \
+  --retries 5 \
+  --timeoutMs 60000 \
+  --settleMs 2000 \
+  --verbose
 ```
 
 ## 🧪 Development

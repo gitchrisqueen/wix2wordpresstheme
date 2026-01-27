@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/gitchrisqueen/wix2wordpresstheme/schemas/crawl-summary.schema.json",
+  "title": "Crawl Summary Schema",
+  "description": "Schema for crawl run summary output",
+  "type": "object",
+  "required": ["startTime", "endTime", "duration", "baseUrl", "config", "stats", "results"],
+  "properties": {
+    "startTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Crawl start time"
+    },
+    "endTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Crawl end time"
+    },
+    "duration": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Duration in milliseconds"
+    },
+    "baseUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Base URL crawled"
+    },
+    "config": {
+      "type": "object",
+      "description": "Crawl configuration used",
+      "properties": {
+        "maxPages": {
+          "type": ["integer", "null"]
+        },
+        "concurrency": {
+          "type": "integer"
+        },
+        "timeoutMs": {
+          "type": "integer"
+        },
+        "retries": {
+          "type": "integer"
+        },
+        "breakpoints": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "downloadAssets": {
+          "type": "boolean"
+        }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "required": ["totalPages", "successful", "failed", "skipped"],
+      "properties": {
+        "totalPages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "successful": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "totalAssets": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "assetsDownloaded": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["url", "slug", "status"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["success", "failed", "skipped"]
+          },
+          "error": {
+            "type": ["string", "null"]
+          },
+          "duration": {
+            "type": ["integer", "null"]
+          },
+          "outputPath": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    }
+  }
+}

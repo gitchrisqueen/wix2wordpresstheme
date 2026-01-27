@@ -25,20 +25,32 @@
          │
          ▼
   ┌──────────────────┐
-  │  2. CRAWLER      │  Phase 2 (Coming)
-  │  (Playwright)    │  • Page snapshots
-  └──────────────────┘  • Asset extraction
-         │              • Style capturing
-         │              • Content extraction
+  │  2. CRAWLER      │  ✅ Phase 2 (Complete)
+  │  (Playwright)    │  • Page capture (screenshots)
+  └──────────────────┘  • DOM extraction
+         │              • Metadata extraction
+         │              • Asset discovery + download
          ▼
   ┌──────────────────┐
-  │  Crawled Data    │  JSON + Assets
+  │  Crawled Data    │  Per-page snapshots + assets
   └──────────────────┘
          │
          ▼
   ┌──────────────────┐
-  │ 3. THEME GEN     │  Phase 3 (Coming)
-  │  (Node.js)       │  • Template generation
+  │ 3. SPEC GEN      │  Phase 3 (Coming)
+  │  (Analysis)      │  • PageSpec inference
+  └──────────────────┘  • Design token extraction
+         │              • Layout detection
+         │              • Component mapping
+         ▼
+  ┌──────────────────┐
+  │  PageSpec JSON   │  Structured page specifications
+  └──────────────────┘
+         │
+         ▼
+  ┌──────────────────┐
+  │ 4. THEME GEN     │  Phase 4 (Coming)
+  │  (Generator)     │  • Template generation
   └──────────────────┘  • Asset optimization
          │              • WordPress structure
          │              • Style conversion
@@ -49,14 +61,14 @@
          │
          ▼
   ┌──────────────────┐
-  │ 4. WP LOCAL      │  Phase 4 (Coming)
+  │ 5. WP LOCAL      │  Phase 5 (Coming)
   │  (Docker)        │  • WordPress install
   └──────────────────┘  • MySQL database
          │              • Theme deployment
          │              • Plugin support
          ▼
   ┌──────────────────┐
-  │ 5. TESTS         │  Phase 5 (Coming)
+  │ 6. TESTS         │  Phase 6 (Coming)
   │  (Vitest+Playwright)│ • Visual regression
   └──────────────────┘  • DOM validation
          │              • Performance tests
@@ -166,6 +178,219 @@ crawler/
 - `docs/REPORTS/<timestamp>/run.json` - Machine-readable run report
 - `docs/REPORTS/<timestamp>/summary.md` - Human-readable summary
 - `docs/REPORTS/<timestamp>/logs.json` - Complete log entries
+
+---
+
+## Phase 2: Crawler (Playwright) ✅
+
+### Purpose
+
+Capture comprehensive snapshots of discovered pages using Playwright, including:
+
+- Full-page screenshots (multiple viewports)
+- Rendered HTML
+- Structured DOM snapshots
+- Metadata extraction
+- Asset discovery and download
+
+### Directory Structure
+
+```
+crawler/
+├── src/
+│   ├── cli/
+│   │   └── crawl.ts            # Crawl CLI command
+│   ├── crawl/
+│   │   ├── runner.ts           # Queue & concurrency orchestration
+│   │   ├── pageCapture.ts      # Single page capture logic
+│   │   ├── domExtract.ts       # DOM serialization
+│   │   ├── metaExtract.ts      # Metadata extraction
+│   │   ├── assetsDiscover.ts   # Asset discovery (DOM/CSS)
+│   │   └── assetsDownload.ts   # Asset fetching & hashing
+│   ├── lib/
+│   │   ├── hash.ts             # SHA-256 hashing utilities
+│   │   ├── slug.ts             # Stable slug generation
+│   │   └── fileio.ts           # Safe file operations
+│   └── types/
+│       └── crawl.ts            # Crawl types & schemas
+├── schemas/
+│   ├── meta.schema.json        # Metadata output schema
+│   ├── dom.schema.json         # DOM snapshot schema
+│   ├── assets-manifest.schema.json  # Assets manifest schema
+│   └── crawl-summary.schema.json    # Crawl summary schema
+└── output/
+    ├── manifest.json           # From Phase 1
+    ├── crawl-summary.json      # Crawl statistics
+    └── pages/
+        └── <slug>/             # Per-page artifacts
+            ├── page.json
+            ├── html/rendered.html
+            ├── dom/dom.json
+            ├── meta/meta.json
+            ├── screenshots/
+            │   ├── desktop.png
+            │   └── mobile.png
+            └── assets/
+                ├── manifest.json
+                └── files/
+```
+
+### Crawl Flow
+
+1. **Load manifest** - Read discovered URLs from Phase 1
+2. **Initialize browser** - Launch Chromium with custom config
+3. **Process queue** - Concurrent page capture with worker pool
+4. **Per page**:
+   a. Navigate with retry logic (networkidle → domcontentloaded fallback)
+   b. Wait for page settle (default 750ms)
+   c. Capture screenshots for each breakpoint
+   d. Extract rendered HTML
+   e. Serialize DOM to structured JSON
+   f. Extract metadata (title, OG, headings, canonical)
+   g. Discover assets (images, fonts, CSS, JS)
+   h. Download assets (with deduplication & hashing)
+5. **Generate summaries** - crawl-summary.json and reports
+
+### Browser Configuration
+
+- **Engine**: Chromium (headless)
+- **User Agent**: Chrome 120 (configurable)
+- **Viewports**:
+  - Desktop: 1920x1080
+  - Mobile: 375x667
+  - Tablet: 768x1024
+- **Cache**: Disabled for determinism
+- **HTTPS Errors**: Ignored (configurable)
+
+### Wait Strategy
+
+Default behavior:
+
+1. `page.goto(url, { waitUntil: 'networkidle' })`
+2. Additional settle time (`--settleMs`, default 750ms)
+3. Verify `document.readyState === 'complete'`
+
+On timeout/failure, retry with fallback:
+
+1. `waitUntil: 'domcontentloaded'` (faster, less strict)
+2. Logged as downgrade in reports
+
+### Concurrency Model
+
+- One browser instance
+- Multiple contexts (one per page)
+- Worker pool for concurrent processing
+- Configurable concurrency (`--concurrency`, default 3)
+- Context isolation (each page gets fresh context)
+- Automatic cleanup after page capture
+
+### DOM Extraction
+
+**Captured attributes**: `id`, `class`, `href`, `src`, `srcset`, `alt`, `role`, `aria-label`, `name`, `type`, `rel`, `title`
+
+**Skipped tags**: `script`, `style`, `noscript`, `iframe`, `svg`
+
+**Output format**:
+
+```json
+{
+  "url": "https://example.com/page",
+  "capturedAt": "2026-01-27T18:00:00.000Z",
+  "hash": "abc123...",
+  "root": {
+    "type": "element",
+    "tag": "body",
+    "children": [
+      {
+        "type": "element",
+        "tag": "h1",
+        "attributes": { "class": "title" },
+        "children": [
+          { "type": "text", "text": "Hello World" }
+        ]
+      }
+    ]
+  },
+  "keyElements": {
+    "nav": "nav[role='navigation']",
+    "footer": "footer",
+    "main": "main"
+  }
+}
+```
+
+### Metadata Extraction
+
+Extracts:
+
+- `title` - Document title
+- `metaDescription` - Meta description tag
+- `canonical` - Canonical URL
+- `og` - Open Graph metadata (title, description, image, url, type)
+- `headings` - All h1-h6 elements with text content
+
+### Asset Discovery
+
+**Sources**:
+
+1. **DOM attributes**:
+   - `img[src]`, `img[srcset]`
+   - `source[srcset]`
+   - `link[rel="icon"]`, `link[rel="apple-touch-icon"]`
+   - `meta[property="og:image"]`
+   - `video[poster]`
+   - `link[rel="stylesheet"]`
+   - `script[src]`
+
+2. **CSS references**:
+   - Parse loaded stylesheets
+   - Extract `url()` references
+   - Download fonts and background images
+
+**Asset types**: `image`, `font`, `css`, `js`, `other`
+
+**Download policy**:
+
+- Same-origin by default
+- Third-party assets require explicit flag
+- Deduplication by normalized URL
+- Hash-based file naming (`{shortHash}.{ext}`)
+- SHA-256 hashing for verification
+
+### Output Schemas
+
+All outputs validated against JSON schemas:
+
+- `meta.schema.json` - Metadata structure
+- `dom.schema.json` - DOM snapshot structure
+- `assets-manifest.schema.json` - Asset list structure
+- `crawl-summary.schema.json` - Run summary structure
+
+### Error Handling
+
+**Per-page failures**:
+
+- Retry with exponential backoff (up to `--retries`, default 2)
+- Downgrade wait strategy on retry
+- Save `error.png` screenshot and `error.txt` stack trace
+- Add entry to `crawl-errors.json`
+- Continue to next page if `--allowPartial true`
+
+**Recovery strategies**:
+
+- Timeout → Retry with longer timeout or faster wait strategy
+- Network error → Retry with backoff
+- Screenshot failure → Continue without screenshots
+- Asset download failure → Mark as failed, continue
+
+### Reports Generated
+
+- `crawler/output/crawl-summary.json` - Statistics and per-page results
+- `crawler/output/crawl-errors.json` - Failed pages (if any)
+- `docs/REPORTS/<timestamp>/run.json` - Machine-readable run report
+- `docs/REPORTS/<timestamp>/summary.md` - Human-readable summary
+
+---
 
 ### 2. Crawler Module (Phase 2 - Coming Soon)
 

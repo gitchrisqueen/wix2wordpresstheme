@@ -289,10 +289,220 @@ This document records key technical decisions made during the development of the
 
 ---
 
+## Phase 2: Crawl + Snapshots
+
+### Decision: Playwright for Page Capture
+
+**Date**: 2026-01-27
+
+**Context**: Need to capture full page snapshots including screenshots, rendered HTML, and dynamic content.
+
+**Decision**: Use Playwright (Chromium) for Phase 2 page capture.
+
+**Rationale**:
+
+- **Full browser environment** - Can execute JavaScript and capture fully rendered pages
+- **Screenshot capability** - Built-in screenshot API with viewport control
+- **Multiple viewports** - Easy to capture desktop, mobile, and tablet views
+- **Network control** - Can intercept and monitor network requests for asset discovery
+- **Mature and maintained** - Industry-standard tool with good TypeScript support
+- **Headless by default** - No GUI overhead in production
+
+**Trade-offs**:
+
+- **Resource intensive** - Requires more CPU/memory than simple HTTP requests
+- **Slower** - Browser startup and page load take longer than fetch
+- **Binary dependencies** - Requires browser binaries to be installed
+
+**Alternatives Considered**:
+
+1. **Puppeteer**: Similar to Playwright but Playwright has better API and cross-browser support
+2. **jsdom**: Lighter but can't handle complex sites or capture screenshots
+3. **Static HTTP + Cheerio**: Too limited for dynamic sites and visual capture
+
+### Decision: Concurrent Page Processing with Context Isolation
+
+**Date**: 2026-01-27
+
+**Context**: Need to balance speed with resource usage when crawling multiple pages.
+
+**Decision**: Use a single browser instance with multiple isolated contexts, processed by a worker pool.
+
+**Rationale**:
+
+- **Performance** - Concurrent processing is much faster than sequential
+- **Resource efficiency** - One browser instance is cheaper than multiple instances
+- **Isolation** - Separate contexts prevent state leakage between pages
+- **Memory management** - Close contexts after each page to prevent memory leaks
+- **Configurable** - Allow users to tune concurrency based on their resources
+
+**Trade-offs**:
+
+- **Complexity** - More complex than sequential processing
+- **Memory usage** - Can use significant memory with high concurrency
+- **Failure isolation** - One page crash doesn't affect others
+
+**Configuration**: Default concurrency of 3, configurable via `--concurrency`
+
+### Decision: Network Idle Wait Strategy with Fallback
+
+**Date**: 2026-01-27
+
+**Context**: Pages need time to fully render before capture, but timeout behavior varies.
+
+**Decision**: Use `networkidle` as primary wait strategy with automatic fallback to `domcontentloaded` on retry.
+
+**Rationale**:
+
+- **Completeness** - `networkidle` ensures most dynamic content has loaded
+- **Reliability** - Fallback prevents complete failure on slow/flaky pages
+- **Configurable settle time** - Additional wait after navigation allows for final rendering
+- **Logged downgrades** - Track when fallback is used for debugging
+
+**Trade-offs**:
+
+- **Slower** - `networkidle` takes longer than simpler strategies
+- **Not perfect** - Some lazy-loaded content may still be missed
+- **Timeouts possible** - Sites with ongoing network activity may never reach idle
+
+**Configuration**: Default `waitUntil: 'networkidle'` with `settleMs: 750`
+
+### Decision: Structured DOM Snapshot vs Full HTML
+
+**Date**: 2026-01-27
+
+**Context**: Need machine-readable DOM structure for later analysis while preserving full HTML.
+
+**Decision**: Capture both rendered HTML (verbatim) and structured DOM (pruned JSON).
+
+**Rationale**:
+
+- **Rendered HTML** - Preserves exact output for debugging and fallback
+- **Structured DOM** - Enables programmatic analysis and comparison
+- **Pruned tree** - Removes scripts, styles, and SVGs to reduce size
+- **Normalized** - Consistent whitespace and attribute ordering
+- **Hashable** - Can detect structural changes between versions
+
+**Attributes captured**: `id`, `class`, `href`, `src`, `srcset`, `alt`, `role`, `aria-label`, `name`, `type`, `rel`, `title`
+
+**Trade-offs**:
+
+- **Storage** - Two representations take more space
+- **Processing** - Requires serialization logic in browser context
+- **Maintenance** - Need to keep attribute list updated
+
+**Future**: May add CSS computed styles in Phase 3 for design token extraction
+
+### Decision: Hash-Based Asset Deduplication
+
+**Date**: 2026-01-27
+
+**Context**: Multiple pages may reference the same assets, causing redundant downloads.
+
+**Decision**: Use SHA-256 hash-based file naming for downloaded assets with URL-based deduplication.
+
+**Rationale**:
+
+- **Deduplication** - Same asset from different pages downloaded only once
+- **Integrity** - SHA-256 verifies file hasn't been corrupted
+- **Collision resistance** - Hash-based naming prevents filename conflicts
+- **Deterministic** - Same content always gets same filename
+
+**Implementation**:
+
+- Normalize asset URLs
+- Track seen URLs to avoid duplicate requests
+- Use short hash (12 chars) for file naming: `{shortHash}.{ext}`
+- Store full SHA-256 in manifest for verification
+
+**Trade-offs**:
+
+- **Complexity** - More logic than simple sequential naming
+- **Different URLs** - Same content from different CDN URLs downloaded twice (acceptable trade-off)
+
+### Decision: Same-Origin Asset Policy with Opt-In Third-Party
+
+**Date**: 2026-01-27
+
+**Context**: Sites reference assets from multiple domains (CDNs, external services).
+
+**Decision**: Download only same-origin assets by default, with explicit flag for third-party assets.
+
+**Rationale**:
+
+- **Privacy** - Avoid unintentional downloading of tracking pixels or analytics scripts
+- **Relevance** - Same-origin assets are more likely to be site-specific
+- **Size control** - Third-party assets (ads, social widgets) can be large
+- **Opt-in** - Users can enable third-party if needed for their use case
+
+**Trade-offs**:
+
+- **Incomplete** - May miss essential CDN-hosted assets
+- **Configuration burden** - Users must know if they need third-party assets
+
+**Future**: May add allowlist for known good CDNs (Google Fonts, etc.)
+
+### Decision: Per-Page Folder Structure
+
+**Date**: 2026-01-27
+
+**Context**: Need organized, consistent output structure for hundreds of pages.
+
+**Decision**: Create a folder per page slug with standardized subfolders.
+
+**Rationale**:
+
+- **Organization** - Easy to find artifacts for a specific page
+- **Atomicity** - Each page is self-contained
+- **Parallelism** - Safe concurrent writes to different page folders
+- **Slugs** - Stable, filesystem-safe identifiers from URL paths
+- **Uniqueness** - Hash suffix added if slug collision occurs
+
+**Structure**:
+```
+pages/<slug>/
+├── page.json
+├── html/rendered.html
+├── dom/dom.json
+├── meta/meta.json
+├── screenshots/desktop.png
+└── assets/manifest.json
+```
+
+**Trade-offs**:
+
+- **Depth** - Creates many nested directories
+- **Duplication** - Some assets stored multiple times if not deduplicated
+
+###  Decision: JSON Schema Validation for All Outputs
+
+**Date**: 2026-01-27
+
+**Context**: Outputs must be machine-readable and consistent across runs.
+
+**Decision**: Define JSON schemas for all output formats and validate before writing.
+
+**Rationale**:
+
+- **Contract** - Clear specification of output format
+- **Validation** - Catch errors before writing invalid files
+- **Evolution** - Schema versioning allows controlled format changes
+- **Documentation** - Schema serves as format documentation
+
+**Schemas**: `meta.schema.json`, `dom.schema.json`, `assets-manifest.schema.json`, `crawl-summary.schema.json`
+
+**Trade-offs**:
+
+- **Overhead** - Schema validation adds small performance cost
+- **Maintenance** - Schemas must be kept in sync with code
+
+---
+
 ## Future Decisions (To Be Made)
 
-- Playwright vs. alternatives for Phase 2 snapshot capture
+- Phase 3: PageSpec inference and design token extraction strategy
+- Phase 3: CSS parsing and computed style capture
+- Phase 4: WordPress theme template generation approach
+- Phase 5: Visual diff testing tools and thresholds
 - Storage strategy for large asset collections
 - Caching strategy for incremental crawls
-- WordPress theme generation approach
-- Visual diff testing tools and thresholds

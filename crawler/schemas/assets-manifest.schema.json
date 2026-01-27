@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/gitchrisqueen/wix2wordpresstheme/schemas/assets-manifest.schema.json",
+  "title": "Assets Manifest Schema",
+  "description": "Schema for discovered and downloaded assets manifest",
+  "type": "object",
+  "required": ["pageUrl", "capturedAt", "assets"],
+  "properties": {
+    "pageUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Page URL where assets were discovered"
+    },
+    "capturedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of asset discovery"
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/asset"
+      },
+      "description": "List of discovered assets"
+    }
+  },
+  "definitions": {
+    "asset": {
+      "type": "object",
+      "required": ["url", "type", "discoveredBy"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Original asset URL"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["image", "font", "css", "js", "other"],
+          "description": "Asset type"
+        },
+        "discoveredBy": {
+          "type": "string",
+          "enum": ["dom", "css", "network"],
+          "description": "Discovery method"
+        },
+        "localPath": {
+          "type": ["string", "null"],
+          "description": "Local file path if downloaded"
+        },
+        "sha256": {
+          "type": ["string", "null"],
+          "description": "SHA-256 hash of file content"
+        },
+        "sizeBytes": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "File size in bytes"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["downloaded", "skipped", "failed"],
+          "description": "Download status"
+        },
+        "error": {
+          "type": ["string", "null"],
+          "description": "Error message if download failed"
+        }
+      }
+    }
+  }
+}

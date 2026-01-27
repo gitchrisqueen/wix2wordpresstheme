@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/gitchrisqueen/wix2wordpresstheme/schemas/meta.schema.json",
+  "title": "Page Metadata Schema",
+  "description": "Schema for page metadata extraction output",
+  "type": "object",
+  "required": ["url", "finalUrl", "status", "title"],
+  "properties": {
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Original URL requested"
+    },
+    "finalUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Final URL after redirects"
+    },
+    "status": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 599,
+      "description": "HTTP status code"
+    },
+    "title": {
+      "type": "string",
+      "description": "Page title from <title> tag"
+    },
+    "metaDescription": {
+      "type": ["string", "null"],
+      "description": "Meta description content"
+    },
+    "canonical": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "Canonical URL from link rel=canonical"
+    },
+    "og": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": ["string", "null"]
+        },
+        "description": {
+          "type": ["string", "null"]
+        },
+        "image": {
+          "type": ["string", "null"]
+        },
+        "url": {
+          "type": ["string", "null"]
+        },
+        "type": {
+          "type": ["string", "null"]
+        }
+      },
+      "description": "Open Graph metadata"
+    },
+    "headings": {
+      "type": "object",
+      "properties": {
+        "h1": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "h2": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "h3": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "h4": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "h5": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "h6": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "description": "Heading elements grouped by level"
+    }
+  }
+}
