@@ -20,27 +20,50 @@ export async function extractMetadata(page: Page, url: string, status: number): 
 
     // Get meta description
     const metaDesc = document.querySelector('meta[name="description"]');
-    const metaDescription = metaDesc?.getAttribute('content') || null;
+    const metaDescription = metaDesc ? metaDesc.getAttribute('content') : null;
 
     // Get canonical URL
     const canonicalLink = document.querySelector('link[rel="canonical"]');
-    const canonical = canonicalLink?.getAttribute('href') || null;
+    const canonical = canonicalLink ? canonicalLink.getAttribute('href') : null;
 
     // Get Open Graph metadata
-    const ogTitle = document.querySelector('meta[property="og:title"]')?.getAttribute('content') || null;
-    const ogDesc = document.querySelector('meta[property="og:description"]')?.getAttribute('content') || null;
-    const ogImage = document.querySelector('meta[property="og:image"]')?.getAttribute('content') || null;
-    const ogUrl = document.querySelector('meta[property="og:url"]')?.getAttribute('content') || null;
-    const ogType = document.querySelector('meta[property="og:type"]')?.getAttribute('content') || null;
+    const ogTitleEl = document.querySelector('meta[property="og:title"]');
+    const ogTitle = ogTitleEl ? ogTitleEl.getAttribute('content') : null;
+    const ogDescEl = document.querySelector('meta[property="og:description"]');
+    const ogDesc = ogDescEl ? ogDescEl.getAttribute('content') : null;
+    const ogImageEl = document.querySelector('meta[property="og:image"]');
+    const ogImage = ogImageEl ? ogImageEl.getAttribute('content') : null;
+    const ogUrlEl = document.querySelector('meta[property="og:url"]');
+    const ogUrl = ogUrlEl ? ogUrlEl.getAttribute('content') : null;
+    const ogTypeEl = document.querySelector('meta[property="og:type"]');
+    const ogType = ogTypeEl ? ogTypeEl.getAttribute('content') : null;
 
     // Get all headings
     const headings = {
-      h1: Array.from(document.querySelectorAll('h1')).map((h) => h.textContent?.trim() || '').filter(Boolean),
-      h2: Array.from(document.querySelectorAll('h2')).map((h) => h.textContent?.trim() || '').filter(Boolean),
-      h3: Array.from(document.querySelectorAll('h3')).map((h) => h.textContent?.trim() || '').filter(Boolean),
-      h4: Array.from(document.querySelectorAll('h4')).map((h) => h.textContent?.trim() || '').filter(Boolean),
-      h5: Array.from(document.querySelectorAll('h5')).map((h) => h.textContent?.trim() || '').filter(Boolean),
-      h6: Array.from(document.querySelectorAll('h6')).map((h) => h.textContent?.trim() || '').filter(Boolean),
+      h1: Array.from(document.querySelectorAll('h1')).map((h) => {
+        const text = h.textContent ? h.textContent.trim() : '';
+        return text;
+      }).filter(Boolean),
+      h2: Array.from(document.querySelectorAll('h2')).map((h) => {
+        const text = h.textContent ? h.textContent.trim() : '';
+        return text;
+      }).filter(Boolean),
+      h3: Array.from(document.querySelectorAll('h3')).map((h) => {
+        const text = h.textContent ? h.textContent.trim() : '';
+        return text;
+      }).filter(Boolean),
+      h4: Array.from(document.querySelectorAll('h4')).map((h) => {
+        const text = h.textContent ? h.textContent.trim() : '';
+        return text;
+      }).filter(Boolean),
+      h5: Array.from(document.querySelectorAll('h5')).map((h) => {
+        const text = h.textContent ? h.textContent.trim() : '';
+        return text;
+      }).filter(Boolean),
+      h6: Array.from(document.querySelectorAll('h6')).map((h) => {
+        const text = h.textContent ? h.textContent.trim() : '';
+        return text;
+      }).filter(Boolean),
     };
 
     return {

@@ -48,7 +48,7 @@ export async function extractDOM(page: Page, url: string): Promise<DOMSnapshot> 
 
         // Text node
         if (node.nodeType === 3) { // Node.TEXT_NODE
-          const text = node.textContent?.trim();
+          const text = node.textContent ? node.textContent.trim() : '';
           if (!text) return null;
 
           return {
