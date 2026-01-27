@@ -1,0 +1,63 @@
+{
+  "theme": {
+    "name": "Converted Wix Theme",
+    "slug": "converted-wix-theme",
+    "author": "Theme Generator",
+    "authorUri": "https://github.com/gitchrisqueen/wix2wordpresstheme",
+    "description": "A WordPress theme converted from a Wix site",
+    "version": "1.0.0",
+    "license": "GPL-2.0-or-later",
+    "licenseUri": "http://www.gnu.org/licenses/gpl-2.0.html",
+    "textDomain": "converted-wix-theme",
+    "tags": ["custom-background", "custom-logo", "custom-menu", "featured-images", "threaded-comments"]
+  },
+  "templates": {
+    "generate": ["header", "footer", "index", "page", "single", "archive", "404"],
+    "templateEngine": "php",
+    "includeComments": false
+  },
+  "styles": {
+    "convertToWordPressFormat": true,
+    "minify": false,
+    "addThemeSupport": true,
+    "enqueueMethod": "wp_enqueue_scripts",
+    "extractInlineStyles": true
+  },
+  "assets": {
+    "optimize": true,
+    "images": {
+      "compress": true,
+      "quality": 85,
+      "convertToWebP": false,
+      "maxWidth": 2000,
+      "maxHeight": 2000
+    },
+    "css": {
+      "minify": false,
+      "autoprefixer": true,
+      "combineFiles": false
+    },
+    "js": {
+      "minify": false,
+      "combineFiles": false
+    }
+  },
+  "features": {
+    "customizer": true,
+    "widgets": true,
+    "menus": true,
+    "postThumbnails": true,
+    "titleTag": true,
+    "htmlSupport": ["search-form", "comment-form", "comment-list", "gallery", "caption"]
+  },
+  "output": {
+    "directory": "./output",
+    "createZip": false,
+    "includeReadme": true
+  },
+  "logging": {
+    "level": "info",
+    "file": "../logs/theme-generator.log",
+    "console": true
+  }
+}
