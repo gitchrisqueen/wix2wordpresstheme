@@ -25,10 +25,11 @@ export function generateSlug(url: string): string {
     // Convert to slug format
     let slug = path
       .toLowerCase()
-      .replace(/[^a-z0-9\/]+/g, '-') // Replace non-alphanumeric with hyphens
-      .replace(/\/+/g, '--') // Replace slashes with double hyphens
-      .replace(/-+/g, '-') // Collapse multiple hyphens
-      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+      .replace(/\/+/g, '/') // Normalize multiple slashes first
+      .replace(/[^a-z0-9\/]+/g, '-') // Replace non-alphanumeric (except /) with hyphens
+      .replace(/\//g, '--') // Replace slashes with double hyphens
+      .replace(/-{3,}/g, '--') // Collapse 3+ hyphens to 2 (preserve our double-hyphen separators)
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 
     // Limit length
     if (slug.length > 200) {

@@ -4,11 +4,11 @@
  * Orchestrates concurrent page crawling with queue management.
  */
 
-import { chromium, type Browser, type BrowserContext } from 'playwright';
+import { chromium, type Browser } from 'playwright';
 import type { Manifest } from '../types/manifest.js';
-import type { CrawlConfig, CrawlResult, CrawlSummary, BreakpointConfig, BREAKPOINTS } from '../types/crawl.js';
+import type { CrawlConfig, CrawlResult, CrawlSummary, BreakpointConfig } from '../types/crawl.js';
 import { capturePage, type PageCaptureOptions } from './pageCapture.js';
-import { generateSlug, uniqueSlug } from '../lib/slug.js';
+import { uniqueSlug } from '../lib/slug.js';
 import { writeJsonFile } from '../lib/fileio.js';
 import { join } from 'path';
 import type { Logger } from '../lib/logger.js';

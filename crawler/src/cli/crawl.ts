@@ -9,7 +9,7 @@ import { Command } from 'commander';
 import { readFile } from 'fs/promises';
 import { join, resolve } from 'path';
 import { Logger, LogLevel } from '../lib/logger.js';
-import { ReportGenerator, ensureDir, writeJsonFile } from '../lib/report.js';
+import { ReportGenerator, writeJsonFile } from '../lib/report.js';
 import { validateManifest, type Manifest } from '../types/manifest.js';
 import { runCrawl } from '../crawl/runner.js';
 import type { CrawlConfig } from '../types/crawl.js';
@@ -88,7 +88,7 @@ program
       logger.info(`Download assets: ${config.downloadAssets}`);
 
       // Run crawl
-      const { summary, errors } = await runCrawl(manifest, config, logger);
+      const { summary } = await runCrawl(manifest, config, logger);
 
       // Generate reports
       reportGen.end();
@@ -114,7 +114,7 @@ program
       );
 
       // Write summary report
-      await generateCrawlSummaryReport(reportDir, summary, reportGen);
+      await generateCrawlSummaryReport(reportDir, summary);
 
       // Write logs
       await reportGen.writeLogs(reportDir);
@@ -143,11 +143,7 @@ program
 /**
  * Generate crawl-specific summary report
  */
-async function generateCrawlSummaryReport(
-  reportDir: string,
-  summary: any,
-  reportGen: ReportGenerator
-) {
+async function generateCrawlSummaryReport(reportDir: string, summary: any) {
   const summaryMd = `# Crawl Run Summary
 
 ## Run Information

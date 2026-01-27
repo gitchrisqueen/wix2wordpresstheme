@@ -49,6 +49,7 @@
   "homepage": "https://github.com/gitchrisqueen/wix2wordpresstheme#readme",
   "devDependencies": {
     "@playwright/test": "^1.58.0",
+    "@types/css-tree": "^2.3.11",
     "@types/node": "^20.11.5",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
