@@ -5,14 +5,14 @@
  */
 
 import { readFileSync, existsSync } from 'fs';
-import { join, resolve } from 'path';
+import { join } from 'path';
 import type { Logger } from '../../../crawler/src/lib/logger.js';
 import type {
   GeneratorOptions,
   GenerationMetadata,
-  GenerationSummary,
   PageTemplateMapping,
 } from '../types/generator.js';
+import type { PageSpec } from '../../../crawler/src/types/spec.js';
 import { createThemeScaffold } from './scaffold.js';
 import { generateThemeJson } from './themeJson.js';
 import { generateBlockTemplates } from './blockTemplates.js';
@@ -57,25 +57,6 @@ interface LayoutPatterns {
       mediaCount: number;
       ctaCount: number;
     };
-  }>;
-}
-
-interface PageSpec {
-  url: string;
-  slug: string;
-  templateHint: string;
-  sections: Array<{
-    id: string;
-    type: string;
-    heading?: string | null;
-    textBlocks?: string[];
-    ctas?: Array<{ text: string; href?: string | null }>;
-    media?: Array<{
-      type: string;
-      src?: string | null;
-      alt?: string | null;
-      localAsset?: string | null;
-    }>;
   }>;
 }
 

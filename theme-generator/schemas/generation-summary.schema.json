@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/gitchrisqueen/wix2wordpresstheme/schemas/generation-summary.schema.json",
+  "title": "Generation Summary",
+  "description": "Summary of WordPress theme generation process",
+  "type": "object",
+  "required": [
+    "baseUrl",
+    "themeName",
+    "mode",
+    "outputDir",
+    "generatedAt",
+    "metadata",
+    "pages",
+    "warnings",
+    "errors"
+  ],
+  "properties": {
+    "baseUrl": {
+      "type": "string",
+      "description": "Base URL of the original website"
+    },
+    "themeName": {
+      "type": "string",
+      "description": "Name of the generated theme"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["block", "php", "hybrid"],
+      "description": "Theme generation mode"
+    },
+    "outputDir": {
+      "type": "string",
+      "description": "Output directory for the generated theme"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of generation"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["pagesRendered", "patternsEmitted", "phpFallbacksUsed"],
+      "properties": {
+        "pagesRendered": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "patternsEmitted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "phpFallbacksUsed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["slug", "template", "mode", "status"],
+        "properties": {
+          "slug": { "type": "string" },
+          "template": { "type": "string" },
+          "mode": {
+            "type": "string",
+            "enum": ["block", "php", "hybrid"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["success", "partial", "failed"]
+          }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "errors": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

@@ -250,8 +250,8 @@ function buildTypographySettings(
  */
 function buildStyles(
   designTokens: DesignTokens,
-  metadata: GenerationMetadata,
-  logger: Logger,
+  _metadata: GenerationMetadata,
+  _logger: Logger,
 ): ThemeJson['styles'] {
   const styles: ThemeJson['styles'] = {
     typography: {},
