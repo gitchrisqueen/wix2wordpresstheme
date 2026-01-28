@@ -30,6 +30,38 @@ export interface SpecConfig {
 }
 
 /**
+ * Load actual slugs from crawled pages
+ * Returns a map of URLs to their actual slugs as created during crawling
+ */
+async function loadPageSlugs(pagesDir: string, logger: Logger): Promise<Map<string, string>> {
+  const slugMap = new Map<string, string>();
+  const fs = await import('fs/promises');
+
+  try {
+    const entries = await fs.readdir(pagesDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const pageJsonPath = join(pagesDir, entry.name, 'page.json');
+        try {
+          const pageJsonContent = await readFile(pageJsonPath, 'utf-8');
+          const pageJson = JSON.parse(pageJsonContent);
+          if (pageJson.url && pageJson.slug) {
+            slugMap.set(pageJson.url, pageJson.slug);
+            logger.debug(`Mapped URL ${pageJson.url} to slug ${pageJson.slug}`);
+          }
+        } catch (err) {
+          logger.debug(`Could not read page.json from ${entry.name}, skipping`);
+        }
+      }
+    }
+  } catch (err) {
+    logger.warn(`Could not read pages directory: ${(err as Error).message}`);
+  }
+
+  return slugMap;
+}
+
+/**
  * Run spec generation
  */
 export async function runSpec(config: SpecConfig, logger: Logger): Promise<void> {
@@ -49,6 +81,11 @@ export async function runSpec(config: SpecConfig, logger: Logger): Promise<void>
     const manifest: Manifest = JSON.parse(manifestContent);
     logger.info(`Loaded ${manifest.pages.length} pages from manifest`);
 
+    // Load actual page slugs from crawled data
+    logger.info('Loading actual page slugs from crawled data...');
+    const slugMap = await loadPageSlugs(join(config.inDir, 'pages'), logger);
+    logger.info(`Loaded ${slugMap.size} actual page slugs`);
+
     // Limit pages if specified
     let pagesToProcess = manifest.pages;
     if (config.maxPages && config.maxPages > 0) {
@@ -64,7 +101,13 @@ export async function runSpec(config: SpecConfig, logger: Logger): Promise<void>
     const pagesForTokens: Array<{ html: string; slug: string }> = [];
 
     for (const page of pagesToProcess) {
-      const slug = page.path.replace(/^\//, '').replace(/\//g, '-') || 'index';
+      // Get actual slug from crawled data, fallback to derived slug if not found
+      let slug = slugMap.get(page.url);
+      if (!slug) {
+        logger.warn(`No slug found for URL ${page.url}, deriving slug from path`);
+        slug = page.path.replace(/^\//, '').replace(/\//g, '-') || 'index';
+      }
+
       logger.debug(`Processing page: ${slug} (${page.url})`);
 
       try {
