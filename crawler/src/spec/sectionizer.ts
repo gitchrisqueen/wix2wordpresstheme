@@ -140,8 +140,8 @@ function extractCtas($elem: cheerio.Cheerio<cheerio.Element>): Cta[] {
   
   $elem.find('a[href], button').each((_, el) => {
     const $el = cheerio.load(el);
-    const text = normalizeWhitespace($el.text());
-    const href = $el.attr('href') || null;
+    const text = normalizeWhitespace($el('a, button').text());
+    const href = $el('a').attr('href') || null;
     
     if (text && text.length > 0 && text.length < 100) {
       ctas.push({ text, href });
@@ -159,8 +159,8 @@ function extractMedia($elem: cheerio.Cheerio<cheerio.Element>): Media[] {
   
   $elem.find('img').each((_, el) => {
     const $el = cheerio.load(el);
-    const src = $el.attr('src') || null;
-    const alt = $el.attr('alt') || null;
+    const src = $el('img').attr('src') || null;
+    const alt = $el('img').attr('alt') || null;
     
     if (src) {
       media.push({
