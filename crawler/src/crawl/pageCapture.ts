@@ -187,14 +187,22 @@ async function capturePageAttempt(
     // Discover and download assets
     if (config.downloadAssets) {
       logger.debug(`Discovering assets for ${url}`);
-      const discoveredAssets = await discoverAssets(page, config.baseUrl, false);
+      const discoveredAssets = await discoverAssets(page, config.baseUrl, config.allowThirdParty);
 
       logger.info(`Discovered ${discoveredAssets.length} assets for ${url}`);
 
       const assetsDir = join(pageDir, 'assets');
       await ensureDir(assetsDir);
 
-      const downloadedAssets = await downloadAssets(discoveredAssets, assetsDir, logger);
+      const downloadedAssets = await downloadAssets(
+        discoveredAssets,
+        assetsDir,
+        {
+          baseUrl: config.baseUrl,
+          downloadThirdPartyAssets: config.downloadThirdPartyAssets,
+        },
+        logger
+      );
 
       const assetsManifest = {
         pageUrl: url,

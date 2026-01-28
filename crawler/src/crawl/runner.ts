@@ -5,6 +5,7 @@
  */
 
 import { chromium, type Browser } from 'playwright';
+import { readFile } from 'fs/promises';
 import type { Manifest } from '../types/manifest.js';
 import type { CrawlConfig, CrawlResult, CrawlSummary, BreakpointConfig } from '../types/crawl.js';
 import { capturePage, type PageCaptureOptions } from './pageCapture.js';
@@ -73,6 +74,8 @@ export async function runCrawl(
     const failed = results.filter((r) => r.status === 'failed');
     const skipped = results.filter((r) => r.status === 'skipped');
 
+    const assetStats = await aggregateAssetStats(results, logger);
+
     const summary: CrawlSummary = {
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString(),
@@ -85,14 +88,16 @@ export async function runCrawl(
         retries: config.retries,
         breakpoints: config.breakpoints,
         downloadAssets: config.downloadAssets,
+        allowThirdParty: config.allowThirdParty,
+        downloadThirdPartyAssets: config.downloadThirdPartyAssets,
       },
       stats: {
         totalPages: pages.length,
         successful: successful.length,
         failed: failed.length,
         skipped: skipped.length,
-        totalAssets: 0, // TODO: aggregate from page results
-        assetsDownloaded: 0,
+        totalAssets: assetStats.totalAssets,
+        assetsDownloaded: assetStats.assetsDownloaded,
       },
       results,
     };
@@ -198,4 +203,33 @@ function parseBreakpoints(breakpointNames: string[]): BreakpointConfig[] {
   return breakpointNames
     .map((name) => BREAKPOINTS[name.toLowerCase()])
     .filter((bp): bp is BreakpointConfig => bp !== undefined);
+}
+
+async function aggregateAssetStats(
+  results: CrawlResult[],
+  logger: Logger
+): Promise<{ totalAssets: number; assetsDownloaded: number }> {
+  let totalAssets = 0;
+  let assetsDownloaded = 0;
+
+  for (const result of results) {
+    if (!result.outputPath) {
+      continue;
+    }
+
+    try {
+      const manifestPath = join(result.outputPath, 'assets', 'manifest.json');
+      const content = await readFile(manifestPath, 'utf-8');
+      const data = JSON.parse(content);
+      const assets = Array.isArray(data.assets) ? data.assets : [];
+
+      totalAssets += assets.length;
+      assetsDownloaded += assets.filter((asset: { status?: string }) => asset.status === 'downloaded')
+        .length;
+    } catch (error) {
+      logger.debug(`No assets manifest for ${result.outputPath}: ${String(error)}`);
+    }
+  }
+
+  return { totalAssets, assetsDownloaded };
 }
