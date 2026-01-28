@@ -52,6 +52,7 @@ crawler/output/
 crawler/downloads/
 
 # Theme outputs
+theme/output/
 theme-generator/output/
 
 # Reports (exclude timestamped reports but keep directory structure)
