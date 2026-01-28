@@ -151,7 +151,9 @@ export function getPageMappingByWixUrl(
   mappings: PageMapping[],
   wixUrl: string,
 ): PageMapping | undefined {
-  return mappings.find((m) => m.wixUrl === wixUrl);
+  // Normalize URLs for comparison
+  const normalizedWixUrl = normalizeUrl(wixUrl);
+  return mappings.find((m) => normalizeUrl(m.wixUrl) === normalizedWixUrl);
 }
 
 /**
