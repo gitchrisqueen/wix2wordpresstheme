@@ -1,109 +1,277 @@
 # Theme Generator Module
 
-Converts crawled Wix site data into a WordPress-compatible theme with proper structure and hooks.
+**Status**: ✅ Complete (Phase 4)
 
-## 📁 Structure
-
-```
-theme-generator/
-├── src/                      # Source code (to be implemented)
-│   ├── generator.ts         # Main theme generator
-│   ├── template-builder.ts  # Build PHP templates
-│   ├── style-converter.ts   # Convert CSS to WP styles
-│   ├── asset-optimizer.ts   # Optimize and organize assets
-│   ├── functions-builder.ts # Generate functions.php
-│   └── templates/           # Theme templates
-│       ├── style.css.hbs   # Theme stylesheet template
-│       ├── functions.php.hbs # Functions template
-│       ├── header.php.hbs  # Header template
-│       ├── footer.php.hbs  # Footer template
-│       └── page.php.hbs    # Page template
-├── output/                   # Generated themes (generated)
-├── config.json              # Generator configuration
-├── tsconfig.json            # TypeScript configuration
-└── package.json             # Dependencies
-```
+Converts crawled Wix site data (PageSpec and design tokens) into a WordPress-compatible hybrid theme with proper structure, hooks, and block editor support.
 
 ## 🎯 Purpose
 
 The theme generator module is responsible for:
 
-- Loading crawled Wix site data
-- Analyzing structure and creating theme plan
-- Generating WordPress theme file structure
-- Converting styles to WordPress-compatible format
-- Optimizing assets (compress images, minify CSS/JS)
-- Creating theme metadata and configuration
-- Packaging theme for WordPress installation
+- Loading PageSpec, design tokens, and layout patterns from Phase 3
+- Generating a complete WordPress theme with hybrid rendering
+- Creating block templates for the Block Editor
+- Generating PHP section partials for complex layouts
+- Converting design tokens to theme.json
+- Creating reusable block patterns
+- Managing assets and generating mappings
+- Producing comprehensive reports
 
-## 🚀 Usage (Not Yet Implemented)
+## 🚀 Usage
+
+### Basic Usage
 
 ```bash
-# From project root
-npm run generate-theme -- --input ./crawler/output
+# Generate theme from spec output
+npm run generate -- --baseUrl https://example.com
 
-# With options
-npm run generate-theme -- \
-  --input ./crawler/output \
-  --output ./theme-generator/output \
-  --theme-name "My Converted Theme" \
-  --optimize true
+# With custom options
+npm run generate -- \
+  --baseUrl https://example.com \
+  --inDir ./crawler/output \
+  --outDir ./theme/output \
+  --themeName my-custom-theme \
+  --mode hybrid \
+  --verbose
 ```
 
-## ⚙️ Configuration
+### Options
 
-The `config.json` file will contain:
+| Option             | Default          | Description                                      |
+| ------------------ | ---------------- | ------------------------------------------------ |
+| `--baseUrl`        | (required)       | Base URL of the website                          |
+| `--inDir`          | `crawler/output` | Input directory with spec output                 |
+| `--outDir`         | `theme/output`   | Output directory for generated theme             |
+| `--themeName`      | `wix2wp`         | Theme name (slug format)                         |
+| `--mode`           | `hybrid`         | Generation mode: block, php, or hybrid           |
+| `--emitPatterns`   | `true`           | Generate WordPress block patterns                |
+| `--emitThemeJson`  | `true`           | Generate theme.json from design tokens           |
+| `--verbose`        | `false`          | Enable verbose debug logging                     |
 
-- Theme metadata (name, author, version)
-- Template options (which templates to generate)
-- Asset optimization settings
-- Style conversion rules
+### Rendering Modes
+
+1. **block** - Block-first, fully editable in Block Editor
+2. **php** - Classic PHP rendering for pixel-perfect control
+3. **hybrid** *(recommended)* - Blocks for simple content, PHP for complex sections
+
+## 📁 Module Structure
+
+```
+theme-generator/
+├── src/
+│   ├── cli/
+│   │   └── generate.ts           # CLI entry point
+│   ├── generator/                # Core generator modules
+│   │   ├── runner.ts             # Main orchestration
+│   │   ├── scaffold.ts           # Theme structure creation
+│   │   ├── themeJson.ts          # theme.json generation
+│   │   ├── blockTemplates.ts     # Block template generation
+│   │   ├── phpSections.ts        # PHP section partials
+│   │   ├── patterns.ts           # Block pattern generation
+│   │   ├── assets.ts             # Asset management
+│   │   └── reports.ts            # Report generation
+│   ├── types/
+│   │   └── generator.ts          # Type definitions
+│   └── __tests__/                # Unit tests
+├── schemas/
+│   └── generation-summary.schema.json  # JSON schema
+├── config.json                   # Generator configuration
+└── README.md                     # This file
+```
 
 ## 📤 Output Format
 
-The generator will output a complete WordPress theme:
+The generator creates a complete WordPress theme:
 
 ```
-output/my-theme/
-├── style.css              # Theme metadata and styles
-├── functions.php          # Theme setup and hooks
-├── header.php             # Header template
-├── footer.php             # Footer template
-├── index.php              # Main template
-├── page.php               # Page template
-├── single.php             # Single post template
-├── screenshot.png         # Theme screenshot
+output/<themeName>/
+├── style.css                     # Theme header + base styles
+├── functions.php                 # Theme setup, hooks, pattern registration
+├── theme.json                    # Block editor configuration
+├── index.php                     # Required WordPress template
+├── block-templates/
+│   ├── page-home.html           # Block template for home page
+│   └── page-*.html              # Block templates for other pages
+├── patterns/
+│   └── *.php                    # Block patterns from layout patterns
+├── parts/
+│   └── sections/
+│       ├── header.php           # Section type templates
+│       ├── hero.php
+│       ├── footer.php
+│       └── ...                  # 11 section types total
+├── inc/
+│   └── render.php               # Rendering helpers
 ├── assets/
-│   ├── css/              # Stylesheets
-│   ├── js/               # JavaScript files
-│   ├── images/           # Optimized images
-│   └── fonts/            # Web fonts
-├── inc/                   # Include files
-│   ├── customizer.php    # Theme customizer
-│   └── template-tags.php # Helper functions
-├── template-parts/        # Reusable template parts
-└── languages/             # Translation files
+│   └── imported/                # Copied assets with hashes
+└── .generated/
+    ├── generation.json          # Full generation metadata
+    ├── asset-map.json           # Original URL → theme path mapping
+    └── page-mapping.json        # Slug → template → mode mapping
 ```
+
+Plus summary files:
+- `{outDir}/generate-summary.json` - Overall generation statistics
+- `docs/REPORTS/<timestamp>/run.json` - Machine-readable report
+- `docs/REPORTS/<timestamp>/summary.md` - Human-readable summary
+
+## ⚙️ How It Works
+
+### 1. Input Loading
+- Loads manifest.json (list of pages)
+- Loads design-tokens.json (colors, fonts, buttons)
+- Loads layout-patterns.json (reusable patterns)
+- Loads per-page pagespec.json files
+
+### 2. Theme Scaffold Creation
+- Creates WordPress theme directory structure
+- Generates style.css with theme header
+- Creates functions.php with theme setup
+- Generates inc/render.php with helper functions
+- Creates required index.php template
+
+### 3. theme.json Generation
+- Maps design tokens to WordPress theme.json v2
+- Color palette from color tokens
+- Typography settings from font tokens
+- Button styles from component tokens
+- Graceful handling of missing values
+
+### 4. Block Template Generation
+- Converts each PageSpec to a block template
+- Uses WordPress core blocks (group, heading, paragraph, image, buttons)
+- Smart PHP fallback for complex sections in hybrid mode
+- Deterministic template naming: `page-{slug}.html`
+
+### 5. PHP Section Generation
+- Creates PHP partial templates for 11 section types
+- Each template receives section data and renders it
+- Uses WordPress escaping functions (esc_html, esc_url, esc_attr)
+- Supports hybrid rendering (called from block templates)
+
+### 6. Block Pattern Generation
+- Converts layout patterns to WordPress block patterns
+- Auto-generates titles and descriptions
+- Proper WordPress pattern PHP file format
+- Categories: hero, content, layout, call-to-action
+
+### 7. Asset Management
+- Copies assets from crawler output to theme
+- Generates asset-map.json for URL resolution
+- Hash-based deduplication
+- resolve_asset_url() helper function
+
+### 8. Report Generation
+- generation.json with full metadata
+- page-mapping.json with slug → template mapping
+- generate-summary.json with statistics
+- Timestamped reports in docs/REPORTS/
 
 ## 🔧 Technologies
 
 - **TypeScript**: Type-safe development
 - **Node.js**: Runtime environment
-- **Handlebars/EJS**: Template engine
-- **Sharp**: Image optimization
-- **PostCSS**: CSS processing
+- **fs/path**: File operations
+- **WordPress Standards**: Core blocks, theme.json v2, proper escaping
 
 ## 📝 Development Status
 
-**Status**: Structure only - no implementation yet
+**Status**: ✅ Complete (2026-01-28)
 
-**Next Steps**:
+**Features**:
+- [x] CLI command
+- [x] Three rendering modes (block, php, hybrid)
+- [x] Complete theme scaffold
+- [x] Block templates
+- [x] PHP section partials (11 types)
+- [x] Block patterns
+- [x] theme.json generation
+- [x] Asset management
+- [x] Comprehensive reporting
+- [x] Schema validation
+- [x] Unit tests
+- [x] Documentation
 
-1. Install dependencies
-2. Create template files
-3. Implement theme structure generator
-4. Add style conversion logic
-5. Implement asset optimization
-6. Create functions.php builder
-7. Add theme metadata generation
-8. Implement packaging system
+## 🧪 Testing
+
+```bash
+# Run all tests (includes theme-generator tests)
+npm run test
+
+# Run specific test file
+npm run test theme-generator/src/__tests__/generator-modules.test.ts
+```
+
+**Test Coverage**: 6 test suites, all passing
+
+## 📚 Documentation
+
+- [README.md](../../README.md) - Main project README with Phase 4 section
+- [RUNBOOK.md](../../RUNBOOK.md) - Operational guide with troubleshooting
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Technical architecture
+- [docs/DECISIONS.md](../../docs/DECISIONS.md) - Design decisions
+- [PHASE4-SUMMARY.md](../../PHASE4-SUMMARY.md) - Phase 4 completion summary
+
+## 🎓 Examples
+
+### Example 1: Basic Theme Generation
+
+```bash
+npm run generate -- --baseUrl https://example.com
+```
+
+Generates a hybrid theme with default settings in `theme/output/wix2wp/`
+
+### Example 2: Block-Only Theme
+
+```bash
+npm run generate -- \
+  --baseUrl https://example.com \
+  --mode block \
+  --themeName my-block-theme
+```
+
+Generates a fully block-based theme (maximum editability)
+
+### Example 3: PHP-Only Theme
+
+```bash
+npm run generate -- \
+  --baseUrl https://example.com \
+  --mode php \
+  --themeName pixel-perfect
+```
+
+Generates a PHP-based theme (maximum fidelity)
+
+### Example 4: Custom Configuration
+
+```bash
+npm run generate -- \
+  --baseUrl https://example.com \
+  --inDir ./custom-spec \
+  --outDir ./custom-output \
+  --themeName branded-theme \
+  --mode hybrid \
+  --emitPatterns true \
+  --emitThemeJson true \
+  --verbose
+```
+
+Full control over all options with verbose logging
+
+## 🤝 Contributing
+
+This module follows the project's TypeScript and WordPress coding standards. All changes should:
+- Pass TypeScript strict mode compilation
+- Pass ESLint checks
+- Include appropriate tests
+- Update documentation
+- Follow WordPress best practices
+
+## 🔗 Related Modules
+
+- **crawler** (Phase 1 & 2): URL discovery and page crawling
+- **spec** (Phase 3): PageSpec and design token extraction
+- **tests** (Phase 5): Visual regression and validation (coming soon)
+
