@@ -1006,3 +1006,67 @@ pages/<slug>/
 - Phase 6: Visual diff testing tools and thresholds
 - Storage strategy for large asset collections
 - Caching strategy for incremental crawls
+
+## Phase 4: Theme Generation
+
+### Decision: Full WordPress Theme Compliance with Required Files and Hooks
+
+**Date**: 2026-01-28
+
+**Context**: Generated WordPress themes must be fully functional and compliant with WordPress standards to activate cleanly and render pages without errors.
+
+**Decision**: Ensure all generated themes include:
+- Required files: `style.css`, `index.php`, `functions.php`, `header.php`, `footer.php`
+- Proper WordPress hooks: `wp_head()` in header, `wp_footer()` in footer
+- Theme support for core features: `title-tag`, `post-thumbnails`, `menus`
+- WordPress Loop in templates with fallback content
+- PHP function name sanitization (replace hyphens with underscores)
+- Automated validation using `php -l` and structural checks
+
+**Rationale**:
+
+- **WordPress compliance** - Themes must follow WordPress standards to be recognized and activated
+- **Prevent fatal errors** - Proper hooks ensure plugins and WordPress core can inject necessary scripts and styles
+- **Fallback content** - WordPress Loop provides safe rendering when PageSpec sections are missing
+- **Function naming** - PHP function names cannot contain hyphens; sanitization prevents syntax errors
+- **Quality assurance** - Automated validation catches issues before deployment
+
+**Implementation**:
+
+1. **header.php**: Contains `<!DOCTYPE html>`, `<head>` with `wp_head()`, site branding, and navigation menu
+2. **footer.php**: Contains site footer and `wp_footer()` before closing body tag
+3. **index.php**: Uses WordPress Loop with `get_header()` and `get_footer()`, provides fallback for missing content
+4. **functions.php**: 
+   - Wrapped all functions with `function_exists()` checks
+   - Added theme support declarations
+   - Registered navigation menus
+   - Enqueued main stylesheet with `wp_enqueue_style()`
+   - Sanitized function names (e.g., `test-theme` → `test_theme`)
+5. **Block templates**: All modes (block, hybrid, php) now include `get_header()` and `get_footer()` with Loop fallback
+6. **Validation**: Added automated checks for required files, PHP syntax, and WordPress hooks
+
+**Trade-offs**:
+
+- **More boilerplate** - Generated themes now include standard WordPress template files
+- **Increased file count** - Each theme has more files (header, footer, etc.)
+- **Dependency on WordPress functions** - Themes require WordPress environment to function
+
+**Alternatives Considered**:
+
+1. **Minimal theme (style.css + index.php only)**: Would activate but provide poor user experience
+2. **Block theme only (no PHP templates)**: More modern but less compatible with complex layouts
+3. **Manual validation**: Less reliable and not repeatable
+
+**Testing**:
+
+- Created comprehensive test suite (12 tests) covering:
+  - Required file presence
+  - WordPress hooks in correct locations
+  - Theme support declarations
+  - Navigation menu registration
+  - Function existence checks
+  - PHP syntax validation
+  - WordPress Loop implementation
+
+**Result**: Generated themes now activate cleanly in WordPress, render pages without fatal errors, and pass all compliance tests.
+

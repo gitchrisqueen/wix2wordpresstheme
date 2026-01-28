@@ -72,6 +72,12 @@ function generateFullBlockTemplate(
 ): string {
   const blocks: string[] = [];
 
+  // Add header
+  blocks.push('<!-- wp:html -->');
+  blocks.push('<?php get_header(); ?>');
+  blocks.push('<!-- /wp:html -->');
+  blocks.push('');
+
   for (const section of pageSpec.sections) {
     const blockContent = sectionToBlocks(section, assetMap, logger);
     if (blockContent) {
@@ -79,7 +85,27 @@ function generateFullBlockTemplate(
     }
   }
 
-  return blocks.join('\n\n');
+  // Add fallback for empty sections
+  if (pageSpec.sections.length === 0) {
+    blocks.push('<!-- wp:html -->');
+    blocks.push('<?php');
+    blocks.push('if ( have_posts() ) {');
+    blocks.push('  while ( have_posts() ) {');
+    blocks.push('    the_post();');
+    blocks.push('    the_content();');
+    blocks.push('  }');
+    blocks.push('}');
+    blocks.push('?>');
+    blocks.push('<!-- /wp:html -->');
+  }
+
+  // Add footer
+  blocks.push('');
+  blocks.push('<!-- wp:html -->');
+  blocks.push('<?php get_footer(); ?>');
+  blocks.push('<!-- /wp:html -->');
+
+  return blocks.join('\n');
 }
 
 /**
@@ -91,6 +117,12 @@ function generateHybridBlockTemplate(
   logger: Logger
 ): string {
   const blocks: string[] = [];
+
+  // Add header
+  blocks.push('<!-- wp:html -->');
+  blocks.push('<?php get_header(); ?>');
+  blocks.push('<!-- /wp:html -->');
+  blocks.push('');
 
   for (const section of pageSpec.sections) {
     if (isSimpleSection(section)) {
@@ -106,7 +138,27 @@ function generateHybridBlockTemplate(
     }
   }
 
-  return blocks.join('\n\n');
+  // Add fallback for empty sections
+  if (pageSpec.sections.length === 0) {
+    blocks.push('<!-- wp:html -->');
+    blocks.push('<?php');
+    blocks.push('if ( have_posts() ) {');
+    blocks.push('  while ( have_posts() ) {');
+    blocks.push('    the_post();');
+    blocks.push('    the_content();');
+    blocks.push('  }');
+    blocks.push('}');
+    blocks.push('?>');
+    blocks.push('<!-- /wp:html -->');
+  }
+
+  // Add footer
+  blocks.push('');
+  blocks.push('<!-- wp:html -->');
+  blocks.push('<?php get_footer(); ?>');
+  blocks.push('<!-- /wp:html -->');
+
+  return blocks.join('\n');
 }
 
 /**
@@ -119,15 +171,31 @@ function generatePHPBlockTemplate(pageSpec: PageSpec, _logger: Logger): string {
  * Template: ${pageSpec.slug}
  */
 get_header();
+?>
+<!-- /wp:html -->
 
+<!-- wp:html -->
+<?php
 // Render sections for this page
 $sections = get_page_sections('${pageSpec.slug}');
 if ($sections) {
   foreach ($sections as $section) {
     render_section($section['id'], $section);
   }
+} else {
+  // Fallback to WordPress Loop if no sections found
+  if ( have_posts() ) {
+    while ( have_posts() ) {
+      the_post();
+      the_content();
+    }
+  }
 }
+?>
+<!-- /wp:html -->
 
+<!-- wp:html -->
+<?php
 get_footer();
 ?>
 <!-- /wp:html -->`;

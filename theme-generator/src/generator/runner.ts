@@ -20,6 +20,7 @@ import { generatePHPSections } from './phpSections.js';
 import { generateBlockPatterns } from './patterns.js';
 import { copyAssets, generateAssetMap } from './assets.js';
 import { generateReports } from './reports.js';
+import { validateTheme } from './validator.js';
 
 interface Manifest {
   baseUrl: string;
@@ -153,6 +154,25 @@ export async function runGenerator(options: GeneratorOptions, logger: Logger): P
   // Generate reports
   logger.info('Generating reports...');
   await generateReports(options, themeDir, pageMappings, metadata, pageSpecs, logger);
+
+  // Validate generated theme
+  logger.info('Validating generated theme...');
+  const validationResult = await validateTheme(themeDir, logger);
+  
+  if (!validationResult.valid) {
+    const errorMsg = `Theme validation failed with ${validationResult.errors.length} error(s)`;
+    logger.error(errorMsg);
+    for (const error of validationResult.errors) {
+      logger.error(`  - ${error}`);
+    }
+    throw new Error(errorMsg);
+  }
+  
+  if (validationResult.warnings.length > 0) {
+    for (const warning of validationResult.warnings) {
+      logger.warn(`  - ${warning}`);
+    }
+  }
 
   logger.info('Theme generation complete');
 }
