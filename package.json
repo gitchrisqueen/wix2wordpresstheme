@@ -60,6 +60,8 @@
     "@playwright/test": "^1.58.0",
     "@types/css-tree": "^2.3.11",
     "@types/node": "^20.11.5",
+    "@types/pixelmatch": "^5.2.6",
+    "@types/pngjs": "^6.0.5",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
     "@vitest/coverage-v8": "^4.0.18",
@@ -79,6 +81,8 @@
     "commander": "^11.1.0",
     "css-tree": "^3.1.0",
     "fast-xml-parser": "^4.3.3",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0",
     "robots-parser": "^3.0.1",
     "zod": "^3.22.4"
   },
