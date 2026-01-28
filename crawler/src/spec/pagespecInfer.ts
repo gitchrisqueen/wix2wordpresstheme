@@ -128,13 +128,26 @@ function extractForms(html: string): Form[] {
     $form.find('input, textarea, select').each((_, inputElem) => {
       const $input = $(inputElem);
       const type = $input.attr('type') || $input.prop('tagName')?.toLowerCase() || 'text';
+      
+      // Skip submit and button types
+      if (type === 'submit' || type === 'button') {
+        return;
+      }
+      
       const label = $input.attr('placeholder') || $input.attr('aria-label') || null;
       const required = $input.attr('required') !== undefined;
 
       fields.push({ label, type, required });
     });
 
-    forms.push({ name, fields });
+    // Extract submit button text
+    let submitText: string | null = null;
+    const $submit = $form.find('button[type="submit"], input[type="submit"]').first();
+    if ($submit.length > 0) {
+      submitText = $submit.text() || $submit.attr('value') || null;
+    }
+
+    forms.push({ name, fields, submitText });
   });
 
   return forms;
@@ -152,7 +165,7 @@ export function inferPageSpec(inputs: PageInputs): PageSpec {
   const templateHint = inferTemplateHint(slug, html);
 
   // Sectionize HTML
-  const sections = sectionizeHtml(html);
+  const sections = sectionizeHtml(html, baseUrl);
 
   if (sections.length === 0) {
     notes.push('Warning: No sections could be extracted from the page');
