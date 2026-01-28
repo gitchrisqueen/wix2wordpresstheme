@@ -85,10 +85,12 @@ The generator creates a complete WordPress theme:
 
 ```
 output/<themeName>/
-├── style.css                     # Theme header + base styles
+├── style.css                     # Theme header + base styles (WordPress compliant)
 ├── functions.php                 # Theme setup, hooks, pattern registration
+├── header.php                    # Header template with wp_head()
+├── footer.php                    # Footer template with wp_footer()
 ├── theme.json                    # Block editor configuration
-├── index.php                     # Required WordPress template
+├── index.php                     # Required WordPress template with Loop
 ├── block-templates/
 │   ├── page-home.html           # Block template for home page
 │   └── page-*.html              # Block templates for other pages
@@ -167,10 +169,19 @@ Plus summary files:
 - generate-summary.json with statistics
 - Timestamped reports in docs/REPORTS/
 
+### 9. Theme Validation
+- Checks for all required WordPress theme files
+- Validates PHP syntax using `php -l` (if PHP available)
+- Verifies presence of required WordPress hooks (wp_head, wp_footer)
+- Validates theme support declarations
+- Reports errors and warnings
+- Automated compliance testing
+
 ## 🔧 Technologies
 
 - **TypeScript**: Type-safe development
 - **Node.js**: Runtime environment
+- **PHP Validation**: Syntax checking with php -l
 - **fs/path**: File operations
 - **WordPress Standards**: Core blocks, theme.json v2, proper escaping
 
@@ -181,16 +192,27 @@ Plus summary files:
 **Features**:
 - [x] CLI command
 - [x] Three rendering modes (block, php, hybrid)
-- [x] Complete theme scaffold
-- [x] Block templates
+- [x] Complete theme scaffold with WordPress compliance
+- [x] Block templates with WordPress Loop fallbacks
 - [x] PHP section partials (11 types)
 - [x] Block patterns
 - [x] theme.json generation
 - [x] Asset management
 - [x] Comprehensive reporting
 - [x] Schema validation
+- [x] PHP syntax validation
+- [x] WordPress compliance tests
 - [x] Unit tests
 - [x] Documentation
+
+**WordPress Compliance**:
+- [x] Required files: style.css, index.php, functions.php, header.php, footer.php
+- [x] WordPress hooks: wp_head(), wp_footer()
+- [x] Theme support: title-tag, post-thumbnails, menus
+- [x] Navigation menu registration
+- [x] WordPress Loop with fallback content
+- [x] Function name sanitization
+- [x] Automated validation
 
 ## 🧪 Testing
 
@@ -200,9 +222,14 @@ npm run test
 
 # Run specific test file
 npm run test theme-generator/src/__tests__/generator-modules.test.ts
+
+# Run WordPress compliance tests
+npm run test theme-generator/src/__tests__/theme-compliance.test.ts
 ```
 
-**Test Coverage**: 6 test suites, all passing
+**Test Coverage**: 2 test suites (18 tests total), all passing
+- generator-modules.test.ts: 6 module export tests
+- theme-compliance.test.ts: 12 WordPress compliance tests
 
 ## 📚 Documentation
 
