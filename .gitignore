@@ -65,3 +65,4 @@ docs/REPORTS/*/
 tmp/
 temp/
 *.tmp
+test-e2e-output/

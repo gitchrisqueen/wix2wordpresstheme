@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "tsx scripts/test-theme-generation.ts",
     "dev": "npm run wp:up && npm run wp:provision && npm run wp:info",
     "build": "echo 'Build not implemented yet'",
     "crawl": "tsx crawler/src/cli/crawl.ts",
