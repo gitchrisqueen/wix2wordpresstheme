@@ -102,6 +102,14 @@ function formatThemeName(slug: string): string {
 }
 
 /**
+ * Sanitize theme name for use in PHP function names
+ * Replace hyphens and other invalid characters with underscores
+ */
+function sanitizeFunctionName(slug: string): string {
+  return slug.replace(/[^a-zA-Z0-9_]/g, '_');
+}
+
+/**
  * Create style.css with theme header
  */
 async function createStyleCSS(
@@ -161,6 +169,7 @@ async function createFunctionsPHP(
   themeName: string,
   logger: Logger
 ): Promise<void> {
+  const functionPrefix = sanitizeFunctionName(themeName);
   const content = `<?php
 /**
  * Theme functions and definitions
@@ -175,8 +184,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Theme setup
  */
-if ( ! function_exists( '${themeName}_setup' ) ) {
-  function ${themeName}_setup() {
+if ( ! function_exists( '${functionPrefix}_setup' ) ) {
+  function ${functionPrefix}_setup() {
     // Add theme support
     add_theme_support( 'title-tag' );
     add_theme_support( 'post-thumbnails' );
@@ -203,13 +212,13 @@ if ( ! function_exists( '${themeName}_setup' ) ) {
     }
   }
 }
-add_action( 'after_setup_theme', '${themeName}_setup' );
+add_action( 'after_setup_theme', '${functionPrefix}_setup' );
 
 /**
  * Enqueue scripts and styles
  */
-if ( ! function_exists( '${themeName}_scripts' ) ) {
-  function ${themeName}_scripts() {
+if ( ! function_exists( '${functionPrefix}_scripts' ) ) {
+  function ${functionPrefix}_scripts() {
     // Main stylesheet
     wp_enqueue_style( '${themeName}-style', get_stylesheet_uri(), array(), '1.0.0' );
     
@@ -219,7 +228,7 @@ if ( ! function_exists( '${themeName}_scripts' ) ) {
     }
   }
 }
-add_action( 'wp_enqueue_scripts', '${themeName}_scripts' );
+add_action( 'wp_enqueue_scripts', '${functionPrefix}_scripts' );
 
 /**
  * Include render helpers
@@ -229,8 +238,8 @@ require_once get_template_directory() . '/inc/render.php';
 /**
  * Register block patterns
  */
-if ( ! function_exists( '${themeName}_register_patterns' ) ) {
-  function ${themeName}_register_patterns() {
+if ( ! function_exists( '${functionPrefix}_register_patterns' ) ) {
+  function ${functionPrefix}_register_patterns() {
     $patterns_dir = get_template_directory() . '/patterns';
     
     if ( ! is_dir( $patterns_dir ) ) {
@@ -245,7 +254,7 @@ if ( ! function_exists( '${themeName}_register_patterns' ) ) {
     }
   }
 }
-add_action( 'init', '${themeName}_register_patterns' );
+add_action( 'init', '${functionPrefix}_register_patterns' );
 `;
 
   const path = join(themeDir, 'functions.php');
