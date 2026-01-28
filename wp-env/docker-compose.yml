@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  db:
+    image: mariadb:10.11
+    container_name: wix2wp-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-wordpress}
+      MYSQL_USER: ${MYSQL_USER:-wordpress}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - wix2wp-network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # WordPress
+  wordpress:
+    image: wordpress:latest
+    container_name: wix2wp-wordpress
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${WORDPRESS_PORT:-8080}:80"
+    environment:
+      WORDPRESS_DB_HOST: ${DB_HOST:-db}:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE:-wordpress}
+      WORDPRESS_DB_USER: ${MYSQL_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_DEBUG_LOG', true);
+        define('WP_DEBUG_DISPLAY', false);
+        define('SCRIPT_DEBUG', true);
+    volumes:
+      - wordpress-data:/var/www/html
+      # Mount generated themes - path is relative to docker-compose.yml location
+      - ../theme/output:/var/www/html/wp-content/themes/converted-themes:ro
+    networks:
+      - wix2wp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/wp-admin/install.php"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # WP-CLI Setup Service
+  setup:
+    image: wordpress:cli
+    container_name: wix2wp-setup
+    user: "33:33" # www-data user
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: ${DB_HOST:-db}:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE:-wordpress}
+      WORDPRESS_DB_USER: ${MYSQL_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
+      WP_URL: ${WP_URL:-http://localhost:8080}
+      WP_TITLE: ${WP_TITLE:-Wix Conversion Preview}
+      WP_ADMIN_USER: ${WP_ADMIN_USER:-admin}
+      WP_ADMIN_PASS: ${WP_ADMIN_PASS:-password}
+      WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL:-admin@example.com}
+      THEME_NAME: ${THEME_NAME:-wix2wp}
+      WP_SETUP_VERSION: ${WP_SETUP_VERSION:-1.0.0}
+    volumes:
+      - wordpress-data:/var/www/html
+      - ./scripts:/scripts:ro
+      - ./logs:/logs
+      - ../theme/output:/theme-output:ro
+      - ../crawler/output:/crawler-output:ro
+    networks:
+      - wix2wp-network
+    entrypoint: ["/bin/sh", "/scripts/provision.sh"]
+    restart: "no"
+
+  # PHPMyAdmin (optional, for database management)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: wix2wp-phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "${PHPMYADMIN_PORT:-8081}:80"
+    environment:
+      PMA_HOST: ${DB_HOST:-db}
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+    networks:
+      - wix2wp-network
+
+networks:
+  wix2wp-network:
+    driver: bridge
+
+volumes:
+  db-data:
+  wordpress-data:
