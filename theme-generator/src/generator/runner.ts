@@ -160,10 +160,12 @@ export async function runGenerator(options: GeneratorOptions, logger: Logger): P
   const validationResult = await validateTheme(themeDir, logger);
   
   if (!validationResult.valid) {
-    logger.error('Theme validation failed!');
+    const errorMsg = `Theme validation failed with ${validationResult.errors.length} error(s)`;
+    logger.error(errorMsg);
     for (const error of validationResult.errors) {
       logger.error(`  - ${error}`);
     }
+    throw new Error(errorMsg);
   }
   
   if (validationResult.warnings.length > 0) {

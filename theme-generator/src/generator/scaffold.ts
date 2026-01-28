@@ -497,7 +497,7 @@ async function createHeaderPHP(
         $description = get_bloginfo( 'description', 'display' );
         if ( $description || is_customize_preview() ) :
           ?>
-          <p class="site-description"><?php echo $description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+          <p class="site-description"><?php echo esc_html( $description ); ?></p>
           <?php
         endif;
       endif;
@@ -543,10 +543,12 @@ async function createFooterPHP(themeDir: string, logger: Logger): Promise<void> 
 
   <footer id="colophon" class="site-footer">
     <div class="site-info">
-      <?php
-      /* translators: %s: WordPress */
-      printf( esc_html__( 'Powered by %s', 'wix2wp' ), '<a href="https://wordpress.org/">WordPress</a>' );
-      ?>
+      <a href="<?php echo esc_url( __( 'https://wordpress.org/', 'wix2wp' ) ); ?>">
+        <?php
+        /* translators: %s: CMS name, i.e. WordPress. */
+        printf( esc_html__( 'Proudly powered by %s', 'wix2wp' ), 'WordPress' );
+        ?>
+      </a>
       <span class="sep"> | </span>
       <?php
       /* translators: %s: Theme name */

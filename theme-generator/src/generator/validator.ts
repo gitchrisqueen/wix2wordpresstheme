@@ -4,7 +4,7 @@
  * Validates generated WordPress themes for compliance
  */
 
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
@@ -132,8 +132,7 @@ async function validateRequiredHooks(
   // Check header.php for wp_head()
   const headerPath = join(themeDir, 'header.php');
   if (existsSync(headerPath)) {
-    const { default: fs } = await import('fs');
-    const headerContent = fs.readFileSync(headerPath, 'utf-8');
+    const headerContent = readFileSync(headerPath, 'utf-8');
     if (!headerContent.includes('wp_head()')) {
       result.errors.push('header.php is missing wp_head() hook');
       logger.error('header.php is missing wp_head() hook');
@@ -145,8 +144,7 @@ async function validateRequiredHooks(
   // Check footer.php for wp_footer()
   const footerPath = join(themeDir, 'footer.php');
   if (existsSync(footerPath)) {
-    const { default: fs } = await import('fs');
-    const footerContent = fs.readFileSync(footerPath, 'utf-8');
+    const footerContent = readFileSync(footerPath, 'utf-8');
     if (!footerContent.includes('wp_footer()')) {
       result.errors.push('footer.php is missing wp_footer() hook');
       logger.error('footer.php is missing wp_footer() hook');
@@ -158,13 +156,16 @@ async function validateRequiredHooks(
   // Check functions.php for theme support
   const functionsPath = join(themeDir, 'functions.php');
   if (existsSync(functionsPath)) {
-    const { default: fs } = await import('fs');
-    const functionsContent = fs.readFileSync(functionsPath, 'utf-8');
+    const functionsContent = readFileSync(functionsPath, 'utf-8');
 
     const requiredSupport = ['title-tag', 'post-thumbnails', 'menus'];
 
     for (const support of requiredSupport) {
-      if (!functionsContent.includes(`'${support}'`)) {
+      // Check for both single and double quotes
+      if (
+        !functionsContent.includes(`'${support}'`) &&
+        !functionsContent.includes(`"${support}"`)
+      ) {
         result.warnings.push(`functions.php may be missing theme support for: ${support}`);
         logger.warn(`functions.php may be missing theme support for: ${support}`);
       } else {
