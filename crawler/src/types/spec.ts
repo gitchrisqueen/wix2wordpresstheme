@@ -17,6 +17,8 @@ export const SectionTypeSchema = z.enum([
   'contactForm',
   'richText',
   'footer',
+  'grid',
+  'list',
   'unknown',
 ]);
 
@@ -60,19 +62,6 @@ export const DomAnchorSchema = z.object({
 
 export type DomAnchor = z.infer<typeof DomAnchorSchema>;
 
-// Section
-export const SectionSchema = z.object({
-  id: z.string(),
-  type: SectionTypeSchema,
-  heading: z.string().nullable().optional(),
-  textBlocks: z.array(z.string()).optional().default([]),
-  ctas: z.array(CtaSchema).optional().default([]),
-  media: z.array(MediaSchema).optional().default([]),
-  domAnchor: DomAnchorSchema.optional(),
-});
-
-export type Section = z.infer<typeof SectionSchema>;
-
 // Form field
 export const FormFieldSchema = z.object({
   label: z.string().nullable().optional(),
@@ -86,9 +75,41 @@ export type FormField = z.infer<typeof FormFieldSchema>;
 export const FormSchema = z.object({
   name: z.string().nullable().optional(),
   fields: z.array(FormFieldSchema).optional().default([]),
+  submitText: z.string().nullable().optional(),
 });
 
 export type Form = z.infer<typeof FormSchema>;
+
+// Style hints for sections
+export const StyleHintsSchema = z.object({
+  backgroundColor: z.string().nullable().optional(),
+  layout: z.enum(['fullWidth', 'contained']).nullable().optional(),
+});
+
+export type StyleHints = z.infer<typeof StyleHintsSchema>;
+
+// Section
+export const SectionSchema = z.object({
+  id: z.string(),
+  type: SectionTypeSchema,
+  heading: z.string().nullable().optional(),
+  textBlocks: z.array(z.string()).optional().default([]),
+  ctas: z.array(CtaSchema).optional().default([]),
+  media: z.array(MediaSchema).optional().default([]),
+  domAnchor: DomAnchorSchema.optional(),
+  forms: z.array(FormSchema).optional().default([]),
+  links: z
+    .object({
+      internal: z.number().int().min(0).optional().default(0),
+      external: z.number().int().min(0).optional().default(0),
+    })
+    .optional(),
+  notes: z.array(z.string()).optional().default([]),
+  styleHints: StyleHintsSchema.optional(),
+  structuralHash: z.string().optional(),
+});
+
+export type Section = z.infer<typeof SectionSchema>;
 
 // Meta
 export const MetaSchema = z.object({

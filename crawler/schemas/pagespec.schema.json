@@ -148,6 +148,8 @@
             "contactForm",
             "richText",
             "footer",
+            "grid",
+            "list",
             "unknown"
           ],
           "description": "Section type"
@@ -192,6 +194,55 @@
             }
           },
           "description": "DOM reference for this section"
+        },
+        "forms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/form"
+          },
+          "description": "Forms in this section"
+        },
+        "links": {
+          "type": "object",
+          "properties": {
+            "internal": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of internal links"
+            },
+            "external": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of external links"
+            }
+          },
+          "description": "Link counts in this section"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Classification notes and warnings"
+        },
+        "styleHints": {
+          "type": "object",
+          "properties": {
+            "backgroundColor": {
+              "type": ["string", "null"],
+              "description": "Background color hint"
+            },
+            "layout": {
+              "type": ["string", "null"],
+              "enum": ["fullWidth", "contained", null],
+              "description": "Layout width hint"
+            }
+          },
+          "description": "Style hints for theme generation"
+        },
+        "structuralHash": {
+          "type": "string",
+          "description": "Hash of structural signature for matching"
         }
       }
     },
@@ -246,6 +297,10 @@
             "$ref": "#/definitions/formField"
           },
           "description": "Form fields"
+        },
+        "submitText": {
+          "type": ["string", "null"],
+          "description": "Submit button text"
         }
       }
     },

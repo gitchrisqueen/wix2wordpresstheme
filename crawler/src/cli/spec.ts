@@ -20,6 +20,7 @@ program
   .option('--outDir <dir>', 'Output directory for spec files', 'crawler/output')
   .option('--strategy <strategy>', 'Inference strategy (heuristic)', 'heuristic')
   .option('--maxPages <number>', 'Maximum number of pages to process', (val) => parseInt(val, 10))
+  .option('--debugSpec', 'Enable debug spec artifacts generation', false)
   .option('--verbose', 'Enable verbose debug logging', false)
   .parse();
 
@@ -43,6 +44,7 @@ const config: SpecConfig = {
   outDir: resolve(options.outDir),
   maxPages: options.maxPages || null,
   strategy: 'heuristic',
+  debugSpec: options.debugSpec || false,
 };
 
 // Create logger

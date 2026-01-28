@@ -5,7 +5,7 @@
  */
 
 import type { PageSpec, TemplateHint, Form, FormField, Links } from '../types/spec.js';
-import { sectionizeHtml } from './sectionizer.js';
+import { sectionizeHtml, sectionizeHtmlWithDebug, type SectionizeDebugData } from './sectionizer.js';
 import * as cheerio from 'cheerio';
 import { isInternalUrl } from '../lib/url.js';
 
@@ -26,6 +26,7 @@ interface PageInputs {
       type?: string | null;
     };
   };
+  debug?: boolean;
 }
 
 /**
@@ -128,13 +129,26 @@ function extractForms(html: string): Form[] {
     $form.find('input, textarea, select').each((_, inputElem) => {
       const $input = $(inputElem);
       const type = $input.attr('type') || $input.prop('tagName')?.toLowerCase() || 'text';
+      
+      // Skip submit and button types
+      if (type === 'submit' || type === 'button') {
+        return;
+      }
+      
       const label = $input.attr('placeholder') || $input.attr('aria-label') || null;
       const required = $input.attr('required') !== undefined;
 
       fields.push({ label, type, required });
     });
 
-    forms.push({ name, fields });
+    // Extract submit button text
+    let submitText: string | null = null;
+    const $submit = $form.find('button[type="submit"], input[type="submit"]').first();
+    if ($submit.length > 0) {
+      submitText = $submit.text() || $submit.attr('value') || null;
+    }
+
+    forms.push({ name, fields, submitText });
   });
 
   return forms;
@@ -143,8 +157,10 @@ function extractForms(html: string): Form[] {
 /**
  * Generate PageSpec from inputs
  */
-export function inferPageSpec(inputs: PageInputs): PageSpec {
-  const { url, slug, baseUrl, html, meta } = inputs;
+export function inferPageSpec(
+  inputs: PageInputs
+): { pageSpec: PageSpec; debugData?: SectionizeDebugData } {
+  const { url, slug, baseUrl, html, meta, debug } = inputs;
 
   const notes: string[] = [];
 
@@ -152,7 +168,16 @@ export function inferPageSpec(inputs: PageInputs): PageSpec {
   const templateHint = inferTemplateHint(slug, html);
 
   // Sectionize HTML
-  const sections = sectionizeHtml(html);
+  let sections;
+  let debugData: SectionizeDebugData | undefined;
+
+  if (debug) {
+    const result = sectionizeHtmlWithDebug(html, baseUrl);
+    sections = result.sections;
+    debugData = result.debug;
+  } else {
+    sections = sectionizeHtml(html, baseUrl);
+  }
 
   if (sections.length === 0) {
     notes.push('Warning: No sections could be extracted from the page');
@@ -172,7 +197,7 @@ export function inferPageSpec(inputs: PageInputs): PageSpec {
     og: meta.og,
   };
 
-  return {
+  const pageSpec: PageSpec = {
     version: '1.0.0',
     baseUrl,
     url,
@@ -184,4 +209,6 @@ export function inferPageSpec(inputs: PageInputs): PageSpec {
     forms,
     notes,
   };
+
+  return { pageSpec, debugData };
 }
