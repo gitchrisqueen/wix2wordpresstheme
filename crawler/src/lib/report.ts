@@ -155,6 +155,51 @@ ${errors.length > 0 ? `## Errors (${errors.length})\n${errors.map((e) => `- ${e.
 
     await writeFile(logsPath, JSON.stringify(logs, null, 2));
   }
+
+  /**
+   * Generate summary markdown for spec generation
+   */
+  async generateSummaryMarkdown(
+    reportDir: string,
+    specStats: {
+      command: string;
+      pagesProcessed: number;
+      pagesSucceeded: number;
+      totalSections: number;
+      totalPatterns: number;
+    }
+  ): Promise<void> {
+    const logs = this.logger.getLogs();
+    const warnings = logs.filter((log) => log.level === 'WARN');
+    const errors = logs.filter((log) => log.level === 'ERROR');
+
+    const summary = `# Spec Generation Summary
+
+## Run Information
+- **Command**: \`${specStats.command}\`
+- **Start Time**: ${this.startTime.toISOString()}
+- **End Time**: ${(this.endTime || new Date()).toISOString()}
+- **Duration**: ${(this.getDuration() / 1000).toFixed(2)}s
+
+## Statistics
+- **Pages Processed**: ${specStats.pagesProcessed}
+- **Pages Succeeded**: ${specStats.pagesSucceeded}
+- **Total Sections**: ${specStats.totalSections}
+- **Total Patterns**: ${specStats.totalPatterns}
+
+## Status
+${errors.length > 0 ? '❌ **Completed with errors**' : warnings.length > 0 ? '⚠️ **Completed with warnings**' : '✅ **Completed successfully**'}
+
+${warnings.length > 0 ? `## Warnings (${warnings.length})\n${warnings.map((w) => `- ${w.message}`).join('\n')}` : ''}
+
+${errors.length > 0 ? `## Errors (${errors.length})\n${errors.map((e) => `- ${e.message}`).join('\n')}` : ''}
+`;
+
+    const summaryPath = join(reportDir, 'summary.md');
+    await writeFile(summaryPath, summary);
+
+    this.logger.info(`Summary report written to: ${summaryPath}`);
+  }
 }
 
 /**

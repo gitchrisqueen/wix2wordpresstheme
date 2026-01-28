@@ -6,11 +6,7 @@ import { describe, it, expect } from 'vitest';
 
 // Mock the normalizeCrawlConfig function for testing
 // This would ideally be exported from crawl.ts
-function normalizeCrawlConfig(
-  cliOptions: any,
-  manifest: any,
-  defaults: any
-): any {
+function normalizeCrawlConfig(cliOptions: any, manifest: any, defaults: any): any {
   // Helper to get value: CLI override > manifest value > default
   // null/undefined CLI values don't override real values
   const getValue = (cliVal: any, manifestVal: any, defaultVal: any) => {
@@ -36,7 +32,7 @@ function normalizeCrawlConfig(
     concurrency: getValue(cliOptions.concurrency, null, defaults.concurrency || 3),
     timeoutMs: getValue(cliOptions.timeoutMs, null, defaults.timeoutMs || 45000),
     retries: getValue(cliOptions.retries, null, defaults.retries || 2),
-    waitUntil: (cliOptions.waitUntil || defaults.waitUntil || 'networkidle'),
+    waitUntil: cliOptions.waitUntil || defaults.waitUntil || 'networkidle',
     settleMs: getValue(cliOptions.settleMs, null, defaults.settleMs || 750),
     breakpoints,
     downloadAssets: getValue(cliOptions.downloadAssets, null, defaults.downloadAssets ?? true),
@@ -53,9 +49,30 @@ function normalizeCrawlConfig(
 describe('crawl config normalization', () => {
   const mockManifest = {
     pages: [
-      { url: 'https://example.com', path: '/', canonical: 'https://example.com', status: 200, depth: 0, source: 'sitemap' as const },
-      { url: 'https://example.com/about', path: '/about', canonical: 'https://example.com/about', status: 200, depth: 1, source: 'sitemap' as const },
-      { url: 'https://example.com/contact', path: '/contact', canonical: 'https://example.com/contact', status: 200, depth: 1, source: 'sitemap' as const },
+      {
+        url: 'https://example.com',
+        path: '/',
+        canonical: 'https://example.com',
+        status: 200,
+        depth: 0,
+        source: 'sitemap' as const,
+      },
+      {
+        url: 'https://example.com/about',
+        path: '/about',
+        canonical: 'https://example.com/about',
+        status: 200,
+        depth: 1,
+        source: 'sitemap' as const,
+      },
+      {
+        url: 'https://example.com/contact',
+        path: '/contact',
+        canonical: 'https://example.com/contact',
+        status: 200,
+        depth: 1,
+        source: 'sitemap' as const,
+      },
     ],
     discovery: {
       respectRobots: true,

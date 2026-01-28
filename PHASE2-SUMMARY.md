@@ -7,6 +7,7 @@
 ## Overview
 
 Phase 2 implements comprehensive page crawling using Playwright to capture:
+
 - Full-page screenshots (desktop and mobile viewports)
 - Rendered HTML and structured DOM snapshots
 - Page metadata (title, meta tags, Open Graph, headings)
@@ -77,7 +78,7 @@ Phase 2 implements comprehensive page crawling using Playwright to capture:
 
 - **Unit tests**: 107 tests passing
   - Hash utilities (8 tests)
-  - Slug generation (11 tests)  
+  - Slug generation (11 tests)
   - DOM validation (9 tests)
   - Metadata extraction (8 tests)
   - Asset parsing (11 tests)
@@ -228,8 +229,9 @@ All documentation updated:
 ## Files Changed/Added
 
 **New files**: 22
+
 - 6 core crawl modules
-- 3 utility libraries  
+- 3 utility libraries
 - 1 CLI command
 - 4 JSON schemas
 - 1 types file
@@ -237,6 +239,7 @@ All documentation updated:
 - 2 fixture HTML files
 
 **Modified files**: 7
+
 - package.json (dependencies, scripts)
 - README.md (Phase 2 section)
 - RUNBOOK.md (crawl procedures)

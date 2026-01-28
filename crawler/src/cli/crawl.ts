@@ -78,9 +78,7 @@ program
   .option('--concurrency <number>', 'Number of concurrent page captures', (val) =>
     parseInt(val, 10)
   )
-  .option('--timeoutMs <number>', 'Page load timeout in milliseconds', (val) =>
-    parseInt(val, 10)
-  )
+  .option('--timeoutMs <number>', 'Page load timeout in milliseconds', (val) => parseInt(val, 10))
   .option('--retries <number>', 'Number of retries per page', (val) => parseInt(val, 10))
   .option(
     '--waitUntil <strategy>',

@@ -1,6 +1,6 @@
 /**
  * Integration test for page.evaluate() calls
- * 
+ *
  * This test ensures that all page.evaluate() calls in our codebase
  * serialize properly without TypeScript helpers like __name.
  */
@@ -13,11 +13,12 @@ describe('Playwright page.evaluate integration', () => {
   let page: Page;
 
   // Skip if Playwright browsers aren't installed
-  const skipIfNoBrowser = process.env.CI === 'true' || !process.env.PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD;
+  const skipIfNoBrowser =
+    process.env.CI === 'true' || !process.env.PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD;
 
   beforeAll(async () => {
     if (skipIfNoBrowser) return;
-    
+
     try {
       browser = await chromium.launch({ headless: true });
       page = await browser.newPage();
@@ -52,25 +53,30 @@ describe('Playwright page.evaluate integration', () => {
     expect(result).toBe(20);
   });
 
-  it.skipIf(skipIfNoBrowser)('should handle DOM traversal without optional chaining issues', async () => {
-    const result = await page.evaluate(() => {
-      const h1 = document.querySelector('h1');
-      const text = h1 ? h1.textContent : null;
-      return text ? text.trim() : '';
-    });
-    expect(result).toBe('Test');
-  });
+  it.skipIf(skipIfNoBrowser)(
+    'should handle DOM traversal without optional chaining issues',
+    async () => {
+      const result = await page.evaluate(() => {
+        const h1 = document.querySelector('h1');
+        const text = h1 ? h1.textContent : null;
+        return text ? text.trim() : '';
+      });
+      expect(result).toBe('Test');
+    }
+  );
 
   it.skipIf(skipIfNoBrowser)('should handle Array.from and map without type errors', async () => {
     await page.setContent('<html><body><h1>One</h1><h1>Two</h1></body></html>');
-    
+
     const result = await page.evaluate(() => {
-      return Array.from(document.querySelectorAll('h1')).map((h) => {
-        const text = h.textContent ? h.textContent.trim() : '';
-        return text;
-      }).filter(Boolean);
+      return Array.from(document.querySelectorAll('h1'))
+        .map((h) => {
+          const text = h.textContent ? h.textContent.trim() : '';
+          return text;
+        })
+        .filter(Boolean);
     });
-    
+
     expect(result).toEqual(['One', 'Two']);
   });
 
@@ -78,26 +84,28 @@ describe('Playwright page.evaluate integration', () => {
     const result = await page.evaluate(
       ({ items }) => {
         const results = [];
-        
+
         const processItem = (item) => {
           const transform = (x) => x.toUpperCase();
           return transform(item);
         };
-        
+
         for (const item of items) {
           results.push(processItem(item));
         }
-        
+
         return results;
       },
       { items: ['test', 'data'] }
     );
-    
+
     expect(result).toEqual(['TEST', 'DATA']);
   });
 
-  it.skipIf(skipIfNoBrowser)('should handle forEach callbacks without type annotations', async () => {
-    await page.setContent(`
+  it.skipIf(skipIfNoBrowser)(
+    'should handle forEach callbacks without type annotations',
+    async () => {
+      await page.setContent(`
       <html>
         <body>
           <img src="image1.jpg" />
@@ -105,16 +113,17 @@ describe('Playwright page.evaluate integration', () => {
         </body>
       </html>
     `);
-    
-    const result = await page.evaluate(() => {
-      const images = [];
-      document.querySelectorAll('img[src]').forEach((img) => {
-        images.push(img.src);
+
+      const result = await page.evaluate(() => {
+        const images = [];
+        document.querySelectorAll('img[src]').forEach((img) => {
+          images.push(img.src);
+        });
+        return images;
       });
-      return images;
-    });
-    
-    expect(result.length).toBe(2);
-    expect(result.every((src) => src.includes('image'))).toBe(true);
-  });
+
+      expect(result.length).toBe(2);
+      expect(result.every((src) => src.includes('image'))).toBe(true);
+    }
+  );
 });

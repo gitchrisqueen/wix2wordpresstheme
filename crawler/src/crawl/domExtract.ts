@@ -43,12 +43,14 @@ export async function extractDOM(page: Page, url: string): Promise<DOMSnapshot> 
       const __name = (target, value) => target;
       const serializeNode = (node) => {
         // Skip comments and other non-element/text nodes
-        if (node.nodeType === 8) { // Node.COMMENT_NODE
+        if (node.nodeType === 8) {
+          // Node.COMMENT_NODE
           return null;
         }
 
         // Text node
-        if (node.nodeType === 3) { // Node.TEXT_NODE
+        if (node.nodeType === 3) {
+          // Node.TEXT_NODE
           const text = node.textContent ? node.textContent.trim() : '';
           if (!text) return null;
 
@@ -59,7 +61,8 @@ export async function extractDOM(page: Page, url: string): Promise<DOMSnapshot> 
         }
 
         // Element node
-        if (node.nodeType === 1) { // Node.ELEMENT_NODE
+        if (node.nodeType === 1) {
+          // Node.ELEMENT_NODE
           const element = node;
           const tag = element.tagName.toLowerCase();
 

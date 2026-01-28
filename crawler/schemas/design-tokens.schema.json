@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/gitchrisqueen/wix2wordpresstheme/schemas/design-tokens.schema.json",
+  "title": "Design Tokens Schema",
+  "description": "Schema for global design tokens output",
+  "type": "object",
+  "required": ["colors", "typography", "components", "sources"],
+  "properties": {
+    "colors": {
+      "type": "object",
+      "properties": {
+        "primary": {
+          "type": ["string", "null"],
+          "description": "Primary color"
+        },
+        "secondary": {
+          "type": ["string", "null"],
+          "description": "Secondary color"
+        },
+        "background": {
+          "type": ["string", "null"],
+          "description": "Background color"
+        },
+        "text": {
+          "type": ["string", "null"],
+          "description": "Text color"
+        },
+        "palette": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Color palette discovered"
+        }
+      },
+      "description": "Color tokens"
+    },
+    "typography": {
+      "type": "object",
+      "properties": {
+        "fontFamilies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Font families used"
+        },
+        "baseFontSizePx": {
+          "type": ["number", "null"],
+          "description": "Base font size in pixels"
+        },
+        "headings": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "fontFamily": {
+                "type": ["string", "null"]
+              },
+              "fontSize": {
+                "type": ["string", "null"]
+              },
+              "fontWeight": {
+                "type": ["string", "null"]
+              }
+            }
+          },
+          "description": "Heading styles by level"
+        }
+      },
+      "description": "Typography tokens"
+    },
+    "components": {
+      "type": "object",
+      "properties": {
+        "buttons": {
+          "type": "object",
+          "properties": {
+            "primary": {
+              "$ref": "#/definitions/buttonStyle"
+            },
+            "secondary": {
+              "$ref": "#/definitions/buttonStyle"
+            }
+          },
+          "description": "Button styles"
+        }
+      },
+      "description": "Component tokens"
+    },
+    "sources": {
+      "type": "object",
+      "required": ["pagesAnalyzed", "methods"],
+      "properties": {
+        "pagesAnalyzed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of pages analyzed"
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Extraction methods used"
+        }
+      },
+      "description": "Metadata about extraction"
+    }
+  },
+  "definitions": {
+    "buttonStyle": {
+      "type": "object",
+      "properties": {
+        "backgroundColor": {
+          "type": ["string", "null"]
+        },
+        "color": {
+          "type": ["string", "null"]
+        },
+        "borderRadius": {
+          "type": ["string", "null"]
+        },
+        "fontWeight": {
+          "type": ["string", "null"]
+        },
+        "padding": {
+          "type": ["string", "null"]
+        }
+      }
+    }
+  }
+}

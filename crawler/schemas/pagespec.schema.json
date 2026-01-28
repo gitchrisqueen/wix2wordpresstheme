@@ -1,0 +1,271 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/gitchrisqueen/wix2wordpresstheme/schemas/pagespec.schema.json",
+  "title": "PageSpec Schema",
+  "description": "Schema for per-page specification output",
+  "type": "object",
+  "required": [
+    "version",
+    "baseUrl",
+    "url",
+    "slug",
+    "templateHint",
+    "meta",
+    "sections",
+    "links",
+    "forms",
+    "notes"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version",
+      "const": "1.0.0"
+    },
+    "baseUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Base URL of the site"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Full URL of this page"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL slug identifier"
+    },
+    "templateHint": {
+      "type": "string",
+      "enum": ["home", "landing", "content", "contact", "blogIndex", "generic"],
+      "description": "Suggested template type"
+    },
+    "meta": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Page title"
+        },
+        "description": {
+          "type": ["string", "null"],
+          "description": "Meta description"
+        },
+        "canonical": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "Canonical URL"
+        },
+        "og": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": ["string", "null"]
+            },
+            "description": {
+              "type": ["string", "null"]
+            },
+            "image": {
+              "type": ["string", "null"]
+            },
+            "url": {
+              "type": ["string", "null"]
+            },
+            "type": {
+              "type": ["string", "null"]
+            }
+          },
+          "description": "Open Graph metadata"
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/section"
+      },
+      "description": "Ordered page sections"
+    },
+    "links": {
+      "type": "object",
+      "properties": {
+        "internal": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "Internal links"
+        },
+        "external": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "External links"
+        }
+      },
+      "description": "Links on the page"
+    },
+    "forms": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/form"
+      },
+      "description": "Forms on the page"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Warnings and inference notes"
+    }
+  },
+  "definitions": {
+    "section": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique section identifier"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "header",
+            "hero",
+            "featureGrid",
+            "gallery",
+            "testimonial",
+            "pricing",
+            "faq",
+            "cta",
+            "contactForm",
+            "richText",
+            "footer",
+            "unknown"
+          ],
+          "description": "Section type"
+        },
+        "heading": {
+          "type": ["string", "null"],
+          "description": "Section heading"
+        },
+        "textBlocks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Text content blocks"
+        },
+        "ctas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cta"
+          },
+          "description": "Call-to-action elements"
+        },
+        "media": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/media"
+          },
+          "description": "Media elements (images, videos)"
+        },
+        "domAnchor": {
+          "type": "object",
+          "required": ["strategy", "value"],
+          "properties": {
+            "strategy": {
+              "type": "string",
+              "enum": ["selector", "path"],
+              "description": "Anchor strategy"
+            },
+            "value": {
+              "type": "string",
+              "description": "Selector or path value"
+            }
+          },
+          "description": "DOM reference for this section"
+        }
+      }
+    },
+    "cta": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "CTA text"
+        },
+        "href": {
+          "type": ["string", "null"],
+          "description": "Link URL"
+        }
+      }
+    },
+    "media": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["image", "video"],
+          "description": "Media type"
+        },
+        "src": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "Source URL"
+        },
+        "alt": {
+          "type": ["string", "null"],
+          "description": "Alt text (for images)"
+        },
+        "localAsset": {
+          "type": ["string", "null"],
+          "description": "Path to local asset file"
+        }
+      }
+    },
+    "form": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": ["string", "null"],
+          "description": "Form name or ID"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/formField"
+          },
+          "description": "Form fields"
+        }
+      }
+    },
+    "formField": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "label": {
+          "type": ["string", "null"],
+          "description": "Field label"
+        },
+        "type": {
+          "type": "string",
+          "description": "Input type (text, email, textarea, etc.)"
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Whether field is required"
+        }
+      }
+    }
+  }
+}

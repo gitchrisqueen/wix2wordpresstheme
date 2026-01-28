@@ -41,30 +41,42 @@ export async function extractMetadata(page: Page, url: string, status: number): 
 
     // Get all headings
     const headings = {
-      h1: Array.from(document.querySelectorAll('h1')).map((h) => {
-        const text = h.textContent ? h.textContent.trim() : '';
-        return text;
-      }).filter(Boolean),
-      h2: Array.from(document.querySelectorAll('h2')).map((h) => {
-        const text = h.textContent ? h.textContent.trim() : '';
-        return text;
-      }).filter(Boolean),
-      h3: Array.from(document.querySelectorAll('h3')).map((h) => {
-        const text = h.textContent ? h.textContent.trim() : '';
-        return text;
-      }).filter(Boolean),
-      h4: Array.from(document.querySelectorAll('h4')).map((h) => {
-        const text = h.textContent ? h.textContent.trim() : '';
-        return text;
-      }).filter(Boolean),
-      h5: Array.from(document.querySelectorAll('h5')).map((h) => {
-        const text = h.textContent ? h.textContent.trim() : '';
-        return text;
-      }).filter(Boolean),
-      h6: Array.from(document.querySelectorAll('h6')).map((h) => {
-        const text = h.textContent ? h.textContent.trim() : '';
-        return text;
-      }).filter(Boolean),
+      h1: Array.from(document.querySelectorAll('h1'))
+        .map((h) => {
+          const text = h.textContent ? h.textContent.trim() : '';
+          return text;
+        })
+        .filter(Boolean),
+      h2: Array.from(document.querySelectorAll('h2'))
+        .map((h) => {
+          const text = h.textContent ? h.textContent.trim() : '';
+          return text;
+        })
+        .filter(Boolean),
+      h3: Array.from(document.querySelectorAll('h3'))
+        .map((h) => {
+          const text = h.textContent ? h.textContent.trim() : '';
+          return text;
+        })
+        .filter(Boolean),
+      h4: Array.from(document.querySelectorAll('h4'))
+        .map((h) => {
+          const text = h.textContent ? h.textContent.trim() : '';
+          return text;
+        })
+        .filter(Boolean),
+      h5: Array.from(document.querySelectorAll('h5'))
+        .map((h) => {
+          const text = h.textContent ? h.textContent.trim() : '';
+          return text;
+        })
+        .filter(Boolean),
+      h6: Array.from(document.querySelectorAll('h6'))
+        .map((h) => {
+          const text = h.textContent ? h.textContent.trim() : '';
+          return text;
+        })
+        .filter(Boolean),
     };
 
     return {
@@ -113,17 +125,35 @@ export function extractMetadataFromHTML(html: string, url: string, status = 200)
 
   const headings = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    h1: $('h1').map((_: any, el: any) => $(el).text().trim()).get().filter(Boolean),
+    h1: $('h1')
+      .map((_: any, el: any) => $(el).text().trim())
+      .get()
+      .filter(Boolean),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    h2: $('h2').map((_: any, el: any) => $(el).text().trim()).get().filter(Boolean),
+    h2: $('h2')
+      .map((_: any, el: any) => $(el).text().trim())
+      .get()
+      .filter(Boolean),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    h3: $('h3').map((_: any, el: any) => $(el).text().trim()).get().filter(Boolean),
+    h3: $('h3')
+      .map((_: any, el: any) => $(el).text().trim())
+      .get()
+      .filter(Boolean),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    h4: $('h4').map((_: any, el: any) => $(el).text().trim()).get().filter(Boolean),
+    h4: $('h4')
+      .map((_: any, el: any) => $(el).text().trim())
+      .get()
+      .filter(Boolean),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    h5: $('h5').map((_: any, el: any) => $(el).text().trim()).get().filter(Boolean),
+    h5: $('h5')
+      .map((_: any, el: any) => $(el).text().trim())
+      .get()
+      .filter(Boolean),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    h6: $('h6').map((_: any, el: any) => $(el).text().trim()).get().filter(Boolean),
+    h6: $('h6')
+      .map((_: any, el: any) => $(el).text().trim())
+      .get()
+      .filter(Boolean),
   };
 
   return {

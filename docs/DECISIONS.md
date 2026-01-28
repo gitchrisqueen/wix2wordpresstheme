@@ -459,6 +459,7 @@ This document records key technical decisions made during the development of the
 - **Uniqueness** - Hash suffix added if slug collision occurs
 
 **Structure**:
+
 ```
 pages/<slug>/
 ├── page.json
@@ -474,7 +475,7 @@ pages/<slug>/
 - **Depth** - Creates many nested directories
 - **Duplication** - Some assets stored multiple times if not deduplicated
 
-###  Decision: JSON Schema Validation for All Outputs
+### Decision: JSON Schema Validation for All Outputs
 
 **Date**: 2026-01-27
 
@@ -498,10 +499,102 @@ pages/<slug>/
 
 ---
 
+## 13. Heuristic-Based Section Inference (Phase 3)
+
+**Date**: 2026-01-27
+
+**Context**: Need to convert unstructured HTML into typed page sections without AI/ML.
+
+**Decision**: Use rule-based heuristics for section type inference: semantic HTML tags, landmark roles, class names, content patterns, and structural hints.
+
+**Rationale**:
+
+- **Deterministic** - Same input always produces same output
+- **Debuggable** - Clear rules make issues easy to diagnose
+- **Fast** - No model inference or API calls
+- **Conservative** - Use "unknown" type when uncertain
+- **Maintainable** - Rules can be adjusted based on real-world results
+
+**Heuristics**:
+
+- Semantic tags: `<header>` → header, `<footer>` → footer
+- Role attributes: `role="banner"` → header
+- Class patterns: `.hero` → hero, `.pricing` → pricing
+- Content patterns: h1 + CTA + image → hero, multiple images → gallery
+- Form presence: `<form>` → contactForm
+
+**Trade-offs**:
+
+- **Limited accuracy** - Heuristics miss edge cases vs ML models
+- **Manual tuning** - Rules require adjustment for different sites
+- **Conservative** - Many sections classified as "unknown"
+- **No context** - Cannot understand semantic meaning of content
+
+---
+
+## 14. Conservative Design Token Extraction (Phase 3)
+
+**Date**: 2026-01-27
+
+**Context**: Extract design tokens without computed styles or browser context.
+
+**Decision**: Extract only from inline styles, CSS variables, and `<style>` tags. Output null for tokens we cannot reliably infer.
+
+**Rationale**:
+
+- **Honest** - Better to return null than wrong value
+- **Debuggable** - Sources are explicit in metadata
+- **Deterministic** - Same HTML produces same tokens
+- **Extensible** - Can add browser-based extraction later
+
+**Extraction methods**:
+
+- Inline styles: `style="color: #ff0000"`
+- CSS variables: `:root { --primary: #ff0000 }`
+- Style tags: `<style>` content parsing
+- Button detection: `<button>`, `<a role="button">`, `.button` classes
+
+**Trade-offs**:
+
+- **Limited coverage** - Misses computed styles from external CSS
+- **Incomplete** - Many tokens will be null
+- **Manual work** - May require designer input to fill gaps
+
+---
+
+## 15. Pattern Detection by Signature (Phase 3)
+
+**Date**: 2026-01-27
+
+**Context**: Identify reusable layout patterns across pages.
+
+**Decision**: Generate signatures based on section structure (type + content counts) and cluster sections with identical signatures.
+
+**Rationale**:
+
+- **Simple** - No complex clustering algorithms
+- **Fast** - Hash-based grouping is O(n)
+- **Deterministic** - Same sections always group together
+- **Actionable** - Patterns can inform theme template reuse
+
+**Signature components**:
+
+- Section type
+- Heading presence (yes/no)
+- Text block count (bucketed: 0, 1, few, many)
+- Media count (bucketed)
+- CTA count (bucketed)
+
+**Trade-offs**:
+
+- **Coarse** - Similar but not identical sections won't match
+- **No semantic understanding** - Doesn't consider content meaning
+- **Bucketing loss** - "few" vs "many" loses precision
+
+---
+
 ## Future Decisions (To Be Made)
 
-- Phase 3: PageSpec inference and design token extraction strategy
-- Phase 3: CSS parsing and computed style capture
 - Phase 4: WordPress theme template generation approach
 - Phase 5: Visual diff testing tools and thresholds
 - Storage strategy for large asset collections
