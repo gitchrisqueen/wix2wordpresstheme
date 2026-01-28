@@ -12,6 +12,7 @@ import { detectRepeatedSiblings } from './signature.js';
 export interface BlockFeatures {
   headingCount: number;
   textDensity: number;
+  wordCount: number;
   mediaCount: number;
   linkCount: number;
   ctaLikeCount: number;
@@ -74,6 +75,7 @@ export function computeBlockFeatures(
   return {
     headingCount,
     textDensity,
+    wordCount,
     mediaCount,
     linkCount,
     ctaLikeCount,
@@ -118,10 +120,30 @@ export function classifyBlock(
     return { type: 'contactForm', confidence: 0.8, notes };
   }
 
-  // Grid section (repeated siblings)
+  // FAQ (pattern in classes) - check before grid
+  if (features.classes.match(/faq|question|accordion/i)) {
+    return { type: 'faq', confidence: 0.9, notes };
+  }
+
+  // Pricing - check before grid
+  if (features.classes.match(/pricing|plan|package/i)) {
+    return { type: 'pricing', confidence: 0.9, notes };
+  }
+
+  // Testimonial - check before grid
+  if (features.classes.match(/testimonial|review|quote/i)) {
+    return { type: 'testimonial', confidence: 0.9, notes };
+  }
+
+  // Rich text (lots of text content, multiple paragraphs) - check before grid
+  if (features.wordCount > 100) {
+    return { type: 'richText', confidence: 0.8, notes };
+  }
+
+  // Grid section (repeated siblings) - check after more specific patterns
   if (features.repeatedSiblings) {
     notes.push('Detected repeated sibling structures');
-    return { type: 'grid', confidence: 0.85, notes };
+    return { type: 'grid', confidence: 0.75, notes };
   }
 
   // Hero (first section with h1 + CTA + minimal text)
@@ -141,32 +163,12 @@ export function classifyBlock(
   }
 
   // Gallery (multiple images, little text)
-  if (features.mediaCount >= 3 && features.textDensity < 50) {
+  if (features.mediaCount >= 3 && features.wordCount < 100) {
     return { type: 'gallery', confidence: 0.8, notes };
   }
 
-  // FAQ (pattern in classes or multiple h3s)
-  if (features.classes.match(/faq|question|accordion/i)) {
-    return { type: 'faq', confidence: 0.75, notes };
-  }
-
-  // Pricing
-  if (features.classes.match(/pricing|plan|package/i)) {
-    return { type: 'pricing', confidence: 0.75, notes };
-  }
-
-  // Testimonial
-  if (features.classes.match(/testimonial|review|quote/i)) {
-    return { type: 'testimonial', confidence: 0.75, notes };
-  }
-
-  // Rich text (lots of paragraphs, high text density)
-  if (features.textDensity > 100) {
-    return { type: 'richText', confidence: 0.8, notes };
-  }
-
-  // List (multiple headings but not a grid)
-  if (features.headingCount >= 3 && !features.repeatedSiblings) {
+  // List (multiple headings)
+  if (features.headingCount >= 3) {
     return { type: 'list', confidence: 0.7, notes };
   }
 

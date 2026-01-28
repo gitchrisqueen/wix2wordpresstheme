@@ -20,6 +20,7 @@ import {
   validateLayoutPatterns,
   validateSpecSummary,
 } from '../types/spec.js';
+import { generateDebugArtifacts } from './debugSpec.js';
 
 export interface SpecConfig {
   baseUrl: string;
@@ -27,6 +28,7 @@ export interface SpecConfig {
   outDir: string;
   maxPages?: number | null;
   strategy: 'heuristic'; // Only heuristic for now
+  debugSpec?: boolean;
 }
 
 /**
@@ -118,13 +120,16 @@ export async function runSpec(config: SpecConfig, logger: Logger): Promise<void>
         const meta = JSON.parse(metaContent);
 
         // Infer PageSpec
-        const pageSpec = inferPageSpec({
+        const result = inferPageSpec({
           url: page.url,
           slug,
           baseUrl: config.baseUrl,
           html,
           meta,
+          debug: config.debugSpec,
         });
+
+        const pageSpec = result.pageSpec;
 
         // Validate
         validatePageSpec(pageSpec);
@@ -145,6 +150,21 @@ export async function runSpec(config: SpecConfig, logger: Logger): Promise<void>
         const pageSpecPath = join(config.outDir, 'pages', slug, 'spec', 'pagespec.json');
         await writeJsonFile(pageSpecPath, pageSpec);
         logger.debug(`Wrote PageSpec: ${pageSpecPath}`);
+
+        // Generate debug artifacts if enabled
+        if (config.debugSpec && result.debugData) {
+          await generateDebugArtifacts(
+            slug,
+            config.outDir,
+            {
+              blockCandidates: result.debugData.blockCandidates,
+              features: result.debugData.features,
+              sections: pageSpec.sections,
+            },
+            result.debugData.$,
+            logger
+          );
+        }
       } catch (error) {
         logger.error(`Failed to process page ${slug}: ${(error as Error).message}`);
         pageStatuses.push({

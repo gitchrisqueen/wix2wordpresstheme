@@ -16,8 +16,12 @@ import type { Element } from 'domhandler';
 
 // Import pipeline modules
 import { detectLandmarks, getMainContentArea } from './sectionizer/landmarks.js';
-import { generateBlockCandidates, filterBlockCandidates } from './sectionizer/blockCandidates.js';
-import { computeBlockFeatures, classifyBlock } from './sectionizer/classify.js';
+import {
+  generateBlockCandidates,
+  filterBlockCandidates,
+  type BlockCandidate,
+} from './sectionizer/blockCandidates.js';
+import { computeBlockFeatures, classifyBlock, type BlockFeatures } from './sectionizer/classify.js';
 import {
   extractHeading,
   extractTextBlocks,
@@ -38,6 +42,12 @@ interface DomNode {
   children?: DomNode[];
 }
 
+export interface SectionizeDebugData {
+  blockCandidates: BlockCandidate[];
+  features: Array<{ candidate: BlockCandidate; features: BlockFeatures }>;
+  $: cheerio.CheerioAPI;
+}
+
 /**
  * Generate deterministic section ID
  */
@@ -49,8 +59,24 @@ function generateSectionId(index: number): string {
  * Convert HTML to ordered sections using multi-pass pipeline
  */
 export function sectionizeHtml(html: string, baseUrl = ''): Section[] {
+  const result = sectionizeHtmlWithDebug(html, baseUrl);
+  return result.sections;
+}
+
+/**
+ * Convert HTML to ordered sections with debug data
+ */
+export function sectionizeHtmlWithDebug(
+  html: string,
+  baseUrl = ''
+): { sections: Section[]; debug: SectionizeDebugData } {
   const $ = cheerio.load(html);
   const sections: Section[] = [];
+  const debugData: SectionizeDebugData = {
+    blockCandidates: [],
+    features: [],
+    $,
+  };
 
   // PASS 0: Detect landmarks
   const landmarks = detectLandmarks($);
@@ -58,13 +84,7 @@ export function sectionizeHtml(html: string, baseUrl = ''): Section[] {
   // Add header as first section if present
   if (landmarks.header) {
     const $header = $(landmarks.header.element);
-    const section = createSectionFromElement(
-      $,
-      $header,
-      sections.length,
-      'header',
-      baseUrl
-    );
+    const section = createSectionFromElement($, $header, sections.length, 'header', baseUrl);
     if (section) {
       sections.push(section);
     }
@@ -77,6 +97,9 @@ export function sectionizeHtml(html: string, baseUrl = ''): Section[] {
   // Filter out empty/insignificant blocks
   blockCandidates = filterBlockCandidates($, blockCandidates);
 
+  // Store for debug
+  debugData.blockCandidates = blockCandidates;
+
   // Process each block candidate
   for (const candidate of blockCandidates) {
     const $elem = $(candidate.element);
@@ -84,6 +107,9 @@ export function sectionizeHtml(html: string, baseUrl = ''): Section[] {
     // PASS 2: Compute features and classify
     const features = computeBlockFeatures($, $elem);
     const classification = classifyBlock(features, null);
+
+    // Store for debug
+    debugData.features.push({ candidate, features });
 
     // PASS 3 & 4: Extract content and create section
     const section = createSectionFromElement(
@@ -103,19 +129,13 @@ export function sectionizeHtml(html: string, baseUrl = ''): Section[] {
   // Add footer as last section if present
   if (landmarks.footer) {
     const $footer = $(landmarks.footer.element);
-    const section = createSectionFromElement(
-      $,
-      $footer,
-      sections.length,
-      'footer',
-      baseUrl
-    );
+    const section = createSectionFromElement($, $footer, sections.length, 'footer', baseUrl);
     if (section) {
       sections.push(section);
     }
   }
 
-  return sections;
+  return { sections, debug: debugData };
 }
 
 /**
