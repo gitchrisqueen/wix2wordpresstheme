@@ -10,6 +10,9 @@ import type { Logger } from '../../../crawler/src/lib/logger.js';
 import type { Pattern, LayoutPatterns } from '../../../crawler/src/types/spec.js';
 import type { GenerationMetadata } from '../types/generator.js';
 
+const MAX_PATTERN_TEXT_BLOCKS = 3;
+const MAX_PATTERN_BUTTONS = 2;
+
 interface PatternCategory {
   slug: string;
   title: string;
@@ -194,7 +197,7 @@ function generatePatternContent(pattern: Pattern): string {
 
   // Add text blocks if pattern has text
   if (stats.textCount && stats.textCount > 0) {
-    for (let i = 0; i < Math.min(stats.textCount, 3); i++) {
+    for (let i = 0; i < Math.min(stats.textCount, MAX_PATTERN_TEXT_BLOCKS); i++) {
       blocks.push('<!-- wp:paragraph -->');
       blocks.push('<p>Add your content here. This is a placeholder text that demonstrates the pattern structure.</p>');
       blocks.push('<!-- /wp:paragraph -->');
@@ -214,7 +217,7 @@ function generatePatternContent(pattern: Pattern): string {
   if (stats.ctaCount && stats.ctaCount > 0) {
     blocks.push('<!-- wp:buttons -->');
     blocks.push('<div class="wp-block-buttons">');
-    for (let i = 0; i < Math.min(stats.ctaCount, 2); i++) {
+    for (let i = 0; i < Math.min(stats.ctaCount, MAX_PATTERN_BUTTONS); i++) {
       blocks.push('<!-- wp:button -->');
       blocks.push('<div class="wp-block-button">');
       blocks.push('<a class="wp-block-button__link" href="#">Button Text</a>');

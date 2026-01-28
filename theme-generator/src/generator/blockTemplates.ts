@@ -11,6 +11,10 @@ import type { PageSpec, Section } from '../../../crawler/src/types/spec.js';
 import type { GeneratorMode } from '../types/generator.js';
 import type { GenerationMetadata } from '../types/generator.js';
 
+const MAX_MEDIA_COUNT = 3;
+const MAX_TEXT_BLOCKS = 5;
+const MAX_CTA_COUNT = 3;
+
 interface BlockTemplateResult {
   templatePath: string;
   mode: GeneratorMode;
@@ -115,7 +119,15 @@ function generatePHPBlockTemplate(pageSpec: PageSpec, _logger: Logger): string {
  * Template: ${pageSpec.slug}
  */
 get_header();
-render_page_sections('${pageSpec.slug}');
+
+// Render sections for this page
+$sections = get_page_sections('${pageSpec.slug}');
+if ($sections) {
+  foreach ($sections as $section) {
+    render_section($section['id'], $section);
+  }
+}
+
 get_footer();
 ?>
 <!-- /wp:html -->`;
@@ -197,7 +209,12 @@ function sectionToBlocks(
  */
 function generatePHPFallback(section: Section): string {
   return `<!-- wp:html -->
-<?php render_section("${section.id}", $data); ?>
+<?php
+$section = get_section_data('${section.id}');
+if ($section) {
+  render_section($section['id'], $section);
+}
+?>
 <!-- /wp:html -->`;
 }
 
@@ -206,10 +223,10 @@ function generatePHPFallback(section: Section): string {
  */
 function isSimpleSection(section: Section): boolean {
   // Simple sections: basic heading + text + CTA
-  const hasComplexMedia = section.media && section.media.length > 3;
+  const hasComplexMedia = section.media && section.media.length > MAX_MEDIA_COUNT;
   const hasForm = section.type === 'contactForm';
   const hasComplexLayout = ['gallery', 'pricing', 'featureGrid'].includes(section.type);
-  const hasManyItems = (section.textBlocks?.length || 0) > 5 || (section.ctas?.length || 0) > 3;
+  const hasManyItems = (section.textBlocks?.length || 0) > MAX_TEXT_BLOCKS || (section.ctas?.length || 0) > MAX_CTA_COUNT;
 
   return !hasComplexMedia && !hasForm && !hasComplexLayout && !hasManyItems;
 }

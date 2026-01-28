@@ -11,10 +11,12 @@ import type { Logger } from '../../../crawler/src/lib/logger.js';
 
 interface Manifest {
   pages: Array<{
-    slug: string;
     url: string;
+    path: string;
   }>;
 }
+
+const HASH_LENGTH = 8; // Length of MD5 hash to use in filenames
 
 /**
  * Copy assets from crawler output to theme directory
@@ -36,10 +38,12 @@ export function copyAssets(
   let totalFailed = 0;
 
   for (const page of manifest.pages) {
-    const pageAssetsDir = join(inDir, 'pages', page.slug, 'assets', 'files');
+    // Derive slug from path
+    const slug = page.path.replace(/^\//, '').replace(/\//g, '-') || 'home';
+    const pageAssetsDir = join(inDir, 'pages', slug, 'assets', 'files');
 
     if (!existsSync(pageAssetsDir)) {
-      logger.debug(`No assets directory for page: ${page.slug}`);
+      logger.debug(`No assets directory for page: ${slug}`);
       continue;
     }
 
@@ -90,7 +94,7 @@ export function copyAssets(
         }
       }
     } catch (error) {
-      logger.warn(`Failed to read assets directory for page: ${page.slug}`, error);
+      logger.warn(`Failed to read assets directory for page with path: ${page.path}`, error);
     }
   }
 
@@ -136,7 +140,7 @@ export function generateAssetMap(
 function generateFileHash(filePath: string): string {
   const content = readFileSync(filePath);
   const hash = createHash('md5').update(content).digest('hex');
-  return hash.substring(0, 8);
+  return hash.substring(0, HASH_LENGTH);
 }
 
 /**

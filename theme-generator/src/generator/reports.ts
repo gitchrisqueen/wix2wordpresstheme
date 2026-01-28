@@ -23,9 +23,14 @@ export function generateReports(
   themeDir: string,
   pageMappings: PageTemplateMapping[],
   metadata: GenerationMetadata,
-  pageSpecs: Map<string, PageSpec>,
+  pageSpecs: PageSpec[],
   logger: Logger,
 ): void {
+  // Convert array to Map for easier lookup
+  const pageSpecMap = new Map<string, PageSpec>();
+  for (const spec of pageSpecs) {
+    pageSpecMap.set(spec.slug, spec);
+  }
   // Generate .generated/generation.json
   generateGenerationMetadata(themeDir, options, metadata, logger);
 
@@ -36,7 +41,7 @@ export function generateReports(
   generateSummaryReport(options.outDir, options, pageMappings, metadata, logger);
 
   // Generate comprehensive report in docs/REPORTS
-  generateComprehensiveReport(options, themeDir, pageMappings, metadata, pageSpecs, logger);
+  generateComprehensiveReport(options, themeDir, pageMappings, metadata, pageSpecMap, logger);
 
   logger.info('All reports generated successfully');
 }
