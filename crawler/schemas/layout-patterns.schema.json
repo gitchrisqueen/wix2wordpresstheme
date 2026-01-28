@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/gitchrisqueen/wix2wordpresstheme/schemas/layout-patterns.schema.json",
+  "title": "Layout Patterns Schema",
+  "description": "Schema for reusable layout patterns output",
+  "type": "object",
+  "required": ["patterns"],
+  "properties": {
+    "patterns": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/pattern"
+      },
+      "description": "Detected layout patterns"
+    }
+  },
+  "definitions": {
+    "pattern": {
+      "type": "object",
+      "required": ["patternId", "type", "signature", "examples", "stats"],
+      "properties": {
+        "patternId": {
+          "type": "string",
+          "description": "Unique pattern identifier"
+        },
+        "type": {
+          "type": "string",
+          "description": "Section type this pattern represents"
+        },
+        "signature": {
+          "type": "string",
+          "description": "Pattern signature for matching"
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Example section references (slug#sectionId)"
+        },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Number of instances"
+            },
+            "headingCount": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Typical heading count"
+            },
+            "textCount": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Typical text block count"
+            },
+            "mediaCount": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Typical media count"
+            },
+            "ctaCount": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Typical CTA count"
+            },
+            "hasForm": {
+              "type": "boolean",
+              "description": "Whether pattern includes a form"
+            }
+          },
+          "description": "Pattern statistics"
+        }
+      }
+    }
+  }
+}

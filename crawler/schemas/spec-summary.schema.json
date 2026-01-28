@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/gitchrisqueen/wix2wordpresstheme/schemas/spec-summary.schema.json",
+  "title": "Spec Summary Schema",
+  "description": "Schema for spec generation summary output",
+  "type": "object",
+  "required": ["version", "generatedAt", "baseUrl", "stats", "pages"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version",
+      "const": "1.0.0"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Generation timestamp"
+    },
+    "baseUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Base URL of the site"
+    },
+    "stats": {
+      "type": "object",
+      "required": [
+        "pagesProcessed",
+        "pagesSucceeded",
+        "pagesFailed",
+        "totalSections",
+        "totalPatterns"
+      ],
+      "properties": {
+        "pagesProcessed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total pages processed"
+        },
+        "pagesSucceeded": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Pages successfully processed"
+        },
+        "pagesFailed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Pages that failed processing"
+        },
+        "totalSections": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total sections extracted"
+        },
+        "totalPatterns": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total unique patterns detected"
+        }
+      }
+    },
+    "pages": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/pageStatus"
+      },
+      "description": "Per-page processing status"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Global warnings"
+    }
+  },
+  "definitions": {
+    "pageStatus": {
+      "type": "object",
+      "required": ["slug", "url", "status"],
+      "properties": {
+        "slug": {
+          "type": "string",
+          "description": "Page slug"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Page URL"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "failed"],
+          "description": "Processing status"
+        },
+        "sectionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of sections extracted"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Page-specific warnings"
+        },
+        "error": {
+          "type": ["string", "null"],
+          "description": "Error message if failed"
+        }
+      }
+    }
+  }
+}
