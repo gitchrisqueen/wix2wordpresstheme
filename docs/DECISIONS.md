@@ -595,7 +595,189 @@ pages/<slug>/
 
 ## Future Decisions (To Be Made)
 
-- Phase 4: WordPress theme template generation approach
-- Phase 5: Visual diff testing tools and thresholds
+- Phase 5: WordPress local deployment and content import
+- Phase 6: Visual diff testing tools and thresholds
+- Storage strategy for large asset collections
+- Caching strategy for incremental crawls
+
+---
+
+## Phase 4: Theme Generation
+
+### Decision: Hybrid Rendering Mode (Blocks + PHP)
+
+**Date**: 2026-01-27
+
+**Context**: Need to choose how to render PageSpec sections in WordPress theme - pure blocks, pure PHP, or a hybrid approach.
+
+**Decision**: Use hybrid mode as default: WordPress core blocks for content sections, PHP for system sections (header, footer, forms).
+
+**Rationale**:
+
+- **Best of both worlds** - Blocks for editor-friendly content, PHP for dynamic/complex features
+- **Content editability** - Hero, CTA, features can be edited in Gutenberg
+- **System flexibility** - Navigation, forms, widgets work better in PHP
+- **Maintainability** - Clear separation of concerns
+- **WordPress standards** - Follows modern block theme patterns while preserving PHP flexibility
+- **Progressive enhancement** - Can start with blocks and add PHP where needed
+
+**Rendering breakdown**:
+- **Blocks**: hero, CTA, featureGrid, gallery, testimonial, pricing, FAQ
+- **PHP**: header, footer, contactForm
+- **Fallback**: richText and unknown types as HTML blocks
+
+**Trade-offs**:
+
+- **Complexity** - More implementation than pure block or pure PHP
+- **Learning curve** - Developers need to understand both paradigms
+- **Testing overhead** - Must test both block rendering and PHP execution
+- **Migration complexity** - Harder to switch approaches later
+
+**Alternatives Considered**:
+
+1. **Pure block mode**: More editor-friendly but limited for dynamic features like navigation and forms
+2. **Pure PHP mode**: Simpler but loses Gutenberg editing benefits and modern WordPress features
+3. **Shortcode-based**: Legacy approach, poor UX in editor
+
+### Decision: Use WordPress Core Blocks Over Custom Blocks
+
+**Date**: 2026-01-27
+
+**Context**: Need to decide whether to generate custom blocks or use core WordPress blocks.
+
+**Decision**: Prioritize WordPress core blocks (Cover, Heading, Paragraph, Buttons, Gallery, Columns) with custom blocks only for unique patterns.
+
+**Rationale**:
+
+- **Compatibility** - Core blocks work across all block themes
+- **Maintenance** - No need to maintain custom block code
+- **Familiarity** - WordPress editors already know core blocks
+- **Updates** - Core blocks improved with each WordPress release
+- **Plugin compatibility** - Better integration with block-enhancing plugins
+- **Performance** - Core blocks are optimized by WordPress core team
+
+**Core blocks used**:
+- `core/cover` - Hero sections with background images
+- `core/heading` + `core/paragraph` - Text content
+- `core/buttons` - CTAs and action buttons
+- `core/columns` - Feature grids and multi-column layouts
+- `core/gallery` - Image galleries
+- `core/group` - Section containers
+- `core/html` - Fallback for complex HTML
+
+**Custom blocks only for**:
+- Highly specific patterns not possible with core blocks
+- Interactive components requiring custom JavaScript
+
+**Trade-offs**:
+
+- **Limited styling control** - Core blocks have predefined structure
+- **Approximation** - May not perfectly match Wix design
+- **Block limitations** - Some Wix features might not map to core blocks
+- **Workarounds needed** - May require nested blocks for complex layouts
+
+**Alternatives Considered**:
+
+1. **All custom blocks**: Full control but high maintenance burden
+2. **ACF Blocks**: Easier custom block creation but adds dependency
+3. **Classic Editor with shortcodes**: Legacy approach, poor UX
+
+### Decision: PHP Sections for Forms and Navigation
+
+**Date**: 2026-01-27
+
+**Context**: Forms and navigation are dynamic and benefit from server-side rendering.
+
+**Decision**: Render header (navigation), footer (widgets), and contact forms as PHP template parts, not blocks.
+
+**Rationale**:
+
+**Forms**:
+- **Processing logic** - Form submission requires PHP
+- **Validation** - Server-side validation is essential
+- **Security** - CSRF tokens, nonce verification need PHP
+- **Email sending** - wp_mail() is PHP function
+- **Database** - Form submissions may need to be stored
+
+**Header/Navigation**:
+- **Dynamic menus** - wp_nav_menu() is easier in PHP
+- **Conditional logic** - Show/hide elements based on user state
+- **Custom logo** - the_custom_logo() is PHP function
+- **Mobile menu** - JavaScript integration simpler with PHP
+
+**Footer**:
+- **Widget areas** - dynamic_sidebar() requires PHP
+- **Multi-column layouts** - Easier to manage in PHP
+- **Copyright year** - `<?php echo date('Y'); ?>` is dynamic
+
+**Implementation**:
+- PHP files in `sections/` directory
+- Loaded via `get_template_part()` or custom action hooks
+- Block templates include PHP section placeholders:
+  ```html
+  <!-- wp:html -->
+  <?php do_action('theme_render_header'); ?>
+  <!-- /wp:html -->
+  ```
+
+**Trade-offs**:
+
+- **Not editor-editable** - Must edit PHP files directly
+- **Mixed paradigm** - Blocks + PHP may confuse some users
+- **Harder preview** - Can't preview in block editor without server context
+- **PHP knowledge required** - Theme customization needs PHP skills
+
+**Alternatives Considered**:
+
+1. **Block-based forms** - Requires third-party plugins (Gravity Forms, Contact Form 7 blocks)
+2. **FSE Site Editor for header/footer** - Limited dynamic capabilities
+3. **All PHP templates** - Loses block editing benefits for content sections
+
+### Decision: Generate theme.json from Design Tokens
+
+**Date**: 2026-01-27
+
+**Context**: Design tokens (colors, typography, spacing) need to be represented in WordPress.
+
+**Decision**: Generate `theme.json` (v2 schema) from `design-tokens.json` to define global styles.
+
+**Rationale**:
+
+- **WordPress standard** - theme.json is the modern way to define design system
+- **Block editor integration** - Colors and fonts appear in editor controls
+- **Consistency** - Single source of truth for design values
+- **CSS custom properties** - WordPress generates CSS variables automatically
+- **No hardcoded styles** - Values managed in theme.json, not scattered in CSS
+- **User customization** - Global Styles panel allows live editing
+
+**Mapping**:
+- `tokens.colors.primary/secondary` → `theme.json settings.color.palette`
+- `tokens.typography.body/heading` → `theme.json settings.typography.fontFamilies`
+- `tokens.buttons.primary/secondary` → `theme.json styles.blocks.core/button`
+- Spacing inferred from section padding → `theme.json settings.spacing.spacingScale`
+
+**Fallback**:
+- If tokens are null, use WordPress defaults
+- Document missing tokens in generation report
+
+**Trade-offs**:
+
+- **Incomplete tokens** - Phase 3 tokens are conservative, may have nulls
+- **Approximation** - Won't capture every design detail from Wix
+- **Manual tuning** - Designer may need to adjust generated theme.json
+- **WordPress version** - theme.json requires WordPress 5.9+
+
+**Alternatives Considered**:
+
+1. **Hardcode CSS** - Less maintainable, no editor integration
+2. **CSS custom properties only** - Works but loses editor integration
+3. **Customizer API** - Legacy approach, less powerful than theme.json
+
+---
+
+## Future Decisions (To Be Made)
+
+- Phase 5: WordPress local deployment and content import
+- Phase 6: Visual diff testing tools and thresholds
 - Storage strategy for large asset collections
 - Caching strategy for incremental crawls

@@ -569,6 +569,258 @@ Tokens are extracted from inline styles and CSS variables - verify HTML has styl
 
 Ensure all Phase 2 files are valid JSON.
 
+## Phase 4: Theme Generation
+
+Generate a WordPress theme from PageSpec and design tokens using hybrid block + PHP rendering.
+
+### Prerequisites
+
+- Completed Phase 3 with PageSpec files in `crawler/output/pages/<slug>/spec/`
+- Design tokens in `crawler/output/spec/design-tokens.json`
+- Layout patterns in `crawler/output/spec/layout-patterns.json`
+
+### Basic Command
+
+```bash
+npm run generate -- --baseUrl https://example.com
+```
+
+### With Options
+
+```bash
+npm run generate -- \
+  --baseUrl https://example.com \
+  --inDir crawler/output \
+  --outDir theme-generator/output \
+  --themeName "My Wix Theme" \
+  --themeSlug my-wix-theme \
+  --mode hybrid \
+  --verbose
+```
+
+### Configuration Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--baseUrl <url>` | (required) | Original Wix site URL |
+| `--inDir <path>` | `crawler/output` | Input directory with specs |
+| `--outDir <path>` | `theme-generator/output` | Output directory for theme |
+| `--themeName <name>` | Auto-generated | Human-readable theme name |
+| `--themeSlug <slug>` | Auto-generated | Theme directory name |
+| `--mode <mode>` | `hybrid` | Rendering mode: `block`, `php`, or `hybrid` |
+| `--includeAssets` | `true` | Copy downloaded assets to theme |
+| `--verbose` | `false` | Enable verbose debug logging |
+
+### Rendering Modes
+
+#### Hybrid Mode (Recommended)
+
+Combines WordPress blocks with PHP sections for optimal flexibility:
+
+```bash
+npm run generate -- --baseUrl https://example.com --mode hybrid
+```
+
+- **Blocks**: hero, CTA, featureGrid, pricing, FAQ, testimonial
+- **PHP sections**: header, footer, contactForm
+- **Fallback**: richText and unknown types rendered as HTML blocks
+
+#### Block Mode
+
+Pure WordPress blocks (requires Gutenberg):
+
+```bash
+npm run generate -- --baseUrl https://example.com --mode block
+```
+
+- All sections converted to core or custom blocks
+- Best for sites that will use block editor
+- Requires WordPress 5.9+
+
+#### PHP Mode
+
+Traditional PHP templates:
+
+```bash
+npm run generate -- --baseUrl https://example.com --mode php
+```
+
+- All sections rendered in PHP templates
+- Best for classic theme workflows
+- Compatible with older WordPress versions
+
+### Output Structure
+
+```
+theme-generator/output/<theme-slug>/
+├── style.css                    # Theme metadata + base styles
+├── functions.php                # Theme setup and enqueuing
+├── theme.json                   # Block theme configuration
+├── index.php                    # Fallback template
+├── templates/
+│   ├── home.html               # Home page block template
+│   ├── page.html               # Default page block template
+│   ├── contact.html            # Contact page block template
+│   └── ...                     # Other page templates
+├── parts/
+│   ├── header.html             # Header block pattern
+│   └── footer.html             # Footer block pattern
+├── patterns/
+│   ├── hero-*.php              # Hero section patterns
+│   ├── cta-*.php               # CTA patterns
+│   └── ...                     # Other reusable patterns
+├── sections/
+│   ├── header.php              # PHP header section
+│   ├── footer.php              # PHP footer section
+│   └── form-contact.php        # Contact form PHP section
+├── assets/
+│   ├── css/
+│   │   └── theme.css          # Compiled theme styles
+│   ├── js/
+│   │   └── theme.js           # Theme scripts
+│   └── images/                # Downloaded assets
+└── inc/
+    ├── block-renderer.php     # Block rendering utilities
+    └── section-loader.php     # PHP section loader
+```
+
+### Generation Process
+
+1. **Load inputs** - PageSpec, design tokens, patterns
+2. **Generate theme.json** - Colors, typography, spacing from tokens
+3. **Create style.css** - Theme header + global styles
+4. **Build functions.php** - Enqueue scripts, register blocks, theme support
+5. **Generate templates** - Block templates for each page type
+6. **Create patterns** - Reusable block patterns from layout patterns
+7. **Generate PHP sections** - Header, footer, forms
+8. **Copy assets** - Images, fonts, other downloaded files
+9. **Validate output** - Check required files and structure
+
+### Troubleshooting Theme Generation
+
+#### Missing PageSpec Files
+
+**Symptoms**: Generator reports "No PageSpec found for page X"
+
+**Solutions**:
+
+1. Verify Phase 3 completed successfully:
+   ```bash
+   ls crawler/output/pages/*/spec/pagespec.json
+   ```
+2. Check spec-summary.json for errors:
+   ```bash
+   cat crawler/output/spec/spec-summary.json | jq '.errors'
+   ```
+3. Re-run Phase 3 if specs are missing:
+   ```bash
+   npm run spec -- --baseUrl https://example.com
+   ```
+
+#### Invalid Design Tokens
+
+**Symptoms**: Theme has missing colors or fonts
+
+**Solutions**:
+
+1. Check design-tokens.json exists and is valid:
+   ```bash
+   cat crawler/output/spec/design-tokens.json | jq .
+   ```
+2. Verify tokens have values (may be null if not extracted):
+   ```bash
+   cat crawler/output/spec/design-tokens.json | jq '.colors'
+   ```
+3. If many tokens are null, check that Phase 2 HTML includes inline styles or CSS variables
+
+#### Theme Validation Errors
+
+**Symptoms**: Generated theme is missing required files
+
+**Solutions**:
+
+1. Check generation summary for errors:
+   ```bash
+   cat theme-generator/output/<theme-slug>/generation-summary.json | jq '.errors'
+   ```
+2. Verify all required files exist:
+   ```bash
+   ls theme-generator/output/<theme-slug>/{style.css,functions.php,index.php}
+   ```
+3. Re-run with verbose logging to see where generation failed:
+   ```bash
+   npm run generate -- --baseUrl https://example.com --verbose
+   ```
+
+#### Block Rendering Issues
+
+**Symptoms**: Blocks don't render correctly in WordPress
+
+**Solutions**:
+
+1. Verify WordPress version supports blocks (5.9+)
+2. Check theme.json syntax is valid:
+   ```bash
+   cat theme-generator/output/<theme-slug>/theme.json | jq .
+   ```
+3. Try switching to PHP mode as fallback:
+   ```bash
+   npm run generate -- --baseUrl https://example.com --mode php
+   ```
+
+#### Assets Not Copied
+
+**Symptoms**: Images or fonts missing in theme
+
+**Solutions**:
+
+1. Verify assets were downloaded in Phase 2:
+   ```bash
+   find crawler/output/pages/*/assets/files -type f | wc -l
+   ```
+2. Check includeAssets flag is enabled (default):
+   ```bash
+   npm run generate -- --baseUrl https://example.com --includeAssets true
+   ```
+3. Look for asset copy errors in generation log:
+   ```bash
+   cat theme-generator/output/<theme-slug>/generation.log | grep -i "asset"
+   ```
+
+#### Template Mapping Confusion
+
+**Symptoms**: Unclear which Wix pages map to which WordPress templates
+
+**Solutions**:
+
+1. Review the template mapping file:
+   ```bash
+   cat theme-generator/output/<theme-slug>/template-mapping.json | jq .
+   ```
+2. Check PageSpec template hints:
+   ```bash
+   cat crawler/output/pages/*/spec/pagespec.json | jq '.templateHint'
+   ```
+
+### Viewing Reports
+
+```bash
+# Find latest report directory
+ls -lt docs/REPORTS/ | head -2
+
+# View summary
+cat docs/REPORTS/<timestamp>/summary.md
+
+# Parse generation stats with jq
+cat docs/REPORTS/<timestamp>/run.json | jq '.stats'
+
+# View generation warnings
+cat docs/REPORTS/<timestamp>/run.json | jq '.warnings[]'
+
+# View generation errors
+cat docs/REPORTS/<timestamp>/run.json | jq '.errors[]'
+```
+
 ## Troubleshooting
 
 ### Common Issues

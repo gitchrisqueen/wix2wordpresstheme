@@ -556,6 +556,384 @@ type:hero|h:1|txt:1|med:1|cta:1
 
 ---
 
+## Phase 4: Theme Generator (Hybrid) ✅
+
+**Status**: Ready for Implementation (2026-01-27)
+
+**Purpose**: Convert PageSpec, design tokens, and layout patterns into a functional WordPress block theme with hybrid rendering (blocks + PHP sections).
+
+### Input
+
+From Phase 3 spec output:
+
+- `spec/design-tokens.json` - Global design system
+- `spec/layout-patterns.json` - Reusable section patterns
+- Per-page: `pages/<slug>/spec/pagespec.json` - Page specifications
+
+### Output
+
+```
+theme-generator/output/<theme-slug>/
+├── style.css                    # Theme metadata + base styles
+├── functions.php                # Theme setup, enqueuing, block registration
+├── theme.json                   # Block theme configuration (colors, typography, spacing)
+├── index.php                    # Fallback template (required)
+├── templates/
+│   ├── home.html               # Block template for homepage
+│   ├── page.html               # Default page block template
+│   ├── contact.html            # Contact page block template
+│   └── *.html                  # Other page-specific block templates
+├── parts/
+│   ├── header.html             # Header block pattern (site-wide)
+│   └── footer.html             # Footer block pattern (site-wide)
+├── patterns/
+│   ├── hero-image-cta.php      # Hero section pattern
+│   ├── feature-grid-3col.php   # Feature grid pattern
+│   ├── cta-centered.php        # CTA pattern
+│   └── *.php                   # Other reusable block patterns
+├── sections/
+│   ├── header.php              # PHP-rendered header
+│   ├── footer.php              # PHP-rendered footer
+│   └── form-contact.php        # PHP-rendered contact form
+├── assets/
+│   ├── css/
+│   │   ├── theme.css          # Compiled global styles
+│   │   └── blocks.css         # Block-specific styles
+│   ├── js/
+│   │   ├── theme.js           # Theme scripts (navigation, etc.)
+│   │   └── forms.js           # Form handling
+│   └── images/                # Copied from Phase 2 downloads
+│       └── fonts/             # Web fonts
+└── inc/
+    ├── block-renderer.php     # Hybrid block rendering logic
+    ├── section-loader.php     # PHP section include utilities
+    └── template-tags.php      # Helper functions
+```
+
+### Architecture: Hybrid Rendering Model
+
+#### Three Rendering Modes
+
+**1. Block Mode** (`mode: "block"`)
+- All sections converted to WordPress core/custom blocks
+- Pure Gutenberg block templates
+- Requires WordPress 5.9+
+- Best for: Sites that will be edited with block editor
+
+**2. PHP Mode** (`mode: "php"`)
+- Traditional PHP template hierarchy
+- All sections rendered server-side with PHP
+- Compatible with classic themes
+- Best for: Classic theme workflows, older WP versions
+
+**3. Hybrid Mode** (`mode: "hybrid"` - Default)
+- Combines blocks for content sections with PHP for system sections
+- Flexible and maintainable
+- Best for: Most conversions
+
+#### Hybrid Mode Section Mapping
+
+| Section Type | Rendering Method | Rationale |
+|--------------|------------------|-----------|
+| `header` | PHP (`sections/header.php`) | Navigation is dynamic, better in PHP |
+| `footer` | PHP (`sections/footer.php`) | Widget areas, menus - PHP-friendly |
+| `hero` | Block (`core/cover` + `core/heading` + `core/buttons`) | Visual composition suits blocks |
+| `CTA` | Block Pattern (`patterns/cta-*.php`) | Reusable, editor-friendly |
+| `featureGrid` | Block Pattern (`patterns/feature-grid-*.php`) | Structured layout with columns |
+| `gallery` | Block (`core/gallery`) | Built-in WordPress gallery |
+| `testimonial` | Block Pattern (`patterns/testimonial-*.php`) | Reusable quote + citation |
+| `pricing` | Block Pattern (`patterns/pricing-*.php`) | Structured pricing cards |
+| `FAQ` | Block Pattern (`patterns/faq-*.php`) | Expandable Q&A |
+| `contactForm` | PHP (`sections/form-contact.php`) | Form processing needs PHP |
+| `richText` | Block (`core/html` or `core/group`) | Preserve HTML verbatim |
+| `unknown` | Block (`core/html`) | Fallback to raw HTML |
+
+### Data Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Phase 4: Theme Generation                │
+└─────────────────────────────────────────────────────────────┘
+
+Input: PageSpec + Design Tokens + Patterns
+       │
+       ▼
+┌──────────────────────┐
+│ 1. Load Inputs       │  Read all PageSpec files, tokens, patterns
+└──────────────────────┘  Validate schemas
+       │
+       ▼
+┌──────────────────────┐
+│ 2. Generate          │  Extract colors, typography, spacing from tokens
+│    theme.json        │  Generate WordPress theme.json (v2 schema)
+└──────────────────────┘  Define custom color palette and font families
+       │
+       ▼
+┌──────────────────────┐
+│ 3. Build style.css   │  Theme metadata (name, author, version, etc.)
+│    + functions.php   │  Enqueue scripts and styles
+└──────────────────────┘  Register block patterns and template parts
+       │                   Add theme supports (block-styles, editor-styles)
+       ▼
+┌──────────────────────┐
+│ 4. Generate Block    │  For each PageSpec:
+│    Templates         │  - Determine template type (home, page, contact, etc.)
+└──────────────────────┘  - Convert sections to blocks or PHP placeholders
+       │                   - Create templates/*.html files
+       ▼
+┌──────────────────────┐
+│ 5. Create Block      │  Group layout patterns by signature
+│    Patterns          │  Generate reusable patterns/*.php
+└──────────────────────┘  Register patterns in functions.php
+       │
+       ▼
+┌──────────────────────┐
+│ 6. Generate PHP      │  header.php / footer.php for site-wide elements
+│    Sections          │  form-contact.php for contact forms
+└──────────────────────┘  Include navigation, widget areas
+       │
+       ▼
+┌──────────────────────┐
+│ 7. Copy Assets       │  Copy images, fonts from Phase 2 downloads
+│                      │  Organize in assets/ directory
+└──────────────────────┘  Update asset references in templates
+       │
+       ▼
+┌──────────────────────┐
+│ 8. Validate & Report │  Check required files exist
+│                      │  Validate theme.json, style.css
+└──────────────────────┘  Generate template-mapping.json
+       │                   Create generation-summary.json
+       ▼
+Output: WordPress Theme (ready to install)
+```
+
+### Component Breakdown
+
+#### 1. theme.json Generator (`generator/themeJson.ts`)
+
+Converts design tokens to WordPress theme.json (v2 schema):
+
+**Colors**:
+```json
+{
+  "settings": {
+    "color": {
+      "palette": [
+        { "slug": "primary", "color": "#ff0000", "name": "Primary" },
+        { "slug": "secondary", "color": "#0000ff", "name": "Secondary" }
+      ]
+    }
+  }
+}
+```
+
+**Typography**:
+```json
+{
+  "settings": {
+    "typography": {
+      "fontFamilies": [
+        { "slug": "body", "fontFamily": "Roboto, sans-serif", "name": "Body" },
+        { "slug": "heading", "fontFamily": "Montserrat, sans-serif", "name": "Heading" }
+      ]
+    }
+  }
+}
+```
+
+**Spacing**: Inferred from common padding/margin values in sections
+
+#### 2. Block Template Builder (`generator/blockTemplates.ts`)
+
+Converts PageSpec sections to block markup:
+
+**Input (PageSpec)**:
+```json
+{
+  "sections": [
+    {
+      "id": "sec_001",
+      "type": "hero",
+      "heading": { "level": 1, "text": "Welcome" },
+      "textBlocks": ["Subheading text"],
+      "ctas": [{ "text": "Get Started", "url": "/contact" }],
+      "media": [{ "type": "image", "src": "hero.jpg", "alt": "Hero" }]
+    }
+  ]
+}
+```
+
+**Output (Block Template)**:
+```html
+<!-- wp:cover {"url":"assets/images/hero.jpg","alt":"Hero"} -->
+<div class="wp-block-cover">
+  <!-- wp:heading {"level":1} -->
+  <h1>Welcome</h1>
+  <!-- /wp:heading -->
+  
+  <!-- wp:paragraph -->
+  <p>Subheading text</p>
+  <!-- /wp:paragraph -->
+  
+  <!-- wp:buttons -->
+  <div class="wp-block-buttons">
+    <!-- wp:button -->
+    <div class="wp-block-button">
+      <a class="wp-block-button__link" href="/contact">Get Started</a>
+    </div>
+    <!-- /wp:button -->
+  </div>
+  <!-- /wp:buttons -->
+</div>
+<!-- /wp:cover -->
+```
+
+#### 3. PHP Section Generator (`generator/phpSections.ts`)
+
+Creates traditional PHP template parts:
+
+**Header Section**:
+```php
+<?php
+/**
+ * Header section
+ * Rendered via: do_action('theme_render_header')
+ */
+?>
+<header id="site-header" role="banner">
+  <div class="header-container">
+    <?php if ( has_custom_logo() ) : ?>
+      <?php the_custom_logo(); ?>
+    <?php endif; ?>
+    
+    <nav id="site-navigation" role="navigation">
+      <?php
+      wp_nav_menu( array(
+        'theme_location' => 'primary',
+        'menu_class'     => 'primary-menu',
+      ) );
+      ?>
+    </nav>
+  </div>
+</header>
+```
+
+#### 4. Pattern Generator (`generator/patterns.ts`)
+
+Creates reusable block patterns from layout patterns:
+
+**Input (Layout Pattern)**:
+```json
+{
+  "signature": "type:hero|h:1|txt:1|med:1|cta:1",
+  "count": 5,
+  "examples": [
+    { "pageSlug": "home", "sectionId": "sec_001" },
+    { "pageSlug": "about", "sectionId": "sec_002" }
+  ]
+}
+```
+
+**Output (Pattern File)**:
+```php
+<?php
+/**
+ * Title: Hero with Image and CTA
+ * Slug: my-wix-theme/hero-image-cta
+ * Categories: featured
+ */
+?>
+<!-- wp:pattern {"slug":"my-wix-theme/hero-image-cta"} -->
+<!-- wp:cover -->
+<div class="wp-block-cover">
+  <!-- wp:heading {"level":1} -->
+  <h1><?php esc_html_e( 'Hero Heading', 'my-wix-theme' ); ?></h1>
+  <!-- /wp:heading -->
+  
+  <!-- wp:paragraph -->
+  <p><?php esc_html_e( 'Description text', 'my-wix-theme' ); ?></p>
+  <!-- /wp:paragraph -->
+  
+  <!-- wp:buttons -->
+  <div class="wp-block-buttons">
+    <!-- wp:button -->
+    <div class="wp-block-button">
+      <a class="wp-block-button__link"><?php esc_html_e( 'Call to Action', 'my-wix-theme' ); ?></a>
+    </div>
+    <!-- /wp:button -->
+  </div>
+  <!-- /wp:buttons -->
+</div>
+<!-- /wp:cover -->
+<!-- /wp:pattern -->
+```
+
+#### 5. Asset Copier (`generator/assets.ts`)
+
+- Copies downloaded assets from `crawler/output/pages/*/assets/files/`
+- Organizes by type: `images/`, `fonts/`, `css/`, `js/`
+- Updates asset URLs in templates to point to theme directory
+- Maintains hash-based filenames from Phase 2
+
+#### 6. Theme Validator (`generator/validator.ts`)
+
+Checks generated theme:
+
+- Required files exist: `style.css`, `functions.php`, `index.php`
+- `style.css` has valid theme header
+- `theme.json` is valid JSON and conforms to schema
+- Block templates are syntactically valid
+- Asset references resolve to existing files
+
+### Template Mapping Logic
+
+Maps PageSpec `templateHint` to WordPress template:
+
+| templateHint | WordPress Template | Description |
+|--------------|-------------------|-------------|
+| `home` | `templates/home.html` or `front-page.php` | Homepage |
+| `contact` | `templates/contact.html` | Contact page |
+| `landing` | `templates/landing.html` | Landing page |
+| `blogIndex` | `templates/archive.html` or `index.php` | Blog index |
+| `content` | `templates/page.html` | Standard content page |
+| `generic` | `templates/page.html` | Fallback page template |
+
+Template mapping saved to `template-mapping.json` for reference.
+
+### Error Handling & Fallbacks
+
+**Missing PageSpec**: Skip page, log warning
+**Null design tokens**: Use WordPress defaults
+**Unknown section type**: Fallback to `core/html` with original HTML
+**Invalid block syntax**: Wrap in HTML comment, log error
+**Asset not found**: Use placeholder or skip, log warning
+
+### Determinism & Reproducibility
+
+- Section order preserved from PageSpec
+- Block attribute order consistent
+- Pattern slugs generated from signature hash
+- Asset filenames preserved from Phase 2
+- Color slugs based on frequency order
+- Template file naming follows WordPress conventions
+
+### Trade-offs
+
+**Pros**:
+- **Hybrid flexibility** - Blocks where appropriate, PHP for complex logic
+- **Editor-friendly** - Content sections editable in Gutenberg
+- **Maintainable** - Clear separation of content and logic
+- **WordPress-native** - Uses core blocks and standard theme structure
+
+**Cons**:
+- **Complexity** - More moving parts than pure PHP or pure block approach
+- **WordPress version** - Requires 5.9+ for full block theme support
+- **Learning curve** - Developers need to understand both blocks and PHP
+- **Approximation** - Generated blocks won't perfectly match Wix design
+
+---
+
 ### 2. Crawler Module (Phase 2 - Coming Soon)
 
 **Purpose:** Extract complete page data including DOM, styles, assets, and content.
