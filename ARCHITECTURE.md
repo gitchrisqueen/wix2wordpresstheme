@@ -37,15 +37,15 @@
          │
          ▼
   ┌──────────────────┐
-  │ 3. SPEC GEN      │  Phase 3 (Coming)
+  │ 3. SPEC GEN      │  ✅ Phase 3 (Complete)
   │  (Analysis)      │  • PageSpec inference
   └──────────────────┘  • Design token extraction
-         │              • Layout detection
-         │              • Component mapping
+         │              • Layout pattern detection
+         │              • Section classification
          ▼
   ┌──────────────────┐
   │  PageSpec JSON   │  Structured page specifications
-  └──────────────────┘
+  └──────────────────┘  + Design tokens + Patterns
          │
          ▼
   ┌──────────────────┐
@@ -389,6 +389,160 @@ All outputs validated against JSON schemas:
 - `crawler/output/crawl-errors.json` - Failed pages (if any)
 - `docs/REPORTS/<timestamp>/run.json` - Machine-readable run report
 - `docs/REPORTS/<timestamp>/summary.md` - Human-readable summary
+
+---
+
+## Phase 3: Spec Generation ✅
+
+**Status**: Complete (2026-01-27)
+
+**Purpose**: Convert crawled HTML/DOM into structured PageSpec, extract design tokens, and detect reusable layout patterns.
+
+### Input
+
+From Phase 2 crawl output:
+- `manifest.json` - List of pages
+- Per-page data: `html/rendered.html`, `meta/meta.json`, `dom/dom.json`
+
+### Output
+
+```
+crawler/output/
+├── spec/
+│   ├── design-tokens.json      # Global design tokens
+│   ├── layout-patterns.json    # Reusable patterns
+│   └── spec-summary.json       # Generation summary
+└── pages/<slug>/
+    └── spec/
+        └── pagespec.json       # Per-page specification
+```
+
+### Architecture
+
+#### 1. Sectionizer (`spec/sectionizer.ts`)
+
+Converts HTML into ordered, typed sections using heuristics:
+
+**Section types**: header, hero, footer, CTA, contactForm, featureGrid, gallery, testimonial, pricing, FAQ, richText, unknown
+
+**Heuristics**:
+- Semantic tags: `<header>`, `<footer>`, `<main>`
+- Role attributes: `role="banner"`, `role="contentinfo"`
+- Class patterns: `.hero`, `.pricing`, `.testimonial`
+- Content patterns: h1 + CTA + image → hero
+- Form presence: `<form>` → contactForm
+
+**Extracted per section**:
+- Heading (first h1-h6 found)
+- Text blocks (p, li, blockquote)
+- CTAs (buttons and links)
+- Media (images with src/alt)
+- DOM anchor (for reference back to original)
+
+#### 2. PageSpec Inference (`spec/pagespecInfer.ts`)
+
+Generates PageSpec from inputs:
+
+**Template hint inference**:
+- `slug=""` → home
+- `slug match /contact/` → contact
+- `slug match /blog/` + multiple articles → blogIndex
+- Single h1 + 1-3 CTAs → landing
+- Many paragraphs → content
+- Otherwise → generic
+
+**Links extraction**: Internal vs external links from `<a href>`
+
+**Forms extraction**: Detects `<form>` with fields, labels, types
+
+#### 3. Design Token Extraction (`spec/designTokens.ts`)
+
+Extracts from inline styles and CSS variables:
+
+**Colors**:
+- Parse `style="color: #fff"` attributes
+- Parse `:root { --primary: #ff0000 }` from `<style>` tags
+- Detect hex (#RGB, #RRGGBB) and rgb()/rgba() values
+- Infer primary/secondary from frequency
+
+**Typography**:
+- Extract `font-family` from inline styles and CSS
+- Deduplicate font families
+
+**Buttons**:
+- Find `<button>`, `<a role="button">`, `.button` classes
+- Extract background-color, color, border-radius, padding, font-weight
+- Identify primary/secondary based on uniqueness
+
+**Output philosophy**: Conservative - output null for values we can't infer reliably.
+
+#### 4. Pattern Detection (`spec/patterns.ts`)
+
+Clusters similar sections across pages:
+
+**Signature generation** (`spec/signatures.ts`):
+```
+type:hero|h:1|txt:1|med:1|cta:1
+```
+- Section type
+- Heading presence (1/0)
+- Text count (0, 1, few, many)
+- Media count (bucketed)
+- CTA count (bucketed)
+
+**Clustering**:
+- Group sections by identical signature
+- Only create patterns for signatures with 2+ instances
+- Limit examples to first 5
+- Sort patterns by frequency (count descending)
+
+### Processing Flow
+
+```
+1. Load manifest.json
+2. For each page:
+   a. Load html, meta, dom
+   b. Sectionize HTML → sections[]
+   c. Extract links, forms
+   d. Infer template hint
+   e. Build PageSpec
+   f. Validate against schema
+   g. Write pagespec.json
+3. Collect HTML from all pages
+4. Extract design tokens
+5. Detect patterns from all sections
+6. Write design-tokens.json, layout-patterns.json, spec-summary.json
+7. Generate reports
+```
+
+### Error Handling
+
+- **Missing files**: Skip page, log error in summary
+- **Invalid JSON**: Skip page, log error
+- **No sections extracted**: Add warning note to pagespec
+- **Schema validation fails**: Throw error, abort
+- **Empty tokens**: Output null values, document in sources
+
+### Determinism
+
+- **Section IDs**: `sec_001`, `sec_002`, etc. (predictable)
+- **Section order**: Top-to-bottom DOM order
+- **Signature**: Same structure → same signature
+- **Token frequency**: Stable color/font ordering
+
+### Trade-offs
+
+**Pros**:
+- No AI/ML dependencies
+- Fast (processes 100 pages in seconds)
+- Deterministic outputs
+- Conservative (avoids hallucination)
+
+**Cons**:
+- Limited accuracy (many "unknown" sections)
+- Misses computed styles (only inline + CSS vars)
+- Coarse pattern matching (bucketed counts)
+- Manual tuning needed for unusual sites
 
 ---
 

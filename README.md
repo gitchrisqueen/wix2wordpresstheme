@@ -26,9 +26,16 @@ This project provides a complete solution for converting Wix websites into WordP
 - Concurrent page processing with configurable limits
 - Per-page output with JSON validation
 
-**Coming Soon**:
+**Phase 3: PageSpec and Design Token Extraction** ✅ **Complete**
 
-- Phase 3: PageSpec and design token extraction
+- PageSpec generation with section inference
+- Design token extraction (colors, fonts, buttons)
+- Layout pattern detection across pages
+- Heuristic-based section classification
+- Conservative inference with "unknown" fallbacks
+- Schema validation and deterministic output
+
+**Coming Soon**:
 - Phase 4: Theme generation
 - Phase 5: Testing and verification
 
@@ -275,6 +282,126 @@ npm run crawl -- \
   --timeoutMs 60000 \
   --settleMs 2000 \
   --verbose
+```
+
+## 🎨 Phase 3: PageSpec & Design Token Extraction
+
+Generate structured specifications and design tokens from crawled pages.
+
+### Quick Start
+
+```bash
+# Basic usage - generate specs from crawl output
+npm run discover -- --baseUrl https://example.com
+npm run crawl -- --baseUrl https://example.com --manifest crawler/output/manifest.json
+npm run spec -- --baseUrl https://example.com
+
+# Specify custom input/output directories
+npm run spec -- \
+  --baseUrl https://example.com \
+  --inDir ./crawler/output \
+  --outDir ./crawler/output
+
+# Limit number of pages to process
+npm run spec -- \
+  --baseUrl https://example.com \
+  --maxPages 10
+
+# Enable verbose logging
+npm run spec -- \
+  --baseUrl https://example.com \
+  --verbose
+```
+
+### Spec Options
+
+| Option        | Default           | Description                                    |
+| ------------- | ----------------- | ---------------------------------------------- |
+| `--baseUrl`   | (required)        | Base URL of the website                        |
+| `--inDir`     | `crawler/output`  | Input directory with crawl output              |
+| `--outDir`    | `crawler/output`  | Output directory for spec files                |
+| `--strategy`  | `heuristic`       | Inference strategy (only heuristic for now)    |
+| `--maxPages`  | (all)             | Maximum number of pages to process             |
+| `--verbose`   | `false`           | Enable verbose debug logging                   |
+
+### Outputs
+
+Spec generation creates the following outputs:
+
+```
+crawler/output/
+├── spec/
+│   ├── design-tokens.json      # Global design tokens
+│   ├── layout-patterns.json    # Reusable layout patterns
+│   └── spec-summary.json       # Generation summary
+└── pages/<slug>/
+    └── spec/
+        └── pagespec.json       # Per-page specification
+```
+
+**Per-page PageSpec (`pagespec.json`):**
+- Ordered sections with type inference (hero, footer, CTA, etc.)
+- Section content: headings, text blocks, CTAs, media
+- Forms and form fields
+- Internal and external links
+- Template hints (home, landing, content, etc.)
+
+**Global Design Tokens (`design-tokens.json`):**
+- Color palette (primary, secondary, palette)
+- Typography (font families, base size, headings)
+- Component styles (buttons: primary/secondary)
+- Extraction metadata (pages analyzed, methods used)
+
+**Layout Patterns (`layout-patterns.json`):**
+- Detected repeating section patterns
+- Pattern signatures and examples
+- Statistics (count, heading/text/media/CTA counts)
+
+**Summary Report (`spec-summary.json`):**
+- Pages processed and success/failure counts
+- Total sections and patterns detected
+- Per-page status and warnings
+
+Plus timestamped reports:
+
+1. **run.json** - Machine-readable run report
+   - Location: `docs/REPORTS/<timestamp>/run.json`
+2. **summary.md** - Human-readable summary
+   - Location: `docs/REPORTS/<timestamp>/summary.md`
+
+### Examples
+
+**Example 1: Full pipeline**
+
+```bash
+# Step 1: Discover pages
+npm run discover -- --baseUrl https://example.wixsite.com/mysite
+
+# Step 2: Crawl pages
+npm run crawl -- \
+  --baseUrl https://example.wixsite.com/mysite \
+  --manifest crawler/output/manifest.json
+
+# Step 3: Generate specs
+npm run spec -- --baseUrl https://example.wixsite.com/mysite
+```
+
+**Example 2: Limited processing**
+
+```bash
+npm run spec -- \
+  --baseUrl https://example.com \
+  --maxPages 5 \
+  --verbose
+```
+
+**Example 3: Custom directories**
+
+```bash
+npm run spec -- \
+  --baseUrl https://example.com \
+  --inDir ./custom-crawl \
+  --outDir ./custom-specs
 ```
 
 ## 🧪 Development

@@ -7,14 +7,13 @@
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import type { Manifest } from '../types/manifest.js';
-import type { PageSpec, SpecSummary, LayoutPatterns, DesignTokens, PageStatus } from '../types/spec.js';
+import type { PageSpec, SpecSummary, LayoutPatterns, PageStatus } from '../types/spec.js';
 import { inferPageSpec } from './pagespecInfer.js';
 import { extractDesignTokens } from './designTokens.js';
 import { detectPatterns } from './patterns.js';
 import { Logger } from '../lib/logger.js';
 import { writeJsonFile } from '../lib/fileio.js';
 import { ReportGenerator } from '../lib/report.js';
-import { getSchemaPath } from '../lib/validate.js';
 import { validatePageSpec, validateDesignTokens, validateLayoutPatterns, validateSpecSummary } from '../types/spec.js';
 
 export interface SpecConfig {
@@ -105,6 +104,7 @@ export async function runSpec(config: SpecConfig, logger: Logger): Promise<void>
           slug,
           url: page.url,
           status: 'failed',
+          warnings: [],
           error: (error as Error).message,
         });
       }
@@ -163,7 +163,13 @@ export async function runSpec(config: SpecConfig, logger: Logger): Promise<void>
     await reportGen.generateRunReport(
       reportDir,
       'spec',
-      config as Record<string, unknown>,
+      {
+        baseUrl: config.baseUrl,
+        inDir: config.inDir,
+        outDir: config.outDir,
+        maxPages: config.maxPages,
+        strategy: config.strategy,
+      },
       {
         pagesFound: pagesToProcess.length,
         pagesIncluded: pageSpecs.length,

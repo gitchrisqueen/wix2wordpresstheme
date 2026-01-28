@@ -7,7 +7,6 @@
 import type { PageSpec, TemplateHint, Form, FormField, Links } from '../types/spec.js';
 import { sectionizeHtml } from './sectionizer.js';
 import * as cheerio from 'cheerio';
-import { normalizeWhitespace } from '../lib/textNormalize.js';
 import { isInternalUrl } from '../lib/url.js';
 
 interface PageInputs {
@@ -32,7 +31,7 @@ interface PageInputs {
 /**
  * Infer template hint from page characteristics
  */
-function inferTemplateHint(url: string, slug: string, html: string): TemplateHint {
+function inferTemplateHint(slug: string, html: string): TemplateHint {
   const $ = cheerio.load(html);
   
   // Home page
@@ -52,9 +51,9 @@ function inferTemplateHint(url: string, slug: string, html: string): TemplateHin
   
   // Landing page (single h1, single CTA, minimal navigation)
   const h1Count = $('h1').length;
-  const ctaCount = $('button, a[href]').filter((_, el) => {
+  const ctaCount = $('button, a[href]').toArray().filter((el) => {
     const text = $(el).text().toLowerCase();
-    return text.match(/sign|buy|get|start|join|subscribe/);
+    return Boolean(text.match(/sign|buy|get|start|join|subscribe/));
   }).length;
   
   if (h1Count === 1 && ctaCount >= 1 && ctaCount <= 3) {
@@ -142,7 +141,7 @@ export function inferPageSpec(inputs: PageInputs): PageSpec {
   const notes: string[] = [];
   
   // Infer template hint
-  const templateHint = inferTemplateHint(url, slug, html);
+  const templateHint = inferTemplateHint(slug, html);
   
   // Sectionize HTML
   const sections = sectionizeHtml(html);

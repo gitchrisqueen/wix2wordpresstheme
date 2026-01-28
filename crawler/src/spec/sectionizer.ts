@@ -8,6 +8,7 @@
 import type { Section, SectionType, Cta, Media } from '../types/spec.js';
 import { normalizeWhitespace, extractText } from '../lib/textNormalize.js';
 import * as cheerio from 'cheerio';
+import type { Element } from 'domhandler';
 
 interface DomNode {
   type: 'element' | 'text';
@@ -27,7 +28,7 @@ function generateSectionId(index: number): string {
 /**
  * Infer section type from DOM structure and content
  */
-function inferSectionType($elem: cheerio.Cheerio<cheerio.Element>): SectionType {
+function inferSectionType($elem: cheerio.Cheerio<Element>): SectionType {
   const tag = $elem.prop('tagName')?.toLowerCase() || '';
   const role = $elem.attr('role');
   const classes = $elem.attr('class') || '';
@@ -104,7 +105,7 @@ function inferSectionType($elem: cheerio.Cheerio<cheerio.Element>): SectionType 
 /**
  * Extract section heading
  */
-function extractHeading($elem: cheerio.Cheerio<cheerio.Element>): string | null {
+function extractHeading($elem: cheerio.Cheerio<Element>): string | null {
   // Look for h1-h6 in order
   for (let i = 1; i <= 6; i++) {
     const heading = $elem.find(`h${i}`).first();
@@ -119,7 +120,7 @@ function extractHeading($elem: cheerio.Cheerio<cheerio.Element>): string | null 
 /**
  * Extract text blocks from section
  */
-function extractTextBlocks($elem: cheerio.Cheerio<cheerio.Element>): string[] {
+function extractTextBlocks($elem: cheerio.Cheerio<Element>): string[] {
   const blocks: string[] = [];
   
   $elem.find('p, li, blockquote').each((_, el) => {
@@ -135,7 +136,7 @@ function extractTextBlocks($elem: cheerio.Cheerio<cheerio.Element>): string[] {
 /**
  * Extract CTAs from section
  */
-function extractCtas($elem: cheerio.Cheerio<cheerio.Element>): Cta[] {
+function extractCtas($elem: cheerio.Cheerio<Element>): Cta[] {
   const ctas: Cta[] = [];
   
   $elem.find('a[href], button').each((_, el) => {
@@ -154,7 +155,7 @@ function extractCtas($elem: cheerio.Cheerio<cheerio.Element>): Cta[] {
 /**
  * Extract media from section
  */
-function extractMedia($elem: cheerio.Cheerio<cheerio.Element>): Media[] {
+function extractMedia($elem: cheerio.Cheerio<Element>): Media[] {
   const media: Media[] = [];
   
   $elem.find('img').each((_, el) => {
@@ -180,7 +181,7 @@ function extractMedia($elem: cheerio.Cheerio<cheerio.Element>): Media[] {
 /**
  * Generate DOM anchor for section
  */
-function generateDomAnchor($elem: cheerio.Cheerio<cheerio.Element>, index: number) {
+function generateDomAnchor($elem: cheerio.Cheerio<Element>, index: number) {
   // Try to use ID if available
   const id = $elem.attr('id');
   if (id) {
@@ -244,8 +245,8 @@ export function sectionizeHtml(html: string): Section[] {
  * Create a section from an element
  */
 function createSection(
-  $: cheerio.CheerioAPI,
-  $elem: cheerio.Cheerio<cheerio.Element>,
+  _$: cheerio.CheerioAPI,
+  $elem: cheerio.Cheerio<Element>,
   index: number
 ): Section | null {
   const type = inferSectionType($elem);

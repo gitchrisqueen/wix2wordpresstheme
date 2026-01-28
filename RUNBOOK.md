@@ -516,6 +516,59 @@ npm run test -- --theme-name converted-wix-theme
 - DOM structure validation
 - Test report in HTML format
 
+## Phase 3: Spec Generation
+
+Generate PageSpec, design tokens, and layout patterns from crawl output.
+
+### Prerequisites
+
+- Completed Phase 2 crawl with outputs in `crawler/output`
+- Manifest file and per-page data available
+
+### Basic Command
+
+```bash
+npm run spec -- --baseUrl https://example.com
+```
+
+### With Options
+
+```bash
+npm run spec -- \
+  --baseUrl https://example.com \
+  --inDir crawler/output \
+  --outDir crawler/output \
+  --maxPages 10 \
+  --verbose
+```
+
+### Output Structure
+
+```
+crawler/output/
+├── spec/
+│   ├── design-tokens.json      # Global design tokens
+│   ├── layout-patterns.json    # Reusable section patterns
+│   └── spec-summary.json       # Generation summary
+└── pages/<slug>/
+    └── spec/
+        └── pagespec.json       # Per-page specification
+```
+
+### Troubleshooting Spec Generation
+
+#### No Sections Extracted
+
+Check HTML files exist and contain semantic structure.
+
+#### Missing Design Tokens
+
+Tokens are extracted from inline styles and CSS variables - verify HTML has style information.
+
+#### Schema Validation Errors
+
+Ensure all Phase 2 files are valid JSON.
+
 ## Troubleshooting
 
 ### Common Issues
