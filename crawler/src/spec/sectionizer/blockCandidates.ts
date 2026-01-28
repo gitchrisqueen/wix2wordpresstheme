@@ -5,7 +5,8 @@
  * Prefers semantic sections, falls back to structural grouping.
  */
 
-import type { CheerioAPI, Cheerio, Element } from 'cheerio';
+import type { CheerioAPI, Cheerio } from 'cheerio';
+import type { Element } from 'domhandler';
 
 export interface BlockCandidate {
   element: Element;
@@ -106,7 +107,7 @@ export function generateBlockCandidates(
 /**
  * Create a wrapper element for a group of elements
  */
-function createGroupWrapper($: CheerioAPI, elements: Element[]): Element | null {
+function createGroupWrapper(_$: CheerioAPI, elements: Element[]): Element | null {
   if (elements.length === 0) return null;
 
   // If single element, return it

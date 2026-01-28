@@ -5,7 +5,8 @@
  * These landmarks become sections and define regions for further segmentation.
  */
 
-import type { CheerioAPI, Element } from 'cheerio';
+import type { CheerioAPI } from 'cheerio';
+import type { Element } from 'domhandler';
 
 export interface Landmark {
   type: 'header' | 'footer' | 'main';

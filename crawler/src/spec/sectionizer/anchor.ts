@@ -4,14 +4,15 @@
  * Generate stable DOM anchors for sections without relying on volatile attributes.
  */
 
-import type { CheerioAPI, Cheerio, Element } from 'cheerio';
+import type { CheerioAPI, Cheerio } from 'cheerio';
+import type { Element } from 'domhandler';
 import type { DomAnchor } from '../../types/spec.js';
 
 /**
  * Generate DOM anchor for a section
  */
 export function generateDomAnchor(
-  $: CheerioAPI,
+  _$: CheerioAPI,
   $elem: Cheerio<Element>,
   index: number,
   isLandmark: 'header' | 'footer' | 'main' | null = null
@@ -80,7 +81,8 @@ function isVolatileId(id: string): boolean {
  */
 function getStableDataAttributes($elem: Cheerio<Element>): string[] {
   const stableAttrs: string[] = [];
-  const attrs = $elem.get(0)?.attribs || {};
+  const elem = $elem.get(0);
+  const attrs = elem && 'attribs' in elem ? (elem.attribs as Record<string, string>) : {};
 
   for (const [key, value] of Object.entries(attrs)) {
     if (key.startsWith('data-')) {
@@ -120,7 +122,7 @@ function getStableClasses(classString: string): string[] {
 /**
  * Generate a CSS path for an element (as fallback)
  */
-export function generateCssPath($: CheerioAPI, $elem: Cheerio<Element>): string {
+export function generateCssPath(_$: CheerioAPI, $elem: Cheerio<Element>): string {
   const path: string[] = [];
   let current = $elem;
 

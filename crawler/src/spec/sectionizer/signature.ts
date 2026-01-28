@@ -4,7 +4,8 @@
  * Generate signatures for DOM nodes to detect repeated structures (grids).
  */
 
-import type { CheerioAPI, Cheerio, Element } from 'cheerio';
+import type { CheerioAPI, Cheerio } from 'cheerio';
+import type { Element } from 'domhandler';
 import { createHash } from 'crypto';
 
 export interface NodeSignature {
@@ -129,7 +130,7 @@ export function detectRepeatedSiblings(
   for (const item of signatures) {
     let foundMatch = false;
 
-    for (const [key, group] of groups.entries()) {
+    for (const group of groups.values()) {
       if (group.length > 0 && signaturesMatch(item.signature, group[0].signature)) {
         group.push(item);
         foundMatch = true;
@@ -138,8 +139,8 @@ export function detectRepeatedSiblings(
     }
 
     if (!foundMatch) {
-      const key = JSON.stringify(item.signature);
-      groups.set(key, [item]);
+      const signatureKey = JSON.stringify(item.signature);
+      groups.set(signatureKey, [item]);
     }
   }
 

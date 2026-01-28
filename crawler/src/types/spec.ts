@@ -62,6 +62,24 @@ export const DomAnchorSchema = z.object({
 
 export type DomAnchor = z.infer<typeof DomAnchorSchema>;
 
+// Form field
+export const FormFieldSchema = z.object({
+  label: z.string().nullable().optional(),
+  type: z.string(),
+  required: z.boolean().optional().default(false),
+});
+
+export type FormField = z.infer<typeof FormFieldSchema>;
+
+// Form
+export const FormSchema = z.object({
+  name: z.string().nullable().optional(),
+  fields: z.array(FormFieldSchema).optional().default([]),
+  submitText: z.string().nullable().optional(),
+});
+
+export type Form = z.infer<typeof FormSchema>;
+
 // Style hints for sections
 export const StyleHintsSchema = z.object({
   backgroundColor: z.string().nullable().optional(),
@@ -92,24 +110,6 @@ export const SectionSchema = z.object({
 });
 
 export type Section = z.infer<typeof SectionSchema>;
-
-// Form field
-export const FormFieldSchema = z.object({
-  label: z.string().nullable().optional(),
-  type: z.string(),
-  required: z.boolean().optional().default(false),
-});
-
-export type FormField = z.infer<typeof FormFieldSchema>;
-
-// Form
-export const FormSchema = z.object({
-  name: z.string().nullable().optional(),
-  fields: z.array(FormFieldSchema).optional().default([]),
-  submitText: z.string().nullable().optional(),
-});
-
-export type Form = z.infer<typeof FormSchema>;
 
 // Meta
 export const MetaSchema = z.object({

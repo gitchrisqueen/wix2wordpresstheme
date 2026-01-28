@@ -4,7 +4,8 @@
  * Classify block candidates using conservative heuristics.
  */
 
-import type { CheerioAPI, Cheerio, Element } from 'cheerio';
+import type { CheerioAPI, Cheerio } from 'cheerio';
+import type { Element } from 'domhandler';
 import type { SectionType } from '../../types/spec.js';
 import { extractText } from '../../lib/textNormalize.js';
 import { detectRepeatedSiblings } from './signature.js';

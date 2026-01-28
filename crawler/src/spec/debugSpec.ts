@@ -5,7 +5,7 @@
  * segmentation decisions for new layouts.
  */
 
-import type { CheerioAPI, Cheerio, Element } from 'cheerio';
+import type { CheerioAPI } from 'cheerio';
 import type { Logger } from '../lib/logger.js';
 import { writeJsonFile } from '../lib/fileio.js';
 import { join } from 'path';

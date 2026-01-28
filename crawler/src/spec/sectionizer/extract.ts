@@ -4,7 +4,8 @@
  * Extract structured content from each section.
  */
 
-import type { CheerioAPI, Cheerio, Element } from 'cheerio';
+import type { CheerioAPI, Cheerio } from 'cheerio';
+import type { Element } from 'domhandler';
 import type { Cta, Media, Form, FormField } from '../../types/spec.js';
 import { normalizeWhitespace } from '../../lib/textNormalize.js';
 import { isInternalUrl } from '../../lib/url.js';
@@ -59,6 +60,7 @@ export function extractTextBlocks(
     if (text && text.length > 10) {
       blocks.push(text);
     }
+    return undefined; // Continue iteration
   });
 
   return blocks;
@@ -241,7 +243,7 @@ export function extractLinkCounts(
  * Extract style hints from section
  */
 export function extractStyleHints(
-  $: CheerioAPI,
+  _$: CheerioAPI,
   $elem: Cheerio<Element>
 ): { backgroundColor: string | null; layout: 'fullWidth' | 'contained' | null } {
   // Background color
