@@ -26,7 +26,7 @@ export async function createThemeScaffold(
   outDir: string,
   themeName: string,
   designTokens: DesignTokens,
-  logger: Logger,
+  logger: Logger
 ): Promise<string> {
   // Create output directory if it doesn't exist
   if (!existsSync(outDir)) {
@@ -102,7 +102,7 @@ async function createStyleCSS(
   themeDir: string,
   metadata: ThemeMetadata,
   designTokens: DesignTokens,
-  logger: Logger,
+  logger: Logger
 ): Promise<void> {
   const content = `/*
 Theme Name: ${metadata.name}
@@ -153,7 +153,7 @@ body {
 async function createFunctionsPHP(
   themeDir: string,
   themeName: string,
-  logger: Logger,
+  logger: Logger
 ): Promise<void> {
   const content = `<?php
 /**

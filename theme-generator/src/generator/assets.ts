@@ -4,7 +4,15 @@
  * Copy assets from crawler output and generate asset map
  */
 
-import { copyFileSync, writeFileSync, mkdirSync, existsSync, readFileSync, readdirSync, statSync } from 'fs';
+import {
+  copyFileSync,
+  writeFileSync,
+  mkdirSync,
+  existsSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+} from 'fs';
 import { join, basename, dirname } from 'path';
 import { createHash } from 'crypto';
 import type { Logger } from '../../../crawler/src/lib/logger.js';
@@ -25,7 +33,7 @@ export function copyAssets(
   inDir: string,
   themeDir: string,
   manifest: Manifest,
-  logger: Logger,
+  logger: Logger
 ): Map<string, string> {
   const assetMap = new Map<string, string>();
   const assetsDir = join(themeDir, 'assets', 'imported');
@@ -49,7 +57,7 @@ export function copyAssets(
 
     try {
       const files = readdirSync(pageAssetsDir);
-      
+
       for (const file of files) {
         const sourcePath = join(pageAssetsDir, file);
         const stat = statSync(sourcePath);
@@ -108,7 +116,7 @@ export function copyAssets(
 export function generateAssetMap(
   themeDir: string,
   assetMap: Map<string, string>,
-  logger: Logger,
+  logger: Logger
 ): void {
   const generatedDir = join(themeDir, '.generated');
   if (!existsSync(generatedDir)) {
@@ -116,7 +124,7 @@ export function generateAssetMap(
   }
 
   const assetMapPath = join(generatedDir, 'asset-map.json');
-  
+
   // Convert Map to object for JSON serialization
   const assetMapObj: Record<string, string> = {};
   for (const [key, value] of assetMap.entries()) {
@@ -160,7 +168,7 @@ function getFileExtension(fileName: string): string {
 export function copySingleAsset(
   sourcePath: string,
   themeDir: string,
-  logger: Logger,
+  logger: Logger
 ): string | null {
   const assetsDir = join(themeDir, 'assets', 'imported');
 
@@ -199,7 +207,7 @@ export function copySingleAsset(
 export function resolveAssetUrl(
   url: string,
   localAsset: string | null | undefined,
-  assetMap: Map<string, string>,
+  assetMap: Map<string, string>
 ): string {
   // Check asset map first
   if (assetMap.has(url)) {
@@ -226,7 +234,7 @@ export function resolveAssetUrl(
  */
 export function getAssetType(fileName: string): string {
   const ext = getFileExtension(fileName).toLowerCase();
-  
+
   const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.ico'];
   const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
   const fontExtensions = ['.woff', '.woff2', '.ttf', '.otf', '.eot'];

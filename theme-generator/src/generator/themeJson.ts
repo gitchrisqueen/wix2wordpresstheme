@@ -95,7 +95,7 @@ export async function generateThemeJson(
   themeDir: string,
   designTokens: DesignTokens,
   metadata: GenerationMetadata,
-  logger: Logger,
+  logger: Logger
 ): Promise<void> {
   const themeJson: ThemeJson = {
     $schema: 'https://schemas.wp.org/trunk/theme.json',
@@ -121,7 +121,7 @@ export async function generateThemeJson(
 function buildColorSettings(
   designTokens: DesignTokens,
   metadata: GenerationMetadata,
-  logger: Logger,
+  logger: Logger
 ): { palette: Array<{ slug: string; color: string; name: string }> } | undefined {
   const colors = designTokens.colors;
   if (!colors) {
@@ -177,7 +177,7 @@ function buildColorSettings(
         slug: 'secondary',
         color: '#23282d',
         name: 'Secondary',
-      },
+      }
     );
     metadata.warnings.push('theme.json: Using default colors (no tokens available)');
   }
@@ -191,7 +191,7 @@ function buildColorSettings(
 function buildTypographySettings(
   designTokens: DesignTokens,
   metadata: GenerationMetadata,
-  logger: Logger,
+  logger: Logger
 ):
   | {
       fontFamilies?: Array<{ slug: string; fontFamily: string; name: string }>;
@@ -251,7 +251,7 @@ function buildTypographySettings(
 function buildStyles(
   designTokens: DesignTokens,
   _metadata: GenerationMetadata,
-  _logger: Logger,
+  _logger: Logger
 ): ThemeJson['styles'] {
   const styles: ThemeJson['styles'] = {
     typography: {},
@@ -280,20 +280,20 @@ function buildStyles(
     };
 
     if (buttonStyles.backgroundColor) {
-      styles.elements!.button!.color!.background = buttonStyles.backgroundColor;
+      styles.elements!.button.color!.background = buttonStyles.backgroundColor;
     }
 
     if (buttonStyles.color) {
-      styles.elements!.button!.color!.text = buttonStyles.color;
+      styles.elements!.button.color!.text = buttonStyles.color;
     }
 
     if (buttonStyles.borderRadius) {
-      styles.elements!.button!.border!.radius = buttonStyles.borderRadius;
+      styles.elements!.button.border!.radius = buttonStyles.borderRadius;
     }
 
     if (buttonStyles.padding) {
       // Parse padding (simple case: assume uniform)
-      styles.elements!.button!.spacing!.padding = {
+      styles.elements!.button.spacing!.padding = {
         top: buttonStyles.padding,
         right: buttonStyles.padding,
         bottom: buttonStyles.padding,
@@ -302,7 +302,7 @@ function buildStyles(
     }
 
     if (buttonStyles.fontWeight) {
-      styles.elements!.button!.typography!.fontWeight = buttonStyles.fontWeight;
+      styles.elements!.button.typography!.fontWeight = buttonStyles.fontWeight;
     }
   }
 

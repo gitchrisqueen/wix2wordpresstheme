@@ -63,10 +63,7 @@ interface LayoutPatterns {
 /**
  * Run the theme generator
  */
-export async function runGenerator(
-  options: GeneratorOptions,
-  logger: Logger,
-): Promise<void> {
+export async function runGenerator(options: GeneratorOptions, logger: Logger): Promise<void> {
   logger.info('Starting theme generation...');
 
   // Validate inputs
@@ -98,7 +95,7 @@ export async function runGenerator(
     options.outDir,
     options.themeName,
     designTokens,
-    logger,
+    logger
   );
   logger.info(`Theme directory: ${themeDir}`);
 
@@ -135,7 +132,7 @@ export async function runGenerator(
         options.mode,
         assetMap,
         metadata,
-        logger,
+        logger
       );
 
       pageMappings.push({
@@ -155,14 +152,7 @@ export async function runGenerator(
 
   // Generate reports
   logger.info('Generating reports...');
-  await generateReports(
-    options,
-    themeDir,
-    pageMappings,
-    metadata,
-    pageSpecs,
-    logger,
-  );
+  await generateReports(options, themeDir, pageMappings, metadata, pageSpecs, logger);
 
   logger.info('Theme generation complete');
 }
@@ -241,11 +231,7 @@ function loadLayoutPatterns(inDir: string, logger: Logger): LayoutPatterns {
 /**
  * Load all page specifications
  */
-function loadPageSpecs(
-  inDir: string,
-  manifest: Manifest,
-  logger: Logger,
-): PageSpec[] {
+function loadPageSpecs(inDir: string, manifest: Manifest, logger: Logger): PageSpec[] {
   const specs: PageSpec[] = [];
 
   for (const page of manifest.pages) {

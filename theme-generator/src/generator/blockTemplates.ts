@@ -29,7 +29,7 @@ export function generateBlockTemplates(
   mode: GeneratorMode,
   assetMap: Map<string, string>,
   metadata: GenerationMetadata,
-  logger: Logger,
+  logger: Logger
 ): BlockTemplateResult {
   const templateDir = join(themeDir, 'block-templates');
   if (!existsSync(templateDir)) {
@@ -68,7 +68,7 @@ function generateFullBlockTemplate(
   pageSpec: PageSpec,
   assetMap: Map<string, string>,
   _metadata: GenerationMetadata,
-  logger: Logger,
+  logger: Logger
 ): string {
   const blocks: string[] = [];
 
@@ -88,7 +88,7 @@ function generateFullBlockTemplate(
 function generateHybridBlockTemplate(
   pageSpec: PageSpec,
   metadata: GenerationMetadata,
-  logger: Logger,
+  logger: Logger
 ): string {
   const blocks: string[] = [];
 
@@ -139,7 +139,7 @@ get_footer();
 function sectionToBlocks(
   section: Section,
   assetMap: Map<string, string>,
-  _logger: Logger,
+  _logger: Logger
 ): string | null {
   const blocks: string[] = [];
 
@@ -174,7 +174,9 @@ function sectionToBlocks(
         const alt = media.alt || '';
         blocks.push('<!-- wp:image -->');
         blocks.push('<figure class="wp-block-image">');
-        blocks.push(`<img src="<?php echo esc_url(get_template_directory_uri() . '/${localPath}'); ?>" alt="${escapeHtml(alt)}" />`);
+        blocks.push(
+          `<img src="<?php echo esc_url(get_template_directory_uri() . '/${localPath}'); ?>" alt="${escapeHtml(alt)}" />`
+        );
         blocks.push('</figure>');
         blocks.push('<!-- /wp:image -->');
       }
@@ -189,7 +191,9 @@ function sectionToBlocks(
       const href = cta.href || '#';
       blocks.push('<!-- wp:button -->');
       blocks.push('<div class="wp-block-button">');
-      blocks.push(`<a class="wp-block-button__link" href="${escapeHtml(href)}">${escapeHtml(cta.text)}</a>`);
+      blocks.push(
+        `<a class="wp-block-button__link" href="${escapeHtml(href)}">${escapeHtml(cta.text)}</a>`
+      );
       blocks.push('</div>');
       blocks.push('<!-- /wp:button -->');
     }
@@ -226,7 +230,9 @@ function isSimpleSection(section: Section): boolean {
   const hasComplexMedia = section.media && section.media.length > MAX_MEDIA_COUNT;
   const hasForm = section.type === 'contactForm';
   const hasComplexLayout = ['gallery', 'pricing', 'featureGrid'].includes(section.type);
-  const hasManyItems = (section.textBlocks?.length || 0) > MAX_TEXT_BLOCKS || (section.ctas?.length || 0) > MAX_CTA_COUNT;
+  const hasManyItems =
+    (section.textBlocks?.length || 0) > MAX_TEXT_BLOCKS ||
+    (section.ctas?.length || 0) > MAX_CTA_COUNT;
 
   return !hasComplexMedia && !hasForm && !hasComplexLayout && !hasManyItems;
 }

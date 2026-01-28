@@ -21,6 +21,6 @@
     "rootDir": ".",
     "types": ["node", "vitest/globals"]
   },
-  "include": ["crawler/**/*.ts", "theme-generator/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts"],
+  "include": ["crawler/**/*.ts", "theme-generator/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts", "verifier/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

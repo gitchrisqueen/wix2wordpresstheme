@@ -128,7 +128,8 @@ async function discoverFromDOM(
 
             // Find last space to separate URL from descriptor
             const lastSpaceIndex = trimmed.lastIndexOf(' ');
-            const url = lastSpaceIndex === -1 ? trimmed : trimmed.substring(0, lastSpaceIndex).trim();
+            const url =
+              lastSpaceIndex === -1 ? trimmed : trimmed.substring(0, lastSpaceIndex).trim();
 
             addAsset(url, 'image');
           });
@@ -145,7 +146,8 @@ async function discoverFromDOM(
 
             // Find last space to separate URL from descriptor
             const lastSpaceIndex = trimmed.lastIndexOf(' ');
-            const url = lastSpaceIndex === -1 ? trimmed : trimmed.substring(0, lastSpaceIndex).trim();
+            const url =
+              lastSpaceIndex === -1 ? trimmed : trimmed.substring(0, lastSpaceIndex).trim();
 
             addAsset(url, 'image');
           });

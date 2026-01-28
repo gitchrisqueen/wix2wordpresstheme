@@ -47,8 +47,7 @@ export async function downloadAssets(
     urlSeen.add(asset.url);
 
     const assetOrigin = new URL(asset.url).origin;
-    const isThirdParty =
-      assetOrigin !== baseOrigin && !wixAssetOrigins.has(assetOrigin);
+    const isThirdParty = assetOrigin !== baseOrigin && !wixAssetOrigins.has(assetOrigin);
 
     if (isThirdParty && !options.downloadThirdPartyAssets) {
       downloadedAssets.push({

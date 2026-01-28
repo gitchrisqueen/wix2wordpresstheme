@@ -59,13 +59,9 @@ export function extractDesignTokens(pages: PageData[]): DesignTokens {
   const secondaryColor = sortedColors[1] || null;
 
   // Infer button styles (most common)
-  const primaryButtons = buttonStylesCollected
-    .map((b) => b.primary)
-    .filter((b) => b !== null) as Record<string, string>[];
+  const primaryButtons = buttonStylesCollected.map((b) => b.primary).filter((b) => b !== null);
 
-  const secondaryButtons = buttonStylesCollected
-    .map((b) => b.secondary)
-    .filter((b) => b !== null) as Record<string, string>[];
+  const secondaryButtons = buttonStylesCollected.map((b) => b.secondary).filter((b) => b !== null);
 
   const primaryButtonStyle = mergeButtonStyles(primaryButtons);
   const secondaryButtonStyle = mergeButtonStyles(secondaryButtons);

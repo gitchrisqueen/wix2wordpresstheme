@@ -20,16 +20,12 @@ program
   .option('--inDir <dir>', 'Input directory containing spec output', 'crawler/output')
   .option('--outDir <dir>', 'Output directory for generated theme', 'theme/output')
   .option('--themeName <name>', 'Theme name (slug format)', 'wix2wp')
-  .option(
-    '--mode <mode>',
-    'Generation mode: block, php, or hybrid (default: hybrid)',
-    'hybrid',
-  )
+  .option('--mode <mode>', 'Generation mode: block, php, or hybrid (default: hybrid)', 'hybrid')
   .option('--emitPatterns <boolean>', 'Emit WordPress block patterns', (val) =>
-    val === 'true' ? true : false,
+    val === 'true' ? true : false
   )
   .option('--emitThemeJson <boolean>', 'Emit theme.json file', (val) =>
-    val === 'true' ? true : false,
+    val === 'true' ? true : false
   )
   .option('--verbose', 'Enable verbose debug logging', false)
   .parse();

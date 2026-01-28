@@ -75,7 +75,7 @@ export const GenerationSummarySchema = z.object({
       template: z.string(),
       mode: GeneratorModeSchema,
       status: z.enum(['success', 'partial', 'failed']),
-    }),
+    })
   ),
   warnings: z.array(z.string()),
   errors: z.array(z.string()),
