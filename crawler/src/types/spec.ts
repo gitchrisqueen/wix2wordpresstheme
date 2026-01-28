@@ -23,7 +23,14 @@ export const SectionTypeSchema = z.enum([
 export type SectionType = z.infer<typeof SectionTypeSchema>;
 
 // Template hints
-export const TemplateHintSchema = z.enum(['home', 'landing', 'content', 'contact', 'blogIndex', 'generic']);
+export const TemplateHintSchema = z.enum([
+  'home',
+  'landing',
+  'content',
+  'contact',
+  'blogIndex',
+  'generic',
+]);
 
 export type TemplateHint = z.infer<typeof TemplateHintSchema>;
 

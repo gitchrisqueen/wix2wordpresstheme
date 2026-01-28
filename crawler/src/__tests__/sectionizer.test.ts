@@ -15,9 +15,9 @@ describe('sectionizeHtml', () => {
         </header>
       </body>
     `;
-    
+
     const sections = sectionizeHtml(html);
-    
+
     expect(sections.length).toBeGreaterThan(0);
     expect(sections[0].type).toBe('header');
     expect(sections[0].heading).toBe('Site Title');
@@ -35,9 +35,9 @@ describe('sectionizeHtml', () => {
         </main>
       </body>
     `;
-    
+
     const sections = sectionizeHtml(html);
-    
+
     expect(sections.length).toBeGreaterThan(0);
     // The first section should be detected (might be unknown if hero heuristics not met)
     expect(sections[0].heading).toBe('Welcome');
@@ -52,11 +52,11 @@ describe('sectionizeHtml', () => {
         </footer>
       </body>
     `;
-    
+
     const sections = sectionizeHtml(html);
-    
+
     expect(sections.length).toBeGreaterThan(0);
-    const footer = sections.find(s => s.type === 'footer');
+    const footer = sections.find((s) => s.type === 'footer');
     expect(footer).toBeDefined();
   });
 
@@ -75,11 +75,11 @@ describe('sectionizeHtml', () => {
         </main>
       </body>
     `;
-    
+
     const sections = sectionizeHtml(html);
-    
+
     expect(sections.length).toBeGreaterThan(0);
-    const contact = sections.find(s => s.type === 'contactForm');
+    const contact = sections.find((s) => s.type === 'contactForm');
     expect(contact).toBeDefined();
   });
 
@@ -96,11 +96,11 @@ describe('sectionizeHtml', () => {
         </main>
       </body>
     `;
-    
+
     const sections = sectionizeHtml(html);
-    
+
     expect(sections.length).toBeGreaterThan(0);
-    const gallery = sections.find(s => s.media && s.media.length >= 3);
+    const gallery = sections.find((s) => s.media && s.media.length >= 3);
     expect(gallery).toBeDefined();
     expect(gallery?.media[0].src).toBe('/img1.jpg');
     expect(gallery?.media[0].alt).toBe('Image 1');
@@ -116,9 +116,9 @@ describe('sectionizeHtml', () => {
         </main>
       </body>
     `;
-    
+
     const sections = sectionizeHtml(html);
-    
+
     expect(sections.length).toBe(3);
     expect(sections[0].id).toBe('sec_001');
     expect(sections[1].id).toBe('sec_002');
@@ -135,9 +135,9 @@ describe('sectionizeHtml', () => {
         </main>
       </body>
     `;
-    
+
     const sections = sectionizeHtml(html);
-    
+
     // Should only have sections with content
     expect(sections.length).toBe(1);
     expect(sections[0].heading).toBe('Has content');
@@ -156,9 +156,9 @@ describe('sectionizeHtml', () => {
         </main>
       </body>
     `;
-    
+
     const sections = sectionizeHtml(html);
-    
+
     expect(sections.length).toBeGreaterThan(0);
     const richText = sections[0];
     expect(richText.textBlocks.length).toBe(3);
@@ -177,9 +177,9 @@ describe('sectionizeHtml', () => {
         </main>
       </body>
     `;
-    
+
     const sections = sectionizeHtml(html);
-    
+
     expect(sections.length).toBeGreaterThan(0);
     const cta = sections[0];
     expect(cta.ctas.length).toBe(2);

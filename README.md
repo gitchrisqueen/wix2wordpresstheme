@@ -36,6 +36,7 @@ This project provides a complete solution for converting Wix websites into WordP
 - Schema validation and deterministic output
 
 **Coming Soon**:
+
 - Phase 4: Theme generation
 - Phase 5: Testing and verification
 
@@ -88,16 +89,16 @@ npm run discover -- --baseUrl https://example.com --verbose
 
 ### Discovery Options
 
-| Option              | Default            | Description                                    |
-| ------------------- | ------------------ | ---------------------------------------------- |
-| `--baseUrl`         | (required)         | Base URL of the website to discover            |
-| `--outDir`          | `crawler/output`   | Output directory for manifest.json             |
-| `--respectRobots`   | `true`             | Respect robots.txt directives                  |
-| `--maxDepth`        | `2`                | Maximum crawl depth (0 = homepage only)        |
-| `--maxPages`        | `500`              | Maximum number of pages to crawl               |
-| `--keepQuery`       | `false`            | Keep query strings in URLs                     |
-| `--includeUnreach`able | `false`         | Include unreachable URLs in manifest           |
-| `--verbose`         | `false`            | Enable verbose debug logging                   |
+| Option                 | Default          | Description                             |
+| ---------------------- | ---------------- | --------------------------------------- |
+| `--baseUrl`            | (required)       | Base URL of the website to discover     |
+| `--outDir`             | `crawler/output` | Output directory for manifest.json      |
+| `--respectRobots`      | `true`           | Respect robots.txt directives           |
+| `--maxDepth`           | `2`              | Maximum crawl depth (0 = homepage only) |
+| `--maxPages`           | `500`            | Maximum number of pages to crawl        |
+| `--keepQuery`          | `false`          | Keep query strings in URLs              |
+| `--includeUnreach`able | `false`          | Include unreachable URLs in manifest    |
+| `--verbose`            | `false`          | Enable verbose debug logging            |
 
 ### Outputs
 
@@ -197,22 +198,22 @@ npm run crawl -- \
 
 ### Crawl Options
 
-| Option              | Default            | Description                                    |
-| ------------------- | ------------------ | ---------------------------------------------- |
-| `--baseUrl`         | (required)         | Base URL of the website                        |
-| `--manifest`        | (required)         | Path to manifest.json from discovery           |
-| `--outDir`          | `crawler/output`   | Output directory for crawl results             |
-| `--maxPages`        | (all)              | Maximum number of pages to crawl               |
-| `--concurrency`     | `3`                | Number of concurrent page captures             |
-| `--timeoutMs`       | `45000`            | Page load timeout in milliseconds              |
-| `--retries`         | `2`                | Number of retries per page on failure          |
-| `--waitUntil`       | `networkidle`      | Wait strategy (networkidle, domcontentloaded)  |
-| `--settleMs`        | `750`              | Additional wait time after page load           |
-| `--breakpoints`     | `desktop,mobile`   | Comma-separated viewport names                 |
-| `--downloadAssets`  | `true`             | Download page assets (images, fonts, CSS)      |
-| `--respectRobots`   | `true`             | Respect robots.txt from discovery              |
-| `--allowPartial`    | `false`            | Allow partial success (don't exit on failures) |
-| `--verbose`         | `false`            | Enable verbose debug logging                   |
+| Option             | Default          | Description                                    |
+| ------------------ | ---------------- | ---------------------------------------------- |
+| `--baseUrl`        | (required)       | Base URL of the website                        |
+| `--manifest`       | (required)       | Path to manifest.json from discovery           |
+| `--outDir`         | `crawler/output` | Output directory for crawl results             |
+| `--maxPages`       | (all)            | Maximum number of pages to crawl               |
+| `--concurrency`    | `3`              | Number of concurrent page captures             |
+| `--timeoutMs`      | `45000`          | Page load timeout in milliseconds              |
+| `--retries`        | `2`              | Number of retries per page on failure          |
+| `--waitUntil`      | `networkidle`    | Wait strategy (networkidle, domcontentloaded)  |
+| `--settleMs`       | `750`            | Additional wait time after page load           |
+| `--breakpoints`    | `desktop,mobile` | Comma-separated viewport names                 |
+| `--downloadAssets` | `true`           | Download page assets (images, fonts, CSS)      |
+| `--respectRobots`  | `true`           | Respect robots.txt from discovery              |
+| `--allowPartial`   | `false`          | Allow partial success (don't exit on failures) |
+| `--verbose`        | `false`          | Enable verbose debug logging                   |
 
 ### Outputs
 
@@ -315,14 +316,14 @@ npm run spec -- \
 
 ### Spec Options
 
-| Option        | Default           | Description                                    |
-| ------------- | ----------------- | ---------------------------------------------- |
-| `--baseUrl`   | (required)        | Base URL of the website                        |
-| `--inDir`     | `crawler/output`  | Input directory with crawl output              |
-| `--outDir`    | `crawler/output`  | Output directory for spec files                |
-| `--strategy`  | `heuristic`       | Inference strategy (only heuristic for now)    |
-| `--maxPages`  | (all)             | Maximum number of pages to process             |
-| `--verbose`   | `false`           | Enable verbose debug logging                   |
+| Option       | Default          | Description                                 |
+| ------------ | ---------------- | ------------------------------------------- |
+| `--baseUrl`  | (required)       | Base URL of the website                     |
+| `--inDir`    | `crawler/output` | Input directory with crawl output           |
+| `--outDir`   | `crawler/output` | Output directory for spec files             |
+| `--strategy` | `heuristic`      | Inference strategy (only heuristic for now) |
+| `--maxPages` | (all)            | Maximum number of pages to process          |
+| `--verbose`  | `false`          | Enable verbose debug logging                |
 
 ### Outputs
 
@@ -340,6 +341,7 @@ crawler/output/
 ```
 
 **Per-page PageSpec (`pagespec.json`):**
+
 - Ordered sections with type inference (hero, footer, CTA, etc.)
 - Section content: headings, text blocks, CTAs, media
 - Forms and form fields
@@ -347,17 +349,20 @@ crawler/output/
 - Template hints (home, landing, content, etc.)
 
 **Global Design Tokens (`design-tokens.json`):**
+
 - Color palette (primary, secondary, palette)
 - Typography (font families, base size, headings)
 - Component styles (buttons: primary/secondary)
 - Extraction metadata (pages analyzed, methods used)
 
 **Layout Patterns (`layout-patterns.json`):**
+
 - Detected repeating section patterns
 - Pattern signatures and examples
 - Statistics (count, heading/text/media/CTA counts)
 
 **Summary Report (`spec-summary.json`):**
+
 - Pages processed and success/failure counts
 - Total sections and patterns detected
 - Per-page status and warnings

@@ -118,16 +118,16 @@ npm run discover -- --baseUrl https://example.com --verbose
 
 #### Full Options Reference
 
-| Option                 | Default          | Description                            |
-| ---------------------- | ---------------- | -------------------------------------- |
-| `--baseUrl <url>`      | (required)       | Base URL of the website                |
-| `--outDir <path>`      | `crawler/output` | Output directory for manifest          |
-| `--respectRobots`      | `true`           | Respect robots.txt directives          |
-| `--maxDepth <number>`  | `2`              | Maximum crawl depth                    |
-| `--maxPages <number>`  | `500`            | Maximum pages to crawl                 |
-| `--keepQuery`          | `false`          | Keep query strings in URLs             |
-| `--includeUnreachable` | `false`          | Include unreachable URLs in manifest   |
-| `--verbose`            | `false`          | Enable verbose debug logging           |
+| Option                 | Default          | Description                          |
+| ---------------------- | ---------------- | ------------------------------------ |
+| `--baseUrl <url>`      | (required)       | Base URL of the website              |
+| `--outDir <path>`      | `crawler/output` | Output directory for manifest        |
+| `--respectRobots`      | `true`           | Respect robots.txt directives        |
+| `--maxDepth <number>`  | `2`              | Maximum crawl depth                  |
+| `--maxPages <number>`  | `500`            | Maximum pages to crawl               |
+| `--keepQuery`          | `false`          | Keep query strings in URLs           |
+| `--includeUnreachable` | `false`          | Include unreachable URLs in manifest |
+| `--verbose`            | `false`          | Enable verbose debug logging         |
 
 ### Expected Output
 

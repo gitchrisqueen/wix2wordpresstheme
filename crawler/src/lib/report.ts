@@ -159,13 +159,16 @@ ${errors.length > 0 ? `## Errors (${errors.length})\n${errors.map((e) => `- ${e.
   /**
    * Generate summary markdown for spec generation
    */
-  async generateSummaryMarkdown(reportDir: string, specStats: {
-    command: string;
-    pagesProcessed: number;
-    pagesSucceeded: number;
-    totalSections: number;
-    totalPatterns: number;
-  }): Promise<void> {
+  async generateSummaryMarkdown(
+    reportDir: string,
+    specStats: {
+      command: string;
+      pagesProcessed: number;
+      pagesSucceeded: number;
+      totalSections: number;
+      totalPatterns: number;
+    }
+  ): Promise<void> {
     const logs = this.logger.getLogs();
     const warnings = logs.filter((log) => log.level === 'WARN');
     const errors = logs.filter((log) => log.level === 'ERROR');

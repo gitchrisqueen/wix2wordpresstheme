@@ -103,9 +103,11 @@ async function discoverFromDOM(
       });
 
       // Favicons
-      document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]').forEach((link) => {
-        addAsset(link.href, 'image');
-      });
+      document
+        .querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]')
+        .forEach((link) => {
+          addAsset(link.href, 'image');
+        });
 
       // OG images
       document.querySelectorAll('meta[property="og:image"]').forEach((meta) => {

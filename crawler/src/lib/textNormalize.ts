@@ -92,16 +92,14 @@ export function normalizeSelector(selector: string): string {
     .split(' ')
     .map((part) => {
       // Remove classes that look like comp-xxxx or wixui-xxxx
-      const classes = part
-        .split('.')
-        .filter((cls) => {
-          if (!cls) return false;
-          // Keep semantic classes, remove generated ones
-          if (cls.match(/^(comp|wixui|style__)[a-zA-Z0-9_-]+/)) {
-            return false;
-          }
-          return true;
-        });
+      const classes = part.split('.').filter((cls) => {
+        if (!cls) return false;
+        // Keep semantic classes, remove generated ones
+        if (cls.match(/^(comp|wixui|style__)[a-zA-Z0-9_-]+/)) {
+          return false;
+        }
+        return true;
+      });
       return classes.join('.');
     })
     .filter((part) => part.length > 0)

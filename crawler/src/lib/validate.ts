@@ -24,7 +24,10 @@ export async function loadSchema(schemaPath: string) {
 /**
  * Validate data against a schema file
  */
-export async function validateAgainstSchema(data: unknown, schemaPath: string): Promise<{
+export async function validateAgainstSchema(
+  data: unknown,
+  schemaPath: string
+): Promise<{
   valid: boolean;
   errors: string[] | null;
 }> {
@@ -33,9 +36,7 @@ export async function validateAgainstSchema(data: unknown, schemaPath: string): 
     const valid = validate(data);
 
     if (!valid && validate.errors) {
-      const errors = validate.errors.map(
-        (err) => `${err.instancePath || 'root'} ${err.message}`
-      );
+      const errors = validate.errors.map((err) => `${err.instancePath || 'root'} ${err.message}`);
       return { valid: false, errors };
     }
 

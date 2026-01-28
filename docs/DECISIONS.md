@@ -459,6 +459,7 @@ This document records key technical decisions made during the development of the
 - **Uniqueness** - Hash suffix added if slug collision occurs
 
 **Structure**:
+
 ```
 pages/<slug>/
 ├── page.json
@@ -474,7 +475,7 @@ pages/<slug>/
 - **Depth** - Creates many nested directories
 - **Duplication** - Some assets stored multiple times if not deduplicated
 
-###  Decision: JSON Schema Validation for All Outputs
+### Decision: JSON Schema Validation for All Outputs
 
 **Date**: 2026-01-27
 

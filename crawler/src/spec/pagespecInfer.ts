@@ -33,39 +33,41 @@ interface PageInputs {
  */
 function inferTemplateHint(slug: string, html: string): TemplateHint {
   const $ = cheerio.load(html);
-  
+
   // Home page
   if (slug === '' || slug === 'index' || slug === 'home') {
     return 'home';
   }
-  
+
   // Contact page
   if (slug.match(/contact|reach|touch/i)) {
     return 'contact';
   }
-  
+
   // Blog index
   if (slug.match(/blog|news|articles/i) && $('article').length >= 3) {
     return 'blogIndex';
   }
-  
+
   // Landing page (single h1, single CTA, minimal navigation)
   const h1Count = $('h1').length;
-  const ctaCount = $('button, a[href]').toArray().filter((el) => {
-    const text = $(el).text().toLowerCase();
-    return Boolean(text.match(/sign|buy|get|start|join|subscribe/));
-  }).length;
-  
+  const ctaCount = $('button, a[href]')
+    .toArray()
+    .filter((el) => {
+      const text = $(el).text().toLowerCase();
+      return Boolean(text.match(/sign|buy|get|start|join|subscribe/));
+    }).length;
+
   if (h1Count === 1 && ctaCount >= 1 && ctaCount <= 3) {
     return 'landing';
   }
-  
+
   // Content page (lots of paragraphs)
   const pCount = $('p').length;
   if (pCount >= 5) {
     return 'content';
   }
-  
+
   return 'generic';
 }
 
@@ -77,21 +79,27 @@ function extractLinks(html: string, baseUrl: string): Links {
   const internal: string[] = [];
   const external: string[] = [];
   const seen = new Set<string>();
-  
+
   $('a[href]').each((_, elem) => {
     const href = $(elem).attr('href');
-    if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) {
+    if (
+      !href ||
+      href.startsWith('#') ||
+      href.startsWith('javascript:') ||
+      href.startsWith('mailto:') ||
+      href.startsWith('tel:')
+    ) {
       return;
     }
-    
+
     try {
       const fullUrl = new URL(href, baseUrl).toString();
-      
+
       if (seen.has(fullUrl)) {
         return;
       }
       seen.add(fullUrl);
-      
+
       if (isInternalUrl(fullUrl, baseUrl)) {
         internal.push(fullUrl);
       } else {
@@ -101,7 +109,7 @@ function extractLinks(html: string, baseUrl: string): Links {
       // Invalid URL, skip
     }
   });
-  
+
   return { internal, external };
 }
 
@@ -111,24 +119,24 @@ function extractLinks(html: string, baseUrl: string): Links {
 function extractForms(html: string): Form[] {
   const $ = cheerio.load(html);
   const forms: Form[] = [];
-  
+
   $('form').each((_, formElem) => {
     const $form = $(formElem);
     const name = $form.attr('name') || $form.attr('id') || null;
     const fields: FormField[] = [];
-    
+
     $form.find('input, textarea, select').each((_, inputElem) => {
       const $input = $(inputElem);
       const type = $input.attr('type') || $input.prop('tagName')?.toLowerCase() || 'text';
       const label = $input.attr('placeholder') || $input.attr('aria-label') || null;
       const required = $input.attr('required') !== undefined;
-      
+
       fields.push({ label, type, required });
     });
-    
+
     forms.push({ name, fields });
   });
-  
+
   return forms;
 }
 
@@ -137,25 +145,25 @@ function extractForms(html: string): Form[] {
  */
 export function inferPageSpec(inputs: PageInputs): PageSpec {
   const { url, slug, baseUrl, html, meta } = inputs;
-  
+
   const notes: string[] = [];
-  
+
   // Infer template hint
   const templateHint = inferTemplateHint(slug, html);
-  
+
   // Sectionize HTML
   const sections = sectionizeHtml(html);
-  
+
   if (sections.length === 0) {
     notes.push('Warning: No sections could be extracted from the page');
   }
-  
+
   // Extract links
   const links = extractLinks(html, baseUrl);
-  
+
   // Extract forms
   const forms = extractForms(html);
-  
+
   // Build meta object
   const pageMeta = {
     title: meta.title,
@@ -163,7 +171,7 @@ export function inferPageSpec(inputs: PageInputs): PageSpec {
     canonical: meta.canonical,
     og: meta.og,
   };
-  
+
   return {
     version: '1.0.0',
     baseUrl,

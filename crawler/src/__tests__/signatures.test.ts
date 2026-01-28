@@ -15,7 +15,7 @@ describe('generateSignature', () => {
       ctas: [],
       media: [],
     };
-    
+
     expect(generateSignature(section)).toBe('type:unknown|h:0|txt:0|med:0|cta:0');
   });
 
@@ -28,7 +28,7 @@ describe('generateSignature', () => {
       ctas: [{ text: 'Get Started', href: '/signup' }],
       media: [{ type: 'image', src: '/hero.jpg', alt: 'Hero', localAsset: null }],
     };
-    
+
     expect(generateSignature(section)).toBe('type:hero|h:1|txt:1|med:1|cta:1');
   });
 
@@ -40,7 +40,7 @@ describe('generateSignature', () => {
       ctas: [],
       media: [],
     };
-    
+
     expect(generateSignature(section)).toBe('type:richText|h:0|txt:many|med:0|cta:0');
   });
 
@@ -56,7 +56,7 @@ describe('generateSignature', () => {
         { type: 'image', src: '/3.jpg', alt: '', localAsset: null },
       ],
     };
-    
+
     expect(generateSignature(section)).toBe('type:gallery|h:0|txt:0|med:few|cta:0');
   });
 });

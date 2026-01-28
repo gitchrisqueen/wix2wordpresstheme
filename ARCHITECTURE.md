@@ -305,9 +305,7 @@ On timeout/failure, retry with fallback:
         "type": "element",
         "tag": "h1",
         "attributes": { "class": "title" },
-        "children": [
-          { "type": "text", "text": "Hello World" }
-        ]
+        "children": [{ "type": "text", "text": "Hello World" }]
       }
     ]
   },
@@ -401,6 +399,7 @@ All outputs validated against JSON schemas:
 ### Input
 
 From Phase 2 crawl output:
+
 - `manifest.json` - List of pages
 - Per-page data: `html/rendered.html`, `meta/meta.json`, `dom/dom.json`
 
@@ -426,6 +425,7 @@ Converts HTML into ordered, typed sections using heuristics:
 **Section types**: header, hero, footer, CTA, contactForm, featureGrid, gallery, testimonial, pricing, FAQ, richText, unknown
 
 **Heuristics**:
+
 - Semantic tags: `<header>`, `<footer>`, `<main>`
 - Role attributes: `role="banner"`, `role="contentinfo"`
 - Class patterns: `.hero`, `.pricing`, `.testimonial`
@@ -433,6 +433,7 @@ Converts HTML into ordered, typed sections using heuristics:
 - Form presence: `<form>` → contactForm
 
 **Extracted per section**:
+
 - Heading (first h1-h6 found)
 - Text blocks (p, li, blockquote)
 - CTAs (buttons and links)
@@ -444,6 +445,7 @@ Converts HTML into ordered, typed sections using heuristics:
 Generates PageSpec from inputs:
 
 **Template hint inference**:
+
 - `slug=""` → home
 - `slug match /contact/` → contact
 - `slug match /blog/` + multiple articles → blogIndex
@@ -460,16 +462,19 @@ Generates PageSpec from inputs:
 Extracts from inline styles and CSS variables:
 
 **Colors**:
+
 - Parse `style="color: #fff"` attributes
 - Parse `:root { --primary: #ff0000 }` from `<style>` tags
 - Detect hex (#RGB, #RRGGBB) and rgb()/rgba() values
 - Infer primary/secondary from frequency
 
 **Typography**:
+
 - Extract `font-family` from inline styles and CSS
 - Deduplicate font families
 
 **Buttons**:
+
 - Find `<button>`, `<a role="button">`, `.button` classes
 - Extract background-color, color, border-radius, padding, font-weight
 - Identify primary/secondary based on uniqueness
@@ -481,9 +486,11 @@ Extracts from inline styles and CSS variables:
 Clusters similar sections across pages:
 
 **Signature generation** (`spec/signatures.ts`):
+
 ```
 type:hero|h:1|txt:1|med:1|cta:1
 ```
+
 - Section type
 - Heading presence (1/0)
 - Text count (0, 1, few, many)
@@ -491,6 +498,7 @@ type:hero|h:1|txt:1|med:1|cta:1
 - CTA count (bucketed)
 
 **Clustering**:
+
 - Group sections by identical signature
 - Only create patterns for signatures with 2+ instances
 - Limit examples to first 5
@@ -533,12 +541,14 @@ type:hero|h:1|txt:1|med:1|cta:1
 ### Trade-offs
 
 **Pros**:
+
 - No AI/ML dependencies
 - Fast (processes 100 pages in seconds)
 - Deterministic outputs
 - Conservative (avoids hallucination)
 
 **Cons**:
+
 - Limited accuracy (many "unknown" sections)
 - Misses computed styles (only inline + CSS vars)
 - Coarse pattern matching (bucketed counts)

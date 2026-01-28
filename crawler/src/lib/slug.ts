@@ -54,11 +54,7 @@ export function uniqueSlug(url: string, existingSlugs: Set<string>): string {
   }
 
   // Append short hash from URL to make it unique
-  const urlHash = require('crypto')
-    .createHash('sha256')
-    .update(url)
-    .digest('hex')
-    .substring(0, 8);
+  const urlHash = require('crypto').createHash('sha256').update(url).digest('hex').substring(0, 8);
 
   return `${baseSlug}-${urlHash}`;
 }
