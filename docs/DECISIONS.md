@@ -775,6 +775,231 @@ pages/<slug>/
 
 ---
 
+## Phase 5: Designer-Friendly Local WordPress & Verification
+
+### Decision: docker-compose Over WP-ENV Package
+
+**Date**: 2026-01-28
+
+**Context**: Need a local WordPress environment for development and testing.
+
+**Decision**: Use docker-compose with custom configuration instead of @wordpress/env package.
+
+**Rationale**:
+
+- **Full control** - Can customize all services, volumes, and networks
+- **Designer-friendly** - Single `npm run dev` command with no Docker knowledge required
+- **Transparency** - All configuration visible in docker-compose.yml
+- **Flexibility** - Easy to add/modify services (PHPMyAdmin, WP-CLI, etc.)
+- **Standard tool** - docker-compose is widely used and well-documented
+- **Theme mounting** - Easy to mount generated themes as read-only volumes
+- **No hidden abstractions** - Everything explicit, easier to debug
+
+**Trade-offs**:
+
+- **Manual configuration** - More initial setup than wp-env package
+- **No wp-env CLI** - Can't use wp-env commands (but have docker-compose commands)
+- **More files** - docker-compose.yml, .env.example, provision scripts
+
+**Alternatives Considered**:
+
+1. **@wordpress/env** - Simpler but less control and harder to customize
+2. **Local by Flywheel** - GUI tool, not scriptable or CI-friendly
+3. **Manual LAMP stack** - Too complex, no reproducibility
+
+### Decision: WP-CLI for Auto-Provisioning
+
+**Date**: 2026-01-28
+
+**Context**: Need to automatically set up WordPress without manual clicks.
+
+**Decision**: Use WP-CLI in a one-shot Docker service to provision WordPress.
+
+**Rationale**:
+
+- **Scriptable** - All setup steps as shell commands
+- **Idempotent** - Safe to run multiple times, checks before acting
+- **Official tool** - WP-CLI is the standard WordPress management tool
+- **No GUI needed** - Everything via command line
+- **One-shot service** - Runs once on startup, exits when done
+- **Logs everything** - Output to wp-env/logs/setup.log for debugging
+- **Version tracking** - Stores setup version in wp_options
+
+**Implementation**:
+
+- Use `wordpress:cli` Docker image
+- Mount WordPress volume and theme/manifest
+- Shell script with health checks and error handling
+- Check if installed before running wp core install
+- Store provisioning state to avoid duplicates
+
+**Trade-offs**:
+
+- **Shell scripting** - More brittle than a full programming language
+- **Limited JSON parsing** - Can't easily parse page-mapping.json without jq
+- **Async delays** - Need waits for services to be ready
+
+**Alternatives Considered**:
+
+1. **Node.js provisioning** - More powerful but adds complexity
+2. **Manual setup** - Not repeatable, not designer-friendly
+3. **WordPress REST API** - Requires WordPress already set up
+
+### Decision: Playwright for Verification Screenshots
+
+**Date**: 2026-01-28
+
+**Context**: Need to capture screenshots of Wix and WordPress pages for visual comparison.
+
+**Decision**: Use Playwright (reuse from Phase 2) for screenshot capture in verification.
+
+**Rationale**:
+
+- **Already used** - Playwright is already in Phase 2 crawler
+- **Consistent** - Same tool for Wix and WP screenshots ensures fair comparison
+- **Full browser** - Executes JavaScript, handles dynamic content
+- **Multiple viewports** - Easy desktop, mobile, tablet breakpoints
+- **Headless** - Fast, no GUI overhead
+- **Network idle** - Waits for page to fully load before capturing
+
+**Trade-offs**:
+
+- **Slower** - Browser overhead vs simple HTTP screenshots
+- **Resource-heavy** - Memory and CPU intensive
+- **Flaky potential** - Network issues or page timeouts can cause failures
+
+**Alternatives Considered**:
+
+1. **Puppeteer** - Similar but Playwright has better API
+2. **Simple HTTP + screenshot service** - Faster but can't handle JS-heavy sites
+3. **Browser extension** - Manual, not scriptable
+
+### Decision: pixelmatch for Visual Diff
+
+**Date**: 2026-01-28
+
+**Context**: Need to compare screenshot images and detect visual differences.
+
+**Decision**: Use pixelmatch library for pixel-by-pixel image comparison.
+
+**Rationale**:
+
+- **Industry standard** - Used by many visual regression tools
+- **Fast** - C++ binding, efficient pixel comparison
+- **Configurable threshold** - Adjust sensitivity via --thresholdPixelRatio
+- **Diff images** - Generates highlighted diff PNG
+- **Anti-aliasing aware** - Can ignore sub-pixel differences
+- **No external service** - Pure Node.js, no API calls
+
+**Implementation**:
+
+- Read PNG images with pngjs
+- Resize to same dimensions if needed (pad with white)
+- Compare with pixelmatch
+- Calculate percentage difference
+- Pass/fail based on threshold
+
+**Trade-offs**:
+
+- **Pixel-level only** - Doesn't understand semantic meaning
+- **Sensitive to rendering** - Font rendering, image compression affect results
+- **Threshold tuning** - May need adjustment per site
+- **False positives** - Dynamic content (dates, times) causes failures
+
+**Alternatives Considered**:
+
+1. **Resemblejs** - Similar but slower
+2. **Visual regression service** - External API, cost and privacy concerns
+3. **Manual comparison** - Not scalable, subjective
+
+### Decision: HTML Report for Designers
+
+**Date**: 2026-01-28
+
+**Context**: Designers need clear, visual reports, not just JSON.
+
+**Decision**: Generate HTML report with embedded screenshots and pass/fail badges.
+
+**Rationale**:
+
+- **Visual** - Side-by-side screenshots show differences clearly
+- **Designer-friendly** - No technical jargon, clear pass/fail status
+- **Self-contained** - Single HTML file (with relative image paths)
+- **Browser-based** - Open in any browser, no special tools
+- **Color-coded** - Green/red badges for instant understanding
+- **Detailed** - Shows DOM checks, link checks, and warnings
+
+**Report contents**:
+
+- Summary with pass/fail rates
+- Per-page cards with:
+  - Wix screenshot
+  - WordPress screenshot
+  - Diff image
+  - DOM check results
+  - Link check results
+- Expandable details for failures
+
+**Trade-offs**:
+
+- **Not interactive** - Static HTML, can't filter or sort
+- **Manual generation** - Need to regenerate for each run
+- **Image storage** - Large screenshots increase report size
+
+**Alternatives Considered**:
+
+1. **JSON only** - Machine-readable but not designer-friendly
+2. **PDF report** - Harder to generate, not web-native
+3. **Web dashboard** - More complex, requires server
+
+### Decision: Designer-First Philosophy
+
+**Date**: 2026-01-28
+
+**Context**: Tool must be usable by designers, not just developers.
+
+**Decision**: Optimize entire UX for designers who may not know Docker, WP-CLI, or Node.js.
+
+**Design principles**:
+
+- **One command to rule them all** - `npm run dev` starts everything
+- **No manual steps** - Auto-provision WordPress, theme, pages
+- **Clear output** - Print URLs designers can click
+- **Friendly errors** - Plain English, not stack traces
+- **Visual reports** - HTML with screenshots, not JSON
+- **Reversible** - `npm run wp:reset` for clean slate
+- **Documentation** - Designer-focused README in wp-env/
+
+**What designers should NOT need to know**:
+
+- How Docker works
+- What wp-admin is
+- How to use WP-CLI
+- What a REST API is
+- How to read JSON
+
+**What designers SHOULD be able to do**:
+
+- Run `npm run dev`
+- Open browser
+- Edit CSS and templates
+- Refresh browser
+- Run `npm run verify`
+- Read HTML report
+
+**Trade-offs**:
+
+- **Less control** - Abstractions hide complexity
+- **Magic** - "It just works" but hard to debug when it doesn't
+- **Opinionated** - Prescribes one workflow
+
+**Alternatives Considered**:
+
+1. **Developer-first** - More power but steeper learning curve
+2. **Manual setup** - More flexible but not repeatable
+
+---
+
 ## Future Decisions (To Be Made)
 
 - Phase 5: WordPress local deployment and content import

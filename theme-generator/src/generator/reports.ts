@@ -7,11 +7,11 @@
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import type { Logger } from '../../../crawler/src/lib/logger.js';
-import type { 
-  GeneratorOptions, 
-  GenerationMetadata, 
+import type {
+  GeneratorOptions,
+  GenerationMetadata,
   PageTemplateMapping,
-  GenerationSummary
+  GenerationSummary,
 } from '../types/generator.js';
 import type { PageSpec } from '../../../crawler/src/types/spec.js';
 
@@ -24,7 +24,7 @@ export function generateReports(
   pageMappings: PageTemplateMapping[],
   metadata: GenerationMetadata,
   pageSpecs: PageSpec[],
-  logger: Logger,
+  logger: Logger
 ): void {
   // Convert array to Map for easier lookup
   const pageSpecMap = new Map<string, PageSpec>();
@@ -53,7 +53,7 @@ function generateGenerationMetadata(
   themeDir: string,
   options: GeneratorOptions,
   metadata: GenerationMetadata,
-  logger: Logger,
+  logger: Logger
 ): void {
   const generatedDir = join(themeDir, '.generated');
   if (!existsSync(generatedDir)) {
@@ -90,7 +90,7 @@ function generateGenerationMetadata(
 function generatePageMappings(
   themeDir: string,
   pageMappings: PageTemplateMapping[],
-  logger: Logger,
+  logger: Logger
 ): void {
   const generatedDir = join(themeDir, '.generated');
   if (!existsSync(generatedDir)) {
@@ -115,7 +115,7 @@ function generateSummaryReport(
   options: GeneratorOptions,
   pageMappings: PageTemplateMapping[],
   metadata: GenerationMetadata,
-  logger: Logger,
+  logger: Logger
 ): void {
   if (!existsSync(outDir)) {
     mkdirSync(outDir, { recursive: true });
@@ -157,7 +157,7 @@ function generateComprehensiveReport(
   pageMappings: PageTemplateMapping[],
   metadata: GenerationMetadata,
   pageSpecs: Map<string, PageSpec>,
-  logger: Logger,
+  logger: Logger
 ): void {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
   const reportDir = join(process.cwd(), 'docs', 'REPORTS', timestamp);
@@ -184,7 +184,7 @@ function generateRunJson(
   pageMappings: PageTemplateMapping[],
   metadata: GenerationMetadata,
   pageSpecs: Map<string, PageSpec>,
-  logger: Logger,
+  logger: Logger
 ): void {
   const runJsonPath = join(reportDir, 'run.json');
 
@@ -234,7 +234,7 @@ function generateSummaryMarkdown(
   pageMappings: PageTemplateMapping[],
   metadata: GenerationMetadata,
   pageSpecs: Map<string, PageSpec>,
-  logger: Logger,
+  logger: Logger
 ): void {
   const summaryMdPath = join(reportDir, 'summary.md');
 
@@ -260,7 +260,7 @@ function generateSummaryMarkdown(
   lines.push('');
   lines.push('| Slug | Template | Mode | Sections | Template Hint |');
   lines.push('|------|----------|------|----------|---------------|');
-  
+
   for (const mapping of pageMappings) {
     const spec = pageSpecs.get(mapping.slug);
     const sectionCount = spec?.sections.length || 0;

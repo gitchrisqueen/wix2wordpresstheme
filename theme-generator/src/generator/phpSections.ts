@@ -17,7 +17,7 @@ export function generatePHPSections(
   themeDir: string,
   _mode: GeneratorMode,
   _metadata: GenerationMetadata,
-  logger: Logger,
+  logger: Logger
 ): void {
   const sectionsDir = join(themeDir, 'parts', 'sections');
   if (!existsSync(sectionsDir)) {

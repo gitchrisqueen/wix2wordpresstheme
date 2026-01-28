@@ -224,8 +224,9 @@ async function aggregateAssetStats(
       const assets = Array.isArray(data.assets) ? data.assets : [];
 
       totalAssets += assets.length;
-      assetsDownloaded += assets.filter((asset: { status?: string }) => asset.status === 'downloaded')
-        .length;
+      assetsDownloaded += assets.filter(
+        (asset: { status?: string }) => asset.status === 'downloaded'
+      ).length;
     } catch (error) {
       logger.debug(`No assets manifest for ${result.outputPath}: ${String(error)}`);
     }

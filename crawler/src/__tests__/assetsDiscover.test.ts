@@ -42,12 +42,13 @@ describe('asset discovery utilities', () => {
     });
 
     it('should handle Cloudinary URLs with commas in path (transformation params)', () => {
-      const srcset = 'https://static.example.com/media/image.png/v1/fill/w_206,h_90,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/image.png 1x, https://static.example.com/media/image.png/v1/fill/w_412,h_180,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/image.png 2x';
+      const srcset =
+        'https://static.example.com/media/image.png/v1/fill/w_206,h_90,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/image.png 1x, https://static.example.com/media/image.png/v1/fill/w_412,h_180,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/image.png 2x';
       const urls = parseSrcset(srcset);
 
       expect(urls).toEqual([
         'https://static.example.com/media/image.png/v1/fill/w_206,h_90,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/image.png',
-        'https://static.example.com/media/image.png/v1/fill/w_412,h_180,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/image.png'
+        'https://static.example.com/media/image.png/v1/fill/w_412,h_180,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/image.png',
       ]);
     });
 

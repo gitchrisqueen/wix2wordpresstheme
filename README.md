@@ -45,9 +45,14 @@ This project provides a complete solution for converting Wix websites into WordP
 - Asset management and mapping
 - Comprehensive reporting and metadata
 
-**Coming Soon**:
+**Phase 5: Designer-Friendly Local WP + Auto Provision + Verification** ✅ **Complete**
 
-- Phase 5: Testing and verification
+- One-command local WordPress startup (docker-compose)
+- Automatic WordPress provisioning via WP-CLI
+- Automatic theme activation and page creation
+- Visual and DOM verification (Wix vs WP)
+- Designer-friendly HTML reports with screenshots
+- No manual wp-admin setup required
 
 ## 📋 Prerequisites
 
@@ -69,6 +74,65 @@ npm install
 npm run typecheck
 npm run test
 ```
+
+## 🎨 Designer Quick Start
+
+**For designers who just want to see the converted theme** – this is all you need:
+
+```bash
+# 1. Start local WordPress (one command!)
+npm run dev
+
+# 2. Open in browser
+open http://localhost:8080
+
+# 3. Edit theme files
+cd theme/output/<your-theme>
+# Make changes to CSS, templates, etc.
+
+# 4. Refresh browser to see changes
+
+# 5. When ready, verify against original
+npm run verify -- --baseUrl https://yourwixsite.com --wpUrl http://localhost:8080
+```
+
+### What npm run dev Does
+
+1. ✅ Starts MariaDB, WordPress, and PHPMyAdmin
+2. ✅ Installs WordPress automatically
+3. ✅ Activates your generated theme
+4. ✅ Creates pages from your Wix site
+5. ✅ Sets up navigation menus
+6. ✅ Prints access URLs
+
+**No clicking around wp-admin. No manual setup. Just run and view.**
+
+### Access Points
+
+- **WordPress**: http://localhost:8080
+- **Admin Panel**: http://localhost:8080/wp-admin (admin / password)
+- **PHPMyAdmin**: http://localhost:8081
+
+### Designer Workflow Commands
+
+```bash
+# Start WordPress
+npm run dev
+
+# Stop WordPress
+npm run wp:down
+
+# View logs
+npm run wp:logs
+
+# Reset everything (clean slate)
+npm run wp:reset
+
+# Verify conversion quality
+npm run verify -- --baseUrl https://yourwixsite.com --wpUrl http://localhost:8080
+```
+
+See [wp-env/README.md](./wp-env/README.md) for detailed WordPress environment documentation.
 
 ## 🔍 Phase 1: URL Discovery
 
@@ -623,6 +687,150 @@ npm run generate -- \
   --baseUrl https://example.com \
   --mode php \
   --themeName pixel-perfect-theme
+```
+
+## 🏢 Phase 5: Local WordPress & Verification
+
+Automatically deploy and verify your theme in a local WordPress environment.
+
+### Quick Start
+
+```bash
+# Full pipeline including verification
+npm run discover -- --baseUrl https://example.com
+npm run crawl -- --baseUrl https://example.com --manifest crawler/output/manifest.json
+npm run spec -- --baseUrl https://example.com
+npm run generate -- --baseUrl https://example.com
+npm run dev
+npm run verify -- --baseUrl https://example.com --wpUrl http://localhost:8080
+```
+
+### Docker-Based Local WordPress
+
+The `npm run dev` command starts a complete WordPress environment with:
+
+- **MariaDB**: Database backend
+- **WordPress**: Latest version with your theme
+- **PHPMyAdmin**: Database management UI
+- **Auto-provisioning**: Installs WP, activates theme, creates pages
+
+Everything is **idempotent** - safe to run multiple times.
+
+```bash
+# Start WordPress
+npm run dev
+
+# Access WordPress
+open http://localhost:8080
+
+# Stop WordPress  
+npm run wp:down
+
+# Reset everything
+npm run wp:reset
+
+# View logs
+npm run wp:logs
+```
+
+### Verification
+
+Compare your WordPress theme against the original Wix site:
+
+```bash
+npm run verify -- \
+  --baseUrl https://example.wixsite.com/mysite \
+  --wpUrl http://localhost:8080 \
+  --manifest crawler/output/manifest.json \
+  --themeName wix2wp \
+  --outDir verifier/output \
+  --breakpoints desktop,mobile \
+  --thresholdPixelRatio 0.01
+```
+
+### Verification Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--baseUrl` | (required) | Original Wix site URL |
+| `--wpUrl` | (required) | Local WordPress URL |
+| `--manifest` | `crawler/output/manifest.json` | Path to manifest |
+| `--themeName` | `wix2wp` | Theme to verify |
+| `--outDir` | `verifier/output` | Output directory |
+| `--breakpoints` | `desktop,mobile` | Viewports to test |
+| `--thresholdPixelRatio` | `0.01` | Diff threshold (1%) |
+| `--allowPartial` | `false` | Exit 0 on partial success |
+| `--verbose` | `false` | Enable verbose logging |
+
+### Verification Process
+
+1. **URL Mapping**: Maps Wix pages to WP pages using manifest and page-mapping.json
+2. **Screenshots**: Captures Wix and WP screenshots at each breakpoint
+3. **Visual Diff**: Compares screenshots and generates diff images
+4. **DOM Checks**: Verifies title, canonical, H1, meta description
+5. **Link Checks**: Tests internal links and asset loading
+6. **Reports**: Generates JSON and HTML reports
+
+### Verification Outputs
+
+```
+verifier/output/
+├── verify-summary.json          # Machine-readable report
+└── <slug>/
+    └── screenshots/
+        ├── wix-desktop.png      # Wix screenshot
+        ├── wp-desktop.png       # WordPress screenshot
+        ├── diff-desktop.png     # Diff image
+        └── ...
+
+docs/REPORTS/<timestamp>/
+└── index.html                   # Designer-friendly HTML report
+```
+
+### Example Verification Report
+
+The HTML report shows:
+
+- ✅ **Summary**: Pass/fail rates and statistics
+- 📸 **Visual Comparisons**: Side-by-side Wix vs WP screenshots with diffs
+- 🔍 **DOM Checks**: Title, canonical, H1, meta tags
+- 🔗 **Link Health**: Internal links and asset loading status
+- ⚠️ **Warnings**: Visual differences exceeding threshold
+
+Open `docs/REPORTS/<timestamp>/index.html` in your browser after verification.
+
+### Examples
+
+**Example 1: Full pipeline with verification**
+
+```bash
+# Generate theme and verify
+npm run discover -- --baseUrl https://example.wixsite.com/mysite
+npm run crawl -- --baseUrl https://example.wixsite.com/mysite --manifest crawler/output/manifest.json
+npm run spec -- --baseUrl https://example.wixsite.com/mysite
+npm run generate -- --baseUrl https://example.wixsite.com/mysite
+npm run dev
+npm run verify -- --baseUrl https://example.wixsite.com/mysite --wpUrl http://localhost:8080
+```
+
+**Example 2: Quick mobile-only verification**
+
+```bash
+npm run verify -- \
+  --baseUrl https://example.com \
+  --wpUrl http://localhost:8080 \
+  --breakpoints mobile \
+  --thresholdPixelRatio 0.02
+```
+
+**Example 3: Strict verification (fail on any difference)**
+
+```bash
+npm run verify -- \
+  --baseUrl https://example.com \
+  --wpUrl http://localhost:8080 \
+  --thresholdPixelRatio 0.005 \
+  --allowPartial false
 ```
 
 ## 🧪 Development

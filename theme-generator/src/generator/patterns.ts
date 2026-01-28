@@ -25,7 +25,7 @@ export function generateBlockPatterns(
   themeDir: string,
   layoutPatterns: LayoutPatterns | null,
   metadata: GenerationMetadata,
-  logger: Logger,
+  logger: Logger
 ): void {
   if (!layoutPatterns || !layoutPatterns.patterns || layoutPatterns.patterns.length === 0) {
     logger.info('No layout patterns to generate');
@@ -44,7 +44,7 @@ export function generateBlockPatterns(
       const content = generatePatternFile(pattern, logger);
       const fileName = sanitizePatternId(pattern.patternId) + '.php';
       const filePath = join(patternsDir, fileName);
-      
+
       writeFileSync(filePath, content, 'utf-8');
       logger.debug(`Generated pattern: ${fileName}`);
       emittedCount++;
@@ -92,7 +92,7 @@ function generatePatternTitle(pattern: Pattern): string {
   // Add pattern stats for context
   const stats = pattern.stats;
   const elements: string[] = [];
-  
+
   if (stats.headingCount && stats.headingCount > 0) {
     elements.push('heading');
   }
@@ -136,9 +136,10 @@ function generatePatternDescription(pattern: Pattern): string {
     parts.push('form');
   }
 
-  const description = parts.length > 0 
-    ? `A ${pattern.type} section with ${parts.join(', ')}.`
-    : `A ${pattern.type} section.`;
+  const description =
+    parts.length > 0
+      ? `A ${pattern.type} section with ${parts.join(', ')}.`
+      : `A ${pattern.type} section.`;
 
   return description + ` Found ${stats.count} time${stats.count > 1 ? 's' : ''} in source site.`;
 }
@@ -199,7 +200,9 @@ function generatePatternContent(pattern: Pattern): string {
   if (stats.textCount && stats.textCount > 0) {
     for (let i = 0; i < Math.min(stats.textCount, MAX_PATTERN_TEXT_BLOCKS); i++) {
       blocks.push('<!-- wp:paragraph -->');
-      blocks.push('<p>Add your content here. This is a placeholder text that demonstrates the pattern structure.</p>');
+      blocks.push(
+        '<p>Add your content here. This is a placeholder text that demonstrates the pattern structure.</p>'
+      );
       blocks.push('<!-- /wp:paragraph -->');
     }
   }

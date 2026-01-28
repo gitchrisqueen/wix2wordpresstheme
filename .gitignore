@@ -47,6 +47,10 @@ docker-compose.override.yml
 wordpress-local/wordpress/
 wordpress-local/data/
 
+# WP-Env
+wp-env/logs/*.log
+wp-env/.env
+
 # Crawler outputs
 crawler/output/
 crawler/downloads/
