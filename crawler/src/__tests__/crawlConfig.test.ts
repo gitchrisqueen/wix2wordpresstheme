@@ -36,6 +36,12 @@ function normalizeCrawlConfig(cliOptions: any, manifest: any, defaults: any): an
     settleMs: getValue(cliOptions.settleMs, null, defaults.settleMs || 750),
     breakpoints,
     downloadAssets: getValue(cliOptions.downloadAssets, null, defaults.downloadAssets ?? true),
+    allowThirdParty: getValue(cliOptions.allowThirdParty, null, defaults.allowThirdParty ?? true),
+    downloadThirdPartyAssets: getValue(
+      cliOptions.downloadThirdPartyAssets,
+      null,
+      defaults.downloadThirdPartyAssets ?? false
+    ),
     respectRobots: getValue(
       cliOptions.respectRobots,
       manifest.discovery?.respectRobots,
@@ -87,6 +93,8 @@ describe('crawl config normalization', () => {
     settleMs: 750,
     waitUntil: 'networkidle',
     downloadAssets: true,
+    allowThirdParty: true,
+    downloadThirdPartyAssets: false,
     respectRobots: true,
     allowPartial: false,
     breakpoints: ['desktop', 'mobile'],
@@ -100,12 +108,16 @@ describe('crawl config normalization', () => {
       manifest: 'manifest.json',
       concurrency: 5,
       retries: 2,
+      allowThirdParty: false,
+      downloadThirdPartyAssets: true,
     };
 
     const config = normalizeCrawlConfig(cliOptions, mockManifest, defaults);
 
     expect(config.concurrency).toBe(5);
     expect(config.retries).toBe(2);
+    expect(config.allowThirdParty).toBe(false);
+    expect(config.downloadThirdPartyAssets).toBe(true);
   });
 
   it('should use defaults when CLI values are undefined', () => {
@@ -114,12 +126,16 @@ describe('crawl config normalization', () => {
       manifest: 'manifest.json',
       concurrency: undefined,
       retries: undefined,
+      allowThirdParty: undefined,
+      downloadThirdPartyAssets: undefined,
     };
 
     const config = normalizeCrawlConfig(cliOptions, mockManifest, defaults);
 
     expect(config.concurrency).toBe(3); // default
     expect(config.retries).toBe(2); // default
+    expect(config.allowThirdParty).toBe(true); // default
+    expect(config.downloadThirdPartyAssets).toBe(false); // default
   });
 
   it('should process all pages when maxPages is null', () => {

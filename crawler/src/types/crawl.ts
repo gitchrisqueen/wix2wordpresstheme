@@ -71,7 +71,7 @@ export type DOMSnapshot = z.infer<typeof DOMSnapshotSchema>;
 // Asset types
 export type AssetType = 'image' | 'font' | 'css' | 'js' | 'other';
 export type DiscoveryMethod = 'dom' | 'css' | 'network';
-export type AssetStatus = 'downloaded' | 'skipped' | 'failed';
+export type AssetStatus = 'downloaded' | 'skipped' | 'failed' | 'third-party';
 
 export const AssetSchema = z.object({
   url: z.string().url(),
@@ -80,7 +80,7 @@ export const AssetSchema = z.object({
   localPath: z.string().nullable().optional(),
   sha256: z.string().nullable().optional(),
   sizeBytes: z.number().int().min(0).nullable().optional(),
-  status: z.enum(['downloaded', 'skipped', 'failed']),
+  status: z.enum(['downloaded', 'skipped', 'failed', 'third-party']),
   error: z.string().nullable().optional(),
 });
 
@@ -118,6 +118,8 @@ export const CrawlSummarySchema = z.object({
     retries: z.number().int(),
     breakpoints: z.array(z.string()),
     downloadAssets: z.boolean(),
+    allowThirdParty: z.boolean(),
+    downloadThirdPartyAssets: z.boolean(),
   }),
   stats: z.object({
     totalPages: z.number().int().min(0),
@@ -145,6 +147,8 @@ export interface CrawlConfig {
   settleMs: number;
   breakpoints: string[];
   downloadAssets: boolean;
+  allowThirdParty: boolean;
+  downloadThirdPartyAssets: boolean;
   respectRobots: boolean;
   allowPartial: boolean;
   verbose: boolean;

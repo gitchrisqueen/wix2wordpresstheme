@@ -35,9 +35,18 @@ This project provides a complete solution for converting Wix websites into WordP
 - Conservative inference with "unknown" fallbacks
 - Schema validation and deterministic output
 
+**Phase 4: Hybrid WordPress Theme Generation** ✅ **Complete**
+
+- Three rendering modes: block, php, and hybrid
+- Block templates with WordPress core blocks
+- PHP section rendering with fallbacks
+- Block patterns from layout patterns
+- theme.json generation from design tokens
+- Asset management and mapping
+- Comprehensive reporting and metadata
+
 **Coming Soon**:
 
-- Phase 4: Theme generation
 - Phase 5: Testing and verification
 
 ## 📋 Prerequisites
@@ -407,6 +416,213 @@ npm run spec -- \
   --baseUrl https://example.com \
   --inDir ./custom-crawl \
   --outDir ./custom-specs
+```
+
+## 🎨 Phase 4: WordPress Theme Generation
+
+Generate a hybrid WordPress theme from PageSpec and design tokens.
+
+### Quick Start
+
+```bash
+# Basic usage - generate theme from spec output
+npm run discover -- --baseUrl https://example.com
+npm run crawl -- --baseUrl https://example.com --manifest crawler/output/manifest.json
+npm run spec -- --baseUrl https://example.com
+npm run generate -- --baseUrl https://example.com
+
+# Specify custom directories and theme name
+npm run generate -- \
+  --baseUrl https://example.com \
+  --inDir ./crawler/output \
+  --outDir ./theme/output \
+  --themeName my-custom-theme
+
+# Choose generation mode
+npm run generate -- \
+  --baseUrl https://example.com \
+  --mode hybrid    # or 'block' or 'php'
+
+# Control pattern and theme.json generation
+npm run generate -- \
+  --baseUrl https://example.com \
+  --emitPatterns true \
+  --emitThemeJson true
+
+# Enable verbose logging
+npm run generate -- \
+  --baseUrl https://example.com \
+  --verbose
+```
+
+### Generation Options
+
+| Option             | Default          | Description                                      |
+| ------------------ | ---------------- | ------------------------------------------------ |
+| `--baseUrl`        | (required)       | Base URL of the website                          |
+| `--inDir`          | `crawler/output` | Input directory with spec output                 |
+| `--outDir`         | `theme/output`   | Output directory for generated theme             |
+| `--themeName`      | `wix2wp`         | Theme name (slug format)                         |
+| `--mode`           | `hybrid`         | Generation mode: block, php, or hybrid           |
+| `--emitPatterns`   | `true`           | Generate WordPress block patterns                |
+| `--emitThemeJson`  | `true`           | Generate theme.json from design tokens           |
+| `--verbose`        | `false`          | Enable verbose debug logging                     |
+
+### Generation Modes
+
+**block (Block-first, editor-friendly)**
+- Uses WordPress core blocks for all content
+- Fully editable in the Block Editor
+- Best for simple, content-focused sites
+
+**php (Classic PHP rendering)**
+- Uses PHP templates for all sections
+- Pixel-perfect reproduction
+- Best for complex layouts requiring precise control
+
+**hybrid (Best of both worlds - RECOMMENDED)**
+- Uses blocks for simple content
+- PHP fallbacks for complex sections
+- Balances editability and fidelity
+- Allows per-section mode selection
+
+### Outputs
+
+Theme generation creates the following outputs:
+
+```
+theme/output/<themeName>/
+├── style.css                    # Theme header and base styles
+├── functions.php                # Theme setup and hooks
+├── theme.json                   # Block editor theme configuration
+├── index.php                    # Required WordPress template
+├── block-templates/             # Block templates for pages
+│   ├── page-home.html
+│   ├── page-about.html
+│   └── ...
+├── patterns/                    # Reusable block patterns
+│   ├── pat_hero_001.php
+│   └── ...
+├── parts/
+│   └── sections/                # PHP section partials
+│       ├── header.php
+│       ├── hero.php
+│       ├── footer.php
+│       └── ...
+├── inc/
+│   └── render.php               # Rendering helpers
+├── assets/
+│   ├── imported/                # Copied assets
+│   └── css/
+└── .generated/
+    ├── generation.json          # Generation metadata
+    ├── asset-map.json           # Asset URL mapping
+    └── page-mapping.json        # Page to template mapping
+```
+
+Plus summary files:
+
+1. **generate-summary.json** - Overall generation statistics
+   - Location: `theme/output/generate-summary.json`
+2. **run.json** - Machine-readable run report
+   - Location: `docs/REPORTS/<timestamp>/run.json`
+3. **summary.md** - Human-readable summary
+   - Location: `docs/REPORTS/<timestamp>/summary.md`
+
+### Understanding the Generated Theme
+
+**Block Templates**
+
+Block templates are HTML files in `block-templates/` that use WordPress block markup:
+
+```html
+<!-- wp:group -->
+<div class="wp-block-group">
+  <!-- wp:heading -->
+  <h1>Welcome</h1>
+  <!-- /wp:heading -->
+  
+  <!-- wp:paragraph -->
+  <p>This is editable content.</p>
+  <!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+```
+
+In hybrid mode, complex sections use PHP fallbacks:
+
+```html
+<!-- wp:html -->
+<?php render_section("sec_003", $data); ?>
+<!-- /wp:html -->
+```
+
+**theme.json**
+
+The theme.json file maps design tokens to WordPress theme settings:
+
+- Colors: Primary, secondary, and palette colors
+- Typography: Font families and sizes
+- Spacing: Units and presets
+- Styles: Global and element-specific styles
+
+**PHP Section Partials**
+
+PHP templates in `parts/sections/` render specific section types:
+
+- `header.php` - Site header
+- `hero.php` - Hero sections
+- `cta.php` - Call-to-action sections
+- `footer.php` - Site footer
+- etc.
+
+Each partial receives section data and uses WordPress escaping functions.
+
+**Block Patterns**
+
+Patterns in `patterns/` directory provide reusable layouts:
+
+- Auto-generated from layout-patterns.json
+- Categorized (hero, content, layout, cta)
+- Appear in Block Editor pattern inserter
+- Fully customizable by users
+
+### Examples
+
+**Example 1: Full pipeline**
+
+```bash
+# Step 1: Discover pages
+npm run discover -- --baseUrl https://example.wixsite.com/mysite
+
+# Step 2: Crawl pages
+npm run crawl -- \
+  --baseUrl https://example.wixsite.com/mysite \
+  --manifest crawler/output/manifest.json
+
+# Step 3: Generate specs
+npm run spec -- --baseUrl https://example.wixsite.com/mysite
+
+# Step 4: Generate theme
+npm run generate -- --baseUrl https://example.wixsite.com/mysite
+```
+
+**Example 2: Block-only theme**
+
+```bash
+npm run generate -- \
+  --baseUrl https://example.com \
+  --mode block \
+  --themeName my-block-theme
+```
+
+**Example 3: PHP fallback theme**
+
+```bash
+npm run generate -- \
+  --baseUrl https://example.com \
+  --mode php \
+  --themeName pixel-perfect-theme
 ```
 
 ## 🧪 Development

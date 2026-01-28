@@ -15,7 +15,7 @@ import * as csstree from 'css-tree';
 export async function discoverAssets(
   page: Page,
   baseUrl: string,
-  allowThirdParty = false
+  allowThirdParty = true
 ): Promise<Asset[]> {
   const discoveredAssets = new Map<string, Asset>();
 
@@ -49,11 +49,25 @@ async function discoverFromDOM(
       const __name = (target, value) => target;
       const baseUrlObj = new URL(base);
       const results = [];
+      const wixAssetOrigins = new Set([
+        'https://static.wixstatic.com',
+        'https://static.parastorage.com',
+        'https://video.wixstatic.com',
+        'https://siteassets.parastorage.com',
+        'https://viewer-assets.parastorage.com',
+        'https://viewer-apps.parastorage.com',
+        'https://pages.parastorage.com',
+        'https://staticorigin.wixstatic.com',
+      ]);
 
       const isAllowed = (url) => {
         try {
           const urlObj = new URL(url, base);
-          return allowThirdParty || urlObj.origin === baseUrlObj.origin;
+          return (
+            allowThirdParty ||
+            urlObj.origin === baseUrlObj.origin ||
+            wixAssetOrigins.has(urlObj.origin)
+          );
         } catch {
           return false;
         }
@@ -72,6 +86,35 @@ async function discoverFromDOM(
         }
       };
 
+      const splitSrcsetCandidates = (srcset) => {
+        const candidates = [];
+        let current = '';
+
+        for (let i = 0; i < srcset.length; i += 1) {
+          const ch = srcset[i];
+          if (ch === ',') {
+            const next = srcset[i + 1];
+            if (next && /\s/.test(next)) {
+              if (current) {
+                candidates.push(current);
+              }
+              current = '';
+              while (i + 1 < srcset.length && /\s/.test(srcset[i + 1])) {
+                i += 1;
+              }
+              continue;
+            }
+          }
+          current += ch;
+        }
+
+        if (current) {
+          candidates.push(current);
+        }
+
+        return candidates;
+      };
+
       // Images
       document.querySelectorAll('img[src]').forEach((img) => {
         addAsset(img.src, 'image');
@@ -79,8 +122,14 @@ async function discoverFromDOM(
         // Handle srcset
         const srcset = img.getAttribute('srcset');
         if (srcset) {
-          srcset.split(',').forEach((entry) => {
-            const url = entry.trim().split(/\s+/)[0];
+          splitSrcsetCandidates(srcset).forEach((entry) => {
+            const trimmed = entry.trim();
+            if (!trimmed) return;
+
+            // Find last space to separate URL from descriptor
+            const lastSpaceIndex = trimmed.lastIndexOf(' ');
+            const url = lastSpaceIndex === -1 ? trimmed : trimmed.substring(0, lastSpaceIndex).trim();
+
             addAsset(url, 'image');
           });
         }
@@ -90,8 +139,14 @@ async function discoverFromDOM(
       document.querySelectorAll('source[srcset]').forEach((source) => {
         const srcset = source.getAttribute('srcset');
         if (srcset) {
-          srcset.split(',').forEach((entry) => {
-            const url = entry.trim().split(/\s+/)[0];
+          splitSrcsetCandidates(srcset).forEach((entry) => {
+            const trimmed = entry.trim();
+            if (!trimmed) return;
+
+            // Find last space to separate URL from descriptor
+            const lastSpaceIndex = trimmed.lastIndexOf(' ');
+            const url = lastSpaceIndex === -1 ? trimmed : trimmed.substring(0, lastSpaceIndex).trim();
+
             addAsset(url, 'image');
           });
         }
@@ -147,6 +202,16 @@ async function discoverFromCSS(
 ): Promise<Asset[]> {
   const assets: Asset[] = [];
   const baseUrlObj = new URL(baseUrl);
+  const wixAssetOrigins = new Set([
+    'https://static.wixstatic.com',
+    'https://static.parastorage.com',
+    'https://video.wixstatic.com',
+    'https://siteassets.parastorage.com',
+    'https://viewer-assets.parastorage.com',
+    'https://viewer-apps.parastorage.com',
+    'https://pages.parastorage.com',
+    'https://staticorigin.wixstatic.com',
+  ]);
 
   // Get all stylesheets
   const stylesheets = await page.evaluate(() => {
@@ -192,7 +257,11 @@ async function discoverFromCSS(
               const absoluteUrl = new URL(url, sheet.href).href;
               const urlObj = new URL(absoluteUrl);
 
-              if (allowThirdParty || urlObj.origin === baseUrlObj.origin) {
+              if (
+                allowThirdParty ||
+                urlObj.origin === baseUrlObj.origin ||
+                wixAssetOrigins.has(urlObj.origin)
+              ) {
                 // Determine type based on extension
                 let type: AssetType = 'other';
                 if (/\.(woff2?|ttf|otf|eot)$/i.test(url)) {
@@ -225,11 +294,60 @@ async function discoverFromCSS(
 
 /**
  * Parse srcset attribute
+ *
+ * Srcset format: "url descriptor, url descriptor, ..."
+ * Where descriptor is optional and can be "1x", "2x", "100w", etc.
+ * The URL and descriptor are separated by whitespace.
+ *
+ * Correctly handles URLs with commas in query strings by finding
+ * the last space in each entry (separating URL from descriptor).
  */
 export function parseSrcset(srcset: string): string[] {
-  return srcset
-    .split(',')
-    .map((entry) => entry.trim().split(/\s+/)[0])
+  const splitSrcsetCandidates = (value: string): string[] => {
+    const candidates: string[] = [];
+    let current = '';
+
+    for (let i = 0; i < value.length; i += 1) {
+      const ch = value[i];
+      if (ch === ',') {
+        const next = value[i + 1];
+        if (next && /\s/.test(next)) {
+          if (current) {
+            candidates.push(current);
+          }
+          current = '';
+          while (i + 1 < value.length && /\s/.test(value[i + 1])) {
+            i += 1;
+          }
+          continue;
+        }
+      }
+      current += ch;
+    }
+
+    if (current) {
+      candidates.push(current);
+    }
+
+    return candidates;
+  };
+
+  return splitSrcsetCandidates(srcset)
+    .map((entry) => {
+      const trimmed = entry.trim();
+      if (!trimmed) return '';
+
+      // Find the last space to separate URL from descriptor
+      const lastSpaceIndex = trimmed.lastIndexOf(' ');
+
+      // If no space found, the entire entry is the URL
+      if (lastSpaceIndex === -1) {
+        return trimmed;
+      }
+
+      // Extract URL (everything before the last space)
+      return trimmed.substring(0, lastSpaceIndex).trim();
+    })
     .filter(Boolean);
 }
 

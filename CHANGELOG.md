@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Critical bug in asset discovery**: Fixed srcset parsing to correctly handle Cloudinary image URLs with embedded commas in transformation parameters. Previous implementation split URLs incorrectly, resulting in 0 assets being downloaded. Now correctly extracts URLs by finding the last space (separator from descriptor), enabling proper asset discovery for Wix sites using Cloudinary.
+  - Fixed `parseSrcset()` function in `crawler/src/crawl/assetsDiscover.ts`
+  - Fixed inline srcset parsing in `discoverFromDOM()` for img and source elements
+  - Added test cases for Cloudinary URLs with commas in path
+
 ### Added
 
 - Initial project structure and scaffolding

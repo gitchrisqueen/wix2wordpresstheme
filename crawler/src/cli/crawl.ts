@@ -56,6 +56,12 @@ function normalizeCrawlConfig(
     settleMs: getValue(cliOptions.settleMs, null, defaults.settleMs || 750),
     breakpoints,
     downloadAssets: getValue(cliOptions.downloadAssets, null, defaults.downloadAssets ?? true),
+    allowThirdParty: getValue(cliOptions.allowThirdParty, null, defaults.allowThirdParty ?? true),
+    downloadThirdPartyAssets: getValue(
+      cliOptions.downloadThirdPartyAssets,
+      null,
+      defaults.downloadThirdPartyAssets ?? false
+    ),
     respectRobots: getValue(
       cliOptions.respectRobots,
       manifest.discovery?.respectRobots,
@@ -90,6 +96,18 @@ program
   )
   .option('--breakpoints <list>', 'Comma-separated breakpoint names', 'desktop,mobile')
   .option('--downloadAssets <boolean>', 'Download assets', (val) => val !== 'false', true)
+  .option(
+    '--allowThirdParty <boolean>',
+    'Allow third-party asset downloads (including Wix CDN)',
+    (val) => val !== 'false',
+    true
+  )
+  .option(
+    '--downloadThirdPartyAssets <boolean>',
+    'Download third-party assets when allowThirdParty is enabled',
+    (val) => val === 'true',
+    false
+  )
   .option('--respectRobots <boolean>', 'Respect robots.txt', (val) => val !== 'false', true)
   .option('--allowPartial <boolean>', 'Allow partial success', (val) => val === 'true', false)
   .option('--verbose', 'Verbose logging')
@@ -134,6 +152,8 @@ program
         settleMs: 750,
         waitUntil: 'networkidle',
         downloadAssets: true,
+        allowThirdParty: true,
+        downloadThirdPartyAssets: false,
         respectRobots: true,
         allowPartial: false,
         breakpoints: ['desktop', 'mobile'],
@@ -167,6 +187,8 @@ program
       logger.info(`Settle time: ${config.settleMs}ms`);
       logger.info(`Breakpoints: ${config.breakpoints.join(', ')}`);
       logger.info(`Download assets: ${config.downloadAssets}`);
+      logger.info(`Allow third-party assets: ${config.allowThirdParty}`);
+      logger.info(`Download third-party assets: ${config.downloadThirdPartyAssets}`);
 
       // Run crawl
       const { summary } = await runCrawl(manifest, config, logger);

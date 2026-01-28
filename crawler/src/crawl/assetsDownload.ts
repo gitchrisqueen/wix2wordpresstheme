@@ -16,6 +16,10 @@ import { ensureDir } from '../lib/fileio.js';
 export async function downloadAssets(
   assets: Asset[],
   outputDir: string,
+  options: {
+    baseUrl: string;
+    downloadThirdPartyAssets: boolean;
+  },
   logger?: { info: (msg: string) => void; error: (msg: string) => void }
 ): Promise<Asset[]> {
   const assetsDir = join(outputDir, 'files');
@@ -23,6 +27,17 @@ export async function downloadAssets(
 
   const downloadedAssets: Asset[] = [];
   const urlSeen = new Set<string>();
+  const baseOrigin = new URL(options.baseUrl).origin;
+  const wixAssetOrigins = new Set([
+    'https://static.wixstatic.com',
+    'https://static.parastorage.com',
+    'https://video.wixstatic.com',
+    'https://siteassets.parastorage.com',
+    'https://viewer-assets.parastorage.com',
+    'https://viewer-apps.parastorage.com',
+    'https://pages.parastorage.com',
+    'https://staticorigin.wixstatic.com',
+  ]);
 
   for (const asset of assets) {
     // Deduplicate
@@ -30,6 +45,19 @@ export async function downloadAssets(
       continue;
     }
     urlSeen.add(asset.url);
+
+    const assetOrigin = new URL(asset.url).origin;
+    const isThirdParty =
+      assetOrigin !== baseOrigin && !wixAssetOrigins.has(assetOrigin);
+
+    if (isThirdParty && !options.downloadThirdPartyAssets) {
+      downloadedAssets.push({
+        ...asset,
+        status: 'third-party',
+        error: 'third-party downloads disabled',
+      });
+      continue;
+    }
 
     try {
       const result = await downloadAsset(asset, assetsDir);
